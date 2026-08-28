@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@indoor/*": ["./indoor/*"],
+      "@outdoor/*": ["./outdoor/*"],
+      "@auth/*": ["./auth/*"],
+      "@layout/*": ["./layout/*"],
+      "@sales/*": ["./sales/*"],
+      "@reports/*": ["./reports/*"],
+      "@inventory/*": ["./inventory/*"],
+      "@ui/*": ["./shared/ui/*"]
+    },
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": "."
+  },
+  "include": [
+    "App.tsx",
+    "main.tsx",
+    "shared",
+    "indoor",
+    "outdoor",
+    "auth",
+    "layout",
+    "sales",
+    "reports",
+    "inventory"
+  ],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

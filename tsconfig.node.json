@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@indoor/*": ["./indoor/*"],
+      "@outdoor/*": ["./outdoor/*"],
+      "@auth/*": ["./auth/*"],
+      "@layout/*": ["./layout/*"],
+      "@sales/*": ["./sales/*"],
+      "@reports/*": ["./reports/*"],
+      "@inventory/*": ["./inventory/*"],
+      "@ui/*": ["./shared/ui/*"]
+    },
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}
