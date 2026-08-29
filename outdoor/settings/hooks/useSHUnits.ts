@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import apiClient from '../../../shared/services/apiClient';
+import { outdoorApi } from '../../services/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 export interface SHUnit {
@@ -17,7 +17,7 @@ export const useSHUnits = () => {
   const fetchUnits = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get('/outdoor/settings/sh-units');
+      const response = await outdoorApi.settings.getShUnits();
       const { data } = parseSpringPage<SHUnit>(response);
       setUnits(data);
     } catch (error) {
@@ -32,17 +32,21 @@ export const useSHUnits = () => {
   }, []);
 
   const createUnit = async (data: { name: string; capacity: number }) => {
-    await apiClient.post('/outdoor/settings/sh-units', data);
+    await outdoorApi.settings.createShUnit(data);
     await fetchUnits();
   };
 
   const updateUnit = async (id: number, data: { name: string; capacity: number; is_active: boolean }) => {
-    await apiClient.put(`/outdoor/settings/sh-units/${id}`, data);
+    await outdoorApi.settings.updateShUnit(id, {
+      name: data.name,
+      capacity: data.capacity,
+      active: data.is_active,
+    });
     await fetchUnits();
   };
 
   const deleteUnit = async (id: number) => {
-    await apiClient.delete(`/outdoor/settings/sh-units/${id}`);
+    await outdoorApi.settings.deleteShUnit(id);
     await fetchUnits();
   };
 

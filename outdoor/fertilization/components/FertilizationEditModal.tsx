@@ -7,6 +7,7 @@ import { Input } from '../../../shared/ui/input';
 import { Badge } from '../../../shared/ui/badge';
 import { Save, Users, Sprout, ChevronDown, ChevronUp } from 'lucide-react';
 import { outdoorApi } from '../../services/outdoorApi';
+import { parseSpringPage } from '../../../shared/utils/springPage';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface FertilizationEditModalProps {
@@ -50,8 +51,7 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
     async function loadWorkers() {
       try {
         const workersRes = await outdoorApi.workers.getAll(1, 500);
-        const workersData = (workersRes as any)?.data || workersRes;
-        const workers = Array.isArray(workersData) ? workersData : [];
+        const workers = parseSpringPage(workersRes).data;
         
         if (!active) return;
         setAllWorkers(workers);

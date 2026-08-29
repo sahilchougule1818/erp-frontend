@@ -91,6 +91,7 @@ export const useWorkerMaster = () => {
       currentPage: currentPageLogs,
       totalPages: totalPagesLogs,
       total: totalLogs,
+      limit,
       onPageChange: handlePageChangeLogs
     }
   };

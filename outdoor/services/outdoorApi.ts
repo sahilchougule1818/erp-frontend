@@ -47,6 +47,8 @@ export const outdoorApi = {
       apiClient.post('/outdoor/settings/sh-units', data),
     updateShUnit: (id: number, data: { name: string; capacity?: number; active?: boolean }) =>
       apiClient.put(`/outdoor/settings/sh-units/${id}`, data),
+    deletePhTunnel: (id: number) => apiClient.delete(`/outdoor/settings/ph-tunnels/${id}`),
+    deleteShUnit: (id: number) => apiClient.delete(`/outdoor/settings/sh-units/${id}`),
   },
 
   // Backward-compatible aliases used by existing hooks

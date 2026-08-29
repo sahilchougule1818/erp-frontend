@@ -30,7 +30,7 @@ export function Tunnels() {
 
   const fetchTunnels = async () => {
     try {
-      const data = await outdoorApi.tunnels.getAll();
+      const data = await outdoorApi.settings.getPhTunnels();
       setTunnels(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch tunnels:', error);
@@ -46,7 +46,7 @@ export function Tunnels() {
   const handleAdd = async () => {
     if (!selectedTunnel) return;
     try {
-      await outdoorApi.tunnels.create({ tunnelName: selectedTunnel, capacity: Number(capacity) || 0 });
+      await outdoorApi.settings.createPhTunnel({ name: selectedTunnel, capacity: Number(capacity) || 0 });
       await fetchTunnels();
       setIsAddOpen(false);
       setSelectedUnit('');
@@ -66,7 +66,10 @@ export function Tunnels() {
   const handleEdit = async () => {
     if (!editingTunnel) return;
     try {
-      await outdoorApi.tunnels.create({ tunnelName: editingTunnel.name, capacity: Number(editCapacity) || 0 });
+      await outdoorApi.settings.updatePhTunnel(editingTunnel.id, {
+        name: editingTunnel.name,
+        capacity: Number(editCapacity) || 0,
+      });
       await fetchTunnels();
       setIsEditOpen(false);
       setEditingTunnel(null);

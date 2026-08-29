@@ -30,6 +30,7 @@ const TunnelShifts = lazy(() => import('./outdoor/tunnels/containers/TunnelShift
 const HoldingArea = lazy(() => import('./outdoor/holding-area/containers/HoldingArea').then(m => ({ default: m.HoldingArea })));
 const OutdoorSampling = lazy(() => import('./outdoor/sampling/containers/OutdoorSampling').then(m => ({ default: m.OutdoorSampling })));
 const BatchMaster = lazy(() => import('./outdoor/batch-master/containers/BatchMaster'));
+const BatchTimeline = lazy(() => import('./outdoor/batch-master/containers/BatchTimeline').then(m => ({ default: m.BatchTimeline })));
 const OutdoorSettings = lazy(() => import('./outdoor/settings/containers/OutdoorSettings'));
 const BankAccountSection = lazy(() => import('./sales/bank-accounts/containers/BankAccountSection'));
 const CustomersManagement = lazy(() => import('./sales/customers/containers/CustomersManagement').then(m => ({ default: m.CustomersManagement })));
@@ -104,6 +105,7 @@ function AppContent() {
               <Route path="/holding-area" element={<HoldingArea />} />
               <Route path="/outdoor-sampling" element={<OutdoorSampling />} />
               <Route path="/batch-master" element={<BatchMaster />} />
+              <Route path="/batch-timeline" element={<BatchTimeline />} />
               <Route path="/outdoor-settings" element={<OutdoorSettings />} />
               <Route path="/sales-bank" element={<BankAccountSection />} />
               <Route path="/instant-sales" element={<InstantSalesList />} />

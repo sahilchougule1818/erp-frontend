@@ -6,6 +6,7 @@ import { Separator } from '../../../shared/ui/separator';
 import { Badge } from '../../../shared/ui/badge';
 import { X, Save, ChevronDown, ChevronUp, FileEdit } from 'lucide-react';
 import { outdoorApi } from '../../services/outdoorApi';
+import { parseSpringPage } from '../../../shared/utils/springPage';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface WorkerEditModalProps {
@@ -63,8 +64,7 @@ export function UnifiedEditModal({
         if (!active) return;
         
         const assignments = Array.isArray(assignmentsRes) ? assignmentsRes : [];
-        const workersData = workersRes?.data || workersRes;
-        const workers = Array.isArray(workersData) ? workersData : [];
+        const workers = parseSpringPage(workersRes).data;
         
         setAllWorkers(workers);
         setInitialAssignments(assignments);

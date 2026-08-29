@@ -3,7 +3,7 @@ import { Card } from '../../../shared/ui/card';
 import { Button } from '../../../shared/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { FileText, Download, TreePine, Sprout, ArrowRightLeft, Droplet, Box, ChevronDown, ChevronUp } from 'lucide-react';
-import apiClient from '../../../shared/services/apiClient';
+import { outdoorApi } from '../../services/outdoorApi';
 import { useSearchParams } from 'react-router-dom';
 
 const getPhaseIcon = (phase: string) => {
@@ -59,9 +59,14 @@ export function BatchTimeline() {
 
   const fetchBatches = async () => {
     try {
-      const data = await apiClient.get('/outdoor/batch-timeline/batches');
-      setBatches(Array.isArray(data) ? data : []);
-      if (data.length > 0) setSelectedBatch(data[0].batch_code);
+      const data = await outdoorApi.batchTimeline.getBatches();
+      const list = Array.isArray(data) ? data : [];
+      setBatches(list);
+      if (batchFromUrl && list.some((b: any) => b.batch_code === batchFromUrl)) {
+        setSelectedBatch(batchFromUrl);
+      } else if (!batchFromUrl && list.length > 0) {
+        setSelectedBatch(list[0].batch_code);
+      }
     } catch (error) {
       console.error('Error fetching batches:', error);
       setBatches([]);
@@ -71,7 +76,7 @@ export function BatchTimeline() {
   const fetchTimeline = async () => {
     setLoading(true);
     try {
-      const data = await apiClient.get(`/outdoor/batch-timeline/${selectedBatch}`);
+      const data = await outdoorApi.batchTimeline.getTimeline(selectedBatch);
       setTimeline(Array.isArray(data) ? data : []);
       // Auto-expand all events by default
       if (Array.isArray(data)) {
@@ -87,7 +92,7 @@ export function BatchTimeline() {
 
   const fetchStats = async () => {
     try {
-      const data = await apiClient.get(`/outdoor/batch-timeline/${selectedBatch}/stats`);
+      const data = await outdoorApi.batchTimeline.getStats(selectedBatch);
       setStats(data);
     } catch (error) {
       console.error('Error fetching stats:', error);
