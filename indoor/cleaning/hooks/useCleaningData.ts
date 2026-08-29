@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { indoorApi } from '../../services/indoorApi';
 import { applySpringPage } from '../../../shared/utils/springPage';
+import { useLabContext } from '../../contexts/LabContext';
 
 export function useCleaningData() {
+  const { labNumber } = useLabContext();
   const [cleaningRecords, setCleaningRecords] = useState<any[]>([]);
   const [deepCleaningRecords, setDeepCleaningRecords] = useState<any[]>([]);
   const [operators, setOperators] = useState<any[]>([]);
@@ -16,8 +18,8 @@ export function useCleaningData() {
     setLoading(true);
     try {
       const [stdRes, deepRes] = await Promise.all([
-        indoorApi.cleaning.getAll({ type: 'standard', page: cleaningPage }),
-        indoorApi.cleaning.getAll({ type: 'deep', page: deepCleaningPage })
+        indoorApi.cleaning.getAll({ type: 'standard', page: cleaningPage, labNumber: labNumber || undefined }),
+        indoorApi.cleaning.getAll({ type: 'deep', page: deepCleaningPage, labNumber: labNumber || undefined })
       ]);
       applySpringPage(stdRes, setCleaningRecords, setCleaningPagination);
       applySpringPage(deepRes, setDeepCleaningRecords, setDeepCleaningPagination);
@@ -26,7 +28,7 @@ export function useCleaningData() {
     } finally {
       setLoading(false);
     }
-  }, [cleaningPage, deepCleaningPage]);
+  }, [cleaningPage, deepCleaningPage, labNumber]);
 
   const fetchOperators = useCallback(async () => {
     try {

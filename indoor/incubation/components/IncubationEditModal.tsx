@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Button } from '../../../shared/ui/button';
@@ -8,19 +8,12 @@ import { Badge } from '../../../shared/ui/badge';
 import { Save, Users, Thermometer, ChevronDown, ChevronUp } from 'lucide-react';
 import { indoorApi } from '../../services/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
+import { syncOperatorAssignments, toggleStagedOperator, type StagedOperator } from '../../operators/utils/syncOperatorAssignments';
 
 interface IncubationEditModalProps {
   record: any;
   onClose: () => void;
   onSuccess: () => void;
-}
-
-interface StagedOperator {
-  id: number;
-  short_name: string;
-  first_name: string;
-  last_name: string;
-  assignmentId?: number;
 }
 
 export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEditModalProps) {
@@ -34,6 +27,7 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
   const [allOperators, setAllOperators] = useState<any[]>([]);
   const [loadingOperators, setLoadingOperators] = useState(true);
   const [isExpanded, setIsExpanded] = useState(false);
+  const freedAssignmentIds = useRef<number[]>([]);
 
   // Incubation details state
   const [incubationDetails, setIncubationDetails] = useState({
@@ -65,12 +59,13 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
         
         setAllOperators(operators);
         setInitialAssignments(assignments);
+        freedAssignmentIds.current = [];
         
         setStagedOperators(assignments.map((a: any) => ({
-          id: a.operator_id,
-          short_name: a.short_name,
-          first_name: a.first_name,
-          last_name: a.last_name,
+          id: a.operator_id ?? a.operatorId,
+          short_name: a.short_name ?? a.shortName,
+          first_name: a.first_name ?? a.firstName,
+          last_name: a.last_name ?? a.lastName,
           assignmentId: a.id
         })));
       } catch (error: any) {
@@ -85,50 +80,45 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
   }, [record.event_code, notify]);
 
   const toggleOperator = (operatorId: number) => {
-    if (stagedOperators.some(op => op.id === operatorId)) {
-      setStagedOperators(prev => prev.filter(op => op.id !== operatorId));
-    } else {
-      const operator = allOperators.find(op => op.id === operatorId);
-      if (!operator) return;
-      setStagedOperators(prev => [...prev, {
+    const operator = allOperators.find(op => op.id === operatorId);
+    if (!operator && !stagedOperators.some(op => op.id === operatorId)) return;
+
+    const { staged, freed } = toggleStagedOperator(
+      stagedOperators,
+      operatorId,
+      operator ? {
         id: operator.id,
         short_name: operator.short_name,
         first_name: operator.first_name,
-        last_name: operator.last_name
-      }]);
-    }
+        last_name: operator.last_name,
+      } : { id: operatorId },
+      freedAssignmentIds.current
+    );
+    freedAssignmentIds.current = freed;
+    setStagedOperators(staged);
   };
 
   const handleSaveOperators = async () => {
     setSaving(true);
     try {
-      const stagedIds = stagedOperators.map(op => op.id);
-      const savedIds = initialAssignments.map((a: any) => a.operator_id);
-      
-      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.operator_id));
-      const additions = stagedOperators.filter(op => !savedIds.includes(op.id));
-
       if (stagedOperators.length === 0) {
         throw new Error('At least one operator must remain assigned');
       }
 
-      if (additions.length > 0) {
-        await Promise.all(
-          additions.map(op => indoorApi.operators.addAssignment({
-            event_code: record.event_code,
-            operator_id: op.id,
-            activity_type: 'event',
-            batch_code: record.batch_code,
-            stage: record.stage
-          }))
-        );
-      }
-
-      if (removals.length > 0) {
-        await Promise.all(
-          removals.map((a: any) => indoorApi.operators.removeAssignment(a.id))
-        );
-      }
+      await syncOperatorAssignments(initialAssignments, stagedOperators, {
+        add: (operatorId) => indoorApi.operators.addAssignment({
+          event_code: record.event_code,
+          operator_id: operatorId,
+          activity_type: 'event',
+          batch_code: record.batch_code,
+          stage: record.stage,
+        }),
+        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, {
+          operator_id: operatorId,
+          stage: record.stage,
+        }),
+        remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
+      });
 
       notify.success('Operators updated successfully');
       onSuccess();

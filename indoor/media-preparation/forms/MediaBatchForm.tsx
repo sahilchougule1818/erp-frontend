@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Label } from '../../../shared/ui/label';
@@ -10,6 +10,7 @@ import { Save, Users, FlaskConical, ChevronDown, ChevronUp, Trash2 } from 'lucid
 import { indoorApi } from '../../services/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { useAuth } from '../../../auth/AuthContext';
+import { syncOperatorAssignments, toggleStagedOperator } from '../../operators/utils/syncOperatorAssignments';
 
 interface MediaBatchFormProps {
   open: boolean;
@@ -40,6 +41,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const [initialAssignments, setInitialAssignments] = useState<any[]>([]);
   const [loadingOperators, setLoadingOperators] = useState(false);
   const [labs, setLabs] = useState<any[]>([]);
+  const freedAssignmentIds = useRef<number[]>([]);
 
   const getDisplayName = (op: any) => `${op.first_name || ''} ${op.last_name || ''}`.trim() || op.short_name;
 
@@ -108,6 +110,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       const ops = Array.isArray(operatorsRes) ? operatorsRes : [];
       setAllOperators(ops);
       setInitialAssignments(assignments);
+      freedAssignmentIds.current = [];
       setStagedOperators(assignments.map((a: any) => ({
         id: parseInt(a.operator_id), short_name: a.short_name,
         first_name: a.first_name, last_name: a.last_name, assignmentId: a.id
@@ -117,11 +120,19 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   };
 
   const toggleOperator = (op: any) => {
-    setStagedOperators(prev =>
-      prev.some(o => o.id === op.id)
-        ? prev.filter(o => o.id !== op.id)
-        : [...prev, { id: op.id, short_name: op.short_name, first_name: op.first_name, last_name: op.last_name }]
+    const { staged, freed } = toggleStagedOperator(
+      stagedOperators,
+      op.id,
+      {
+        id: op.id,
+        short_name: op.short_name,
+        first_name: op.first_name,
+        last_name: op.last_name,
+      },
+      freedAssignmentIds.current
     );
+    freedAssignmentIds.current = freed;
+    setStagedOperators(staged);
   };
 
   const set = (key: string, value: any) => setForm((f: any) => ({ ...f, [key]: value }));
@@ -166,16 +177,19 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const handleSaveOperators = async () => {
     setSaving(true);
     try {
-      const stagedIds = stagedOperators.map(o => o.id);
-      const savedIds = initialAssignments.map((a: any) => parseInt(a.operator_id));
-      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(parseInt(a.operator_id)));
-      const additions = stagedOperators.filter(o => !savedIds.includes(o.id));
-      await Promise.all([
-        ...additions.map(o => indoorApi.operators.addAssignment({ operator_id: o.id, activity_type: 'autoclave', media_code: initialData.media_code })),
-        ...removals.filter((a: any) => a.id).map((a: any) => indoorApi.operators.removeAssignment(a.id))
-      ]);
+      await syncOperatorAssignments(initialAssignments, stagedOperators, {
+        add: (operatorId) => indoorApi.operators.addAssignment({
+          operator_id: operatorId,
+          activity_type: 'autoclave',
+          media_code: initialData.media_code,
+        }),
+        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operator_id: operatorId }),
+        remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
+      });
       notify.success('Operators updated successfully');
-      setInitialAssignments(prev => prev.filter((a: any) => stagedIds.includes(parseInt(a.operator_id))));
+      setInitialAssignments(prev => prev.filter((a: any) =>
+        stagedOperators.some(op => op.assignmentId === a.id || op.id === parseInt(a.operator_id))
+      ));
     } catch (error: any) {
       notify.error(error.message || 'Failed to save operators');
     } finally { setSaving(false); }

@@ -93,31 +93,50 @@ export const indoorApi = {
       eventCode?: string; event_code?: string;
       activityType?: string; activity_type?: string;
       mediaCode?: string; media_code?: string;
-      cleaningId?: number; cleaning_id?: number;
-      cleaningType?: string; cleaning_type?: string;
+      cleaningRecordId?: number; cleaning_record_id?: number;
+      cleaningRecordKind?: string; cleaning_record_kind?: string;
     } = {}) => {
       const eventCode = params.eventCode ?? params.event_code;
       const activityType = params.activityType ?? params.activity_type ?? 'event';
       const mediaCode = params.mediaCode ?? params.media_code;
-      const cleaningId = params.cleaningId ?? params.cleaning_id;
-      const cleaningType = params.cleaningType ?? params.cleaning_type;
+      const cleaningRecordId = params.cleaningRecordId ?? params.cleaning_record_id;
+      const cleaningRecordKind = params.cleaningRecordKind ?? params.cleaning_record_kind ?? 'standard';
       let url = `/indoor/operators/assignment?activityType=${activityType}`;
-      if (mediaCode) url += `&mediaCode=${mediaCode}`;
-      if (eventCode) url += `&eventCode=${eventCode}`;
-      if (cleaningId) url += `&cleaningId=${cleaningId}&cleaningType=${cleaningType}`;
+      if (mediaCode) url += `&mediaCode=${encodeURIComponent(mediaCode)}`;
+      if (eventCode) url += `&eventCode=${encodeURIComponent(eventCode)}`;
+      if (cleaningRecordId != null) {
+        url += `&cleaningRecordId=${cleaningRecordId}&cleaningRecordKind=${encodeURIComponent(cleaningRecordKind)}`;
+      }
       return apiClient.get(url);
     },
     addAssignment: (data: {
-      eventCode?: string;
-      operatorId: number;
-      role?: string;
-      activityType?: string;
-      mediaCode?: string;
-      batchCode?: string;
+      eventCode?: string; event_code?: string;
+      operatorId?: number; operator_id?: number;
+      activityType?: string; activity_type?: string;
+      mediaCode?: string; media_code?: string;
+      batchCode?: string; batch_code?: string;
       stage?: string;
-      cleaningId?: number;
-      cleaningType?: string;
-    }) => apiClient.post('/indoor/operators/assignment', data),
+      cleaningRecordId?: number; cleaning_record_id?: number;
+      cleaningRecordKind?: string; cleaning_record_kind?: string;
+    }) => apiClient.post('/indoor/operators/assignment', {
+      eventCode: data.eventCode ?? data.event_code,
+      operatorId: data.operatorId ?? data.operator_id,
+      activityType: data.activityType ?? data.activity_type,
+      mediaCode: data.mediaCode ?? data.media_code,
+      batchCode: data.batchCode ?? data.batch_code,
+      stage: data.stage,
+      cleaningRecordId: data.cleaningRecordId ?? data.cleaning_record_id,
+      cleaningRecordKind: data.cleaningRecordKind ?? data.cleaning_record_kind,
+    }),
+    updateAssignment: (id: number, data: {
+      operatorId?: number; operator_id?: number;
+      stage?: string;
+      areaCleaned?: string; area_cleaned?: string;
+    }) => apiClient.put(`/indoor/operators/assignment/${id}`, {
+      operatorId: data.operatorId ?? data.operator_id,
+      stage: data.stage,
+      areaCleaned: data.areaCleaned ?? data.area_cleaned,
+    }),
     removeAssignment: (id: number) => apiClient.delete(`/indoor/operators/assignment/${id}`)
   },
 
@@ -137,9 +156,11 @@ export const indoorApi = {
   },
 
   cleaning: {
-    getAll: (params?: { type?: string; page?: number; limit?: number; size?: number }) => {
-      const { type, page = 1, limit = 10, size } = params || {};
-      return apiClient.get('/indoor/cleaning', { params: pageQuery(page, size ?? limit, type ? { type } : {}) });
+    getAll: (params?: { type?: string; page?: number; limit?: number; size?: number; labNumber?: number }) => {
+      const { type, page = 1, limit = 10, size, labNumber } = params || {};
+      return apiClient.get('/indoor/cleaning', {
+        params: pageQuery(page, size ?? limit, { ...(type ? { type } : {}), labNumber })
+      });
     },
     create:  (data: any) => apiClient.post('/indoor/cleaning', data),
     update:  (id: number | string, data: any) => apiClient.put(`/indoor/cleaning/${id}`, data),

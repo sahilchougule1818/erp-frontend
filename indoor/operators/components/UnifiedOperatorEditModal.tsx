@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../../../shared/ui/dialog';
 import { Button } from '../../../shared/ui/button';
 import { Label } from '../../../shared/ui/label';
@@ -7,36 +7,29 @@ import { Badge } from '../../../shared/ui/badge';
 import { X, Save, ChevronDown, ChevronUp, Users } from 'lucide-react';
 import { indoorApi } from '../../services/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
+import { syncOperatorAssignments, toggleStagedOperator, type StagedOperator } from '../utils/syncOperatorAssignments';
 
 interface OperatorEditModalProps {
-  recordId?:   number;        // For future use
-  eventCode?:  string;        // For assignment link
-  batchCode?:  string;
-  mediaCode?:  string;
-  cleaning_id?: number;       // For cleaning assignment
-  cleaning_type?: string;     // 'standard' or 'deep'
+  recordId?: number;
+  eventCode?: string;
+  batchCode?: string;
+  mediaCode?: string;
+  cleaning_record_id?: number;
+  cleaning_record_kind?: 'standard' | 'deep';
+  targetLabel?: string;
   activityType?: string;
-  stage?:      string;
-  onClose:    () => void;
-  onSuccess?:  () => void;
-}
-
-interface StagedOperator {
-  id: number;
-  short_name: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-  assignmentId?: number;
+  stage?: string;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
 export function UnifiedOperatorEditModal({
-  recordId,
   eventCode,
   batchCode,
   mediaCode,
-  cleaning_id,
-  cleaning_type,
+  cleaning_record_id,
+  cleaning_record_kind = 'standard',
+  targetLabel,
   activityType = 'event',
   stage,
   onClose,
@@ -48,6 +41,7 @@ export function UnifiedOperatorEditModal({
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const freedAssignmentIds = useRef<number[]>([]);
   const notify = useNotify();
 
   const getOperatorDisplayName = (op: any) => {
@@ -59,34 +53,35 @@ export function UnifiedOperatorEditModal({
     let active = true;
     async function loadData() {
       try {
-        if (!eventCode && !mediaCode && !cleaning_id) {
+        if (!eventCode && !mediaCode && cleaning_record_id == null) {
           setLoading(false);
           return;
         }
 
         const [assignmentsRes, operatorsRes] = await Promise.all([
-          indoorApi.operators.getAssignments({ 
-            event_code: eventCode, 
-            media_code: mediaCode, 
-            cleaning_id, 
-            cleaning_type,
-            activity_type: activityType 
+          indoorApi.operators.getAssignments({
+            event_code: eventCode,
+            media_code: mediaCode,
+            cleaning_record_id,
+            cleaning_record_kind,
+            activity_type: cleaning_record_id != null ? 'cleaning' : activityType
           }),
           indoorApi.operators.getActive()
         ]);
         if (!active) return;
-        
+
         const assignments = Array.isArray(assignmentsRes) ? assignmentsRes : [];
         const operators = Array.isArray(operatorsRes) ? operatorsRes : [];
-        
+
         setAllOperators(operators);
         setInitialAssignments(assignments);
-        
+        freedAssignmentIds.current = [];
+
         setStagedOperators(assignments.map((a: any) => ({
-          id: a.operator_id,
-          short_name: a.short_name,
-          first_name: a.first_name,
-          last_name: a.last_name,
+          id: a.operator_id ?? a.operatorId,
+          short_name: a.short_name ?? a.shortName,
+          first_name: a.first_name ?? a.firstName,
+          last_name: a.last_name ?? a.lastName,
           assignmentId: a.id
         })));
       } catch (error: any) {
@@ -98,60 +93,49 @@ export function UnifiedOperatorEditModal({
     }
     loadData();
     return () => { active = false; };
-  }, [eventCode, mediaCode, cleaning_id, cleaning_type, activityType, notify]);
+  }, [eventCode, mediaCode, cleaning_record_id, cleaning_record_kind, activityType, notify]);
 
   const toggleOperator = (operatorId: number) => {
-    if (stagedOperators.some(op => op.id === operatorId)) {
-      setStagedOperators(prev => prev.filter(op => op.id !== operatorId));
-    } else {
-      const operator = allOperators.find(op => op.id === operatorId);
-      if (!operator) return;
-      setStagedOperators(prev => [...prev, {
+    const operator = allOperators.find(op => op.id === operatorId);
+    if (!operator && !stagedOperators.some(op => op.id === operatorId)) return;
+
+    const { staged, freed } = toggleStagedOperator(
+      stagedOperators,
+      operatorId,
+      operator ? {
         id: operator.id,
         short_name: operator.short_name,
         first_name: operator.first_name,
-        last_name: operator.last_name
-      }]);
-    }
+        last_name: operator.last_name,
+        role: '',
+      } : { id: operatorId },
+      freedAssignmentIds.current
+    );
+    freedAssignmentIds.current = freed;
+    setStagedOperators(staged);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Operator Assignments Diff
-      const stagedIds = stagedOperators.map(op => op.id);
-      const savedIds = initialAssignments.map((a: any) => a.operator_id);
-      
-      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.operator_id));
-      const additions = stagedOperators.filter(op => !savedIds.includes(op.id));
-
-      // At least one operator must remain
       if (stagedOperators.length === 0) {
         throw new Error('At least one operator must remain assigned');
       }
 
-      // Handle additions
-      if (additions.length > 0) {
-        await Promise.all(
-          additions.map(op => indoorApi.operators.addAssignment({
-            event_code: eventCode,
-            media_code: mediaCode,
-            cleaning_id,
-            cleaning_type,
-            operator_id: op.id,
-            activity_type: activityType,
-            batch_code: batchCode,
-            stage: stage
-          }))
-        );
-      }
-
-      // Handle removals
-      if (removals.length > 0) {
-        await Promise.all(
-          removals.map((a: any) => indoorApi.operators.removeAssignment(a.id))
-        );
-      }
+      await syncOperatorAssignments(initialAssignments, stagedOperators, {
+        add: (operatorId) => indoorApi.operators.addAssignment({
+          event_code: eventCode,
+          media_code: mediaCode,
+          cleaning_record_id,
+          cleaning_record_kind,
+          operator_id: operatorId,
+          activity_type: cleaning_record_id != null ? 'cleaning' : activityType,
+          batch_code: batchCode,
+          stage: stage,
+        }),
+        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operator_id: operatorId }),
+        remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
+      });
 
       notify.success('Operators updated successfully');
       if (onSuccess) onSuccess();
@@ -163,6 +147,14 @@ export function UnifiedOperatorEditModal({
     }
   };
 
+  const subtitle = batchCode
+    ? `Batch: ${batchCode}`
+    : mediaCode
+      ? `Media: ${mediaCode}`
+      : targetLabel
+        ? `Target: ${targetLabel}`
+        : 'Record Details';
+
   return (
     <Dialog open={true} onOpenChange={(open: boolean) => !open && !saving && onClose()}>
       <DialogContent className="sm:max-w-lg">
@@ -172,103 +164,70 @@ export function UnifiedOperatorEditModal({
             Manage Operators
           </DialogTitle>
           <DialogDescription className="text-base text-muted-foreground mt-1 text-left">
-            {batchCode ? `Batch: ${batchCode}` : mediaCode ? `Media: ${mediaCode}` : cleaning_id ? `${cleaning_type === 'deep' ? 'Deep Cleaning' : 'Standard Cleaning'} Record` : 'Record Details'} 
-            {stage ? ` · Stage: ${stage}` : ''}
+            {subtitle}
           </DialogDescription>
         </DialogHeader>
 
         {loading ? (
-          <div className="py-12 text-center text-base text-muted-foreground flex flex-col items-center gap-2">
-            <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            Loading operators...
-          </div>
+          <p className="text-sm text-muted-foreground py-4">Loading operators...</p>
         ) : (
-          <div className="space-y-4 py-4">
-            {/* Currently Assigned Operators */}
-            <div className="space-y-2">
-              <Label className="text-base font-semibold">Assigned Operators ({stagedOperators.length})</Label>
-              <div className="border rounded-md p-3 min-h-[60px]">
+          <>
+            <div className="space-y-3">
+              <Label>Assigned Operators</Label>
+              <div className="flex flex-wrap gap-2 min-h-[32px]">
                 {stagedOperators.length === 0 ? (
-                  <span className="text-gray-500 text-base">No operators assigned</span>
+                  <span className="text-sm text-muted-foreground">No operators assigned</span>
                 ) : (
-                  <div className="flex flex-wrap gap-2">
-                    {stagedOperators.map((op) => (
-                      <Badge key={op.id} variant="secondary">
-                        {getOperatorDisplayName(op)}
-                      </Badge>
-                    ))}
-                  </div>
+                  stagedOperators.map(op => (
+                    <Badge key={op.id} variant="secondary" className="flex items-center gap-1 pr-1">
+                      {getOperatorDisplayName(op)}
+                      <button type="button" onClick={() => toggleOperator(op.id)} className="ml-1 hover:text-red-500">
+                        <X className="w-3 h-3" />
+                      </button>
+                    </Badge>
+                  ))
                 )}
               </div>
             </div>
 
-            {/* Operator Directory */}
-            <div className="space-y-2">
-              <Label className="text-base font-semibold">Directory</Label>
-              <div className="border rounded-md overflow-hidden">
-                <button
-                  type="button"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  disabled={saving}
-                  className="w-full flex items-center justify-between px-3 py-2.5 text-base bg-transparent transition-colors hover:bg-muted/30"
-                >
-                  <span className="text-muted-foreground">
-                    Click to browse operator directory...
-                  </span>
-                  {isExpanded ? <ChevronUp className="w-4 h-4 opacity-50" /> : <ChevronDown className="w-4 h-4 opacity-50" />}
-                </button>
-                
-                {isExpanded && (
-                  <div className="border-t max-h-[200px] overflow-y-auto p-3 space-y-2">
-                    {allOperators.map((op) => {
-                      const isSelected = stagedOperators.some(so => so.id === op.id);
-                      return (
-                        <div key={op.id} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            id={`operator-${op.id}`}
-                            checked={isSelected}
-                            onChange={() => toggleOperator(op.id)}
-                            disabled={saving}
-                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                          />
-                          <Label htmlFor={`operator-${op.id}`} className="text-base cursor-pointer">
-                            {getOperatorDisplayName(op)}
-                          </Label>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+            <Separator />
+
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="flex items-center justify-between w-full text-sm font-medium text-muted-foreground hover:text-foreground"
+            >
+              <span>Add / Remove Operators</span>
+              {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+
+            {isExpanded && (
+              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                {allOperators.map(op => {
+                  const isSelected = stagedOperators.some(s => s.id === op.id);
+                  return (
+                    <button
+                      key={op.id}
+                      type="button"
+                      onClick={() => toggleOperator(op.id)}
+                      className={`text-left px-3 py-2 rounded-md border text-sm transition-colors ${
+                        isSelected ? 'bg-indigo-50 border-indigo-300 text-indigo-700' : 'hover:bg-gray-50'
+                      }`}
+                    >
+                      {getOperatorDisplayName(op)}
+                    </button>
+                  );
+                })}
               </div>
-            </div>
-          </div>
+            )}
+          </>
         )}
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t">
-          <Button 
-            variant="outline" 
-            onClick={onClose} 
-            disabled={saving}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={loading || saving}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
-            {saving ? (
-              <>
-                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Updating...
-              </>
-            ) : (
-              <>
-                <Save className="w-4 h-4 mr-2" />
-                Save Changes
-              </>
-            )}
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
+          <Button onClick={handleSave} disabled={saving || loading}>
+            <Save className="w-4 h-4 mr-2" />
+            {saving ? 'Saving...' : 'Save Changes'}
           </Button>
         </DialogFooter>
       </DialogContent>

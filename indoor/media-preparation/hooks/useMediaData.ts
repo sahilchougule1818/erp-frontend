@@ -60,7 +60,7 @@ export function useMediaData() {
   const saveMediaBatch = async (formData: any) => {
     setLoading(true);
     try {
-      const { operator_ids: operatorIds, lab_number: _labNumber, ...rest } = formData;
+      const { operator_ids: operatorIds, ...rest } = formData;
 
       if (formData.id) {
         await indoorApi.autoclave.update(formData.id, rest);

@@ -134,9 +134,10 @@ export function CleaningRecord() {
       </AlertDialog>
 
       {editingAssignment && (
-        <UnifiedOperatorEditModal 
-          cleaning_id={editingAssignment.id}
-          cleaning_type={editingAssignment.type}
+        <UnifiedOperatorEditModal
+          cleaning_record_id={editingAssignment.id}
+          cleaning_record_kind={editingAssignment.type === 'deep' ? 'deep' : 'standard'}
+          targetLabel={editingAssignment.area_cleaned ?? editingAssignment.instrument_cleaned}
           onClose={() => setEditingAssignment(null)}
           onSuccess={refetch}
         />

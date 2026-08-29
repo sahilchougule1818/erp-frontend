@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { indoorApi } from '../../services/indoorApi';
 import apiClient from '../../../shared/services/apiClient';
-import { applySpringPage } from '../../../shared/utils/springPage';
+import { applySpringPage, toSpringPageParams } from '../../../shared/utils/springPage';
 
 export const useOperatorMaster = () => {
   const [operators, setOperators] = useState<any[]>([]);
@@ -75,13 +75,15 @@ export const useOperatorMaster = () => {
   const loadActivityLogs = useCallback(async (params: { operatorId?: number, referenceCode?: string, category?: string, page?: number, lab_number?: number } = {}) => {
     setLoading(true);
     try {
-      const requestParams = { 
-        ...params, 
-        page: params.page || activityLogsPage, 
-        limit: 10,
-        lab_number: params.lab_number !== undefined ? params.lab_number : currentLabFilter
+      const uiPage = params.page ?? activityLogsPage;
+      const requestParams = {
+        ...toSpringPageParams(uiPage, 10),
+        ...(params.operatorId != null ? { operatorId: params.operatorId } : {}),
+        ...(params.referenceCode ? { referenceCode: params.referenceCode } : {}),
+        ...(params.category ? { category: params.category } : {}),
+        lab_number: params.lab_number !== undefined ? params.lab_number : currentLabFilter,
       };
-      
+
       const data = await apiClient.get('/indoor/operator-log/activity-logs', { params: requestParams });
       applySpringPage(data, setActivityLogs, setActivityLogsPagination);
     } catch (error) {
@@ -143,7 +145,7 @@ export const useOperatorMaster = () => {
 
   useEffect(() => {
     loadActivityLogs({ page: activityLogsPage });
-  }, [activityLogsPage, currentLabFilter]);
+  }, [activityLogsPage, currentLabFilter, loadActivityLogs]);
 
   return {
     operators,

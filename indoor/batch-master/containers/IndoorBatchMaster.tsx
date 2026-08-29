@@ -253,7 +253,7 @@ const IndoorBatchMaster: React.FC = () => {
       console.error('Failed to fetch permissions:', error);
     }
     
-    // Fetch undo preview
+    // Fetch undo preview (read-only; lock checks avoid FOR UPDATE)
     const preview = await previewUndo(batch.batchCode);
     if (preview.success) {
       const d = preview.data as Record<string, unknown>;
@@ -261,6 +261,16 @@ const IndoorBatchMaster: React.FC = () => {
         (!d.canUndo || d.isUndoLocked || d.is_undo_locked) ? [String(d.message ?? 'Undo locked')] : []
       );
       setUndoLockReasons(prev => ({ ...prev, [batch.batchCode]: reasons }));
+    } else if (batch.isSampled === 'c') {
+      setUndoLockReasons(prev => ({
+        ...prev,
+        [batch.batchCode]: ['Sample result has been reported — cannot undo'],
+      }));
+    } else {
+      setUndoLockReasons(prev => ({
+        ...prev,
+        [batch.batchCode]: [preview.error || 'Unable to check undo status'],
+      }));
     }
   };
 
