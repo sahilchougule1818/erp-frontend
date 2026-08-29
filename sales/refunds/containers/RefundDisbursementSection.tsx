@@ -17,7 +17,6 @@ import {
   Banknote,
   Trash2,
   CheckCircle2,
-  XCircle,
   ArrowDownLeft
 } from 'lucide-react';
 
@@ -45,12 +44,9 @@ const RefundDisbursementSection: React.FC = () => {
     notes: ''
   });
 
-  const [termError, setTermError] = useState<string | null>(null);
-
   const handleOpenDetail = (record: any) => {
     setSelectedRefundId(record.refund_id);
     setIsDetailOpen(true);
-    setTermError(null);
     setTermForm({
       amount: '',
       payment_method: 'Cash',
@@ -63,7 +59,6 @@ const RefundDisbursementSection: React.FC = () => {
 
   const handleCreateTerm = async () => {
     if (!selectedRefundId || !termForm.amount) return;
-    setTermError(null);
     try {
       await createTerm({
         amount: parseFloat(termForm.amount),
@@ -78,9 +73,7 @@ const RefundDisbursementSection: React.FC = () => {
       await refetch();
       setTermForm(f => ({ ...f, amount: '', transaction_number: '', notes: '' }));
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to record refund term';
-      setTermError(errorMessage);
-      notify.error(errorMessage);
+      notify.error(err.message || 'Failed to record refund term');
     }
   };
 
@@ -305,13 +298,6 @@ const RefundDisbursementSection: React.FC = () => {
                   <h3 className="font-semibold text-base text-gray-700 flex items-center gap-1.5">
                     <Banknote className="h-4 w-4" /> Record Disbursement Term
                   </h3>
-
-                  {termError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-base text-red-700 flex items-start gap-2">
-                      <XCircle className="h-4 w-4 mt-0.5 shrink-0" />
-                      <span>{termError}</span>
-                    </div>
-                  )}
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="col-span-2 space-y-2">

@@ -6,7 +6,7 @@ import { Button } from '../../../shared/ui/button';
 import { Trash2, Info } from 'lucide-react';
 import { OperatorSelector } from '../../operators/components/OperatorSelector';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
-import apiClient from '../../../shared/services/apiClient';
+import { indoorApi } from '../../services/indoorApi';
 
 interface IncubationFormProps {
   initialData: any;
@@ -49,32 +49,16 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
       mediaCode: selectedBatch?.latestMediaCode || selectedBatch?.mediaCode || '',
       ...initialData
     });
-    if (initialData?.id) fetchOperatorIds(initialData.id);
-    // fetch media codes for terminal incubation (editable select)
+    if (initialData?.operators) {
+      const operatorIds = initialData.operators.map((op: any) => parseInt(op.operatorId ?? op.operator_id));
+      setForm((prev: any) => ({ ...prev, operatorIds }));
+    }
     if (isTerminalIncubation) {
-      apiClient.get('/indoor/form-data/media-codes').then((codes: any) => {
+      indoorApi.autoclave.getMediaCodes().then((codes: any) => {
         setMediaCodes(Array.isArray(codes) ? codes : []);
       }).catch(() => {});
     }
   }, [initialData, selectedBatch, isTerminalIncubation]);
-
-const fetchOperatorIds = async (recordId: number) => {
-    try {
-      // Since operators are now included in the main record response,
-      // we can get them from the record data instead of a separate API call
-      const record = initialData;
-      if (record && record.operators) {
-        const operatorIds = record.operators.map((op: any) => parseInt(op.operator_id));
-        setForm((prev: any) => ({ ...prev, operatorIds }));
-      } else {
-        // Fallback to API call if operators not in record
-        const data = await apiClient.get(`/form-data/incubation/${recordId}/operators`);
-        setForm((prev: any) => ({ ...prev, operatorIds: data.map(id => parseInt(id)) }));
-      }
-    } catch (err) {
-      console.error('Failed to fetch operator IDs:', err);
-    }
-  };
 
   const handleContaminationChange = (value: string) => {
     const contamination = parseInt(value) || 0;

@@ -8,7 +8,6 @@ import { Button } from '../../../shared/ui/button';
 import { Trash2, ArrowRight } from 'lucide-react';
 import { OperatorSelector } from '../../operators/components/OperatorSelector';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
-import apiClient from '../../../shared/services/apiClient';
 
 interface SubcultureFormProps {
   initialData: any;
@@ -55,23 +54,14 @@ export function SubcultureForm({ initialData, selectedBatch, operators, records,
       currentQuantity: selectedBatch?.qtyAvailable ?? selectedBatch?.qtyIn ?? '',
       ...initialData
     });
-    if (initialData?.id) fetchOperatorIds(initialData.id);
-  }, [initialData, selectedBatch]);
-
-  const fetchOperatorIds = async (recordId: number) => {
-    try {
-      const record = records.find((r: any) => r.id === recordId);
-      if (record && record.operators) {
-        const operatorIds = record.operators.map((op: any) => parseInt(op.operatorId));
-        setForm((prev: any) => ({ ...prev, operatorIds }));
-      } else {
-        const data = await apiClient.get(`/form-data/subculturing/${recordId}/operators`);
-        setForm((prev: any) => ({ ...prev, operatorIds: data.map((id: number) => parseInt(String(id))) }));
-      }
-    } catch (err) {
-      console.error('Failed to fetch operator IDs:', err);
+    const record = initialData?.id
+      ? records.find((r: any) => r.id === initialData.id) ?? initialData
+      : null;
+    if (record?.operators) {
+      const operatorIds = record.operators.map((op: any) => parseInt(op.operatorId ?? op.operator_id));
+      setForm((prev: any) => ({ ...prev, operatorIds }));
     }
-  };
+  }, [initialData, selectedBatch, records]);
 
   const handleContaminationChange = (value: string) => {
     const contamination = parseInt(value) || 0;

@@ -8,6 +8,8 @@ import { FULFILLMENT_TYPES } from '../../constants/EventTypes';
 import { Customer } from '../../services/salesApi';
 import { usePlantMaster } from '../../../indoor/settings/hooks/usePlantMaster';
 import { useCustomers } from '../../hooks/useCustomers';
+import { useNotify } from '../../../shared/hooks/useNotify';
+import { extractApiErrorMessage } from '../../../shared/services/apiClient';
 
 type OrderItemRow = {
   plant_id: string;
@@ -40,8 +42,8 @@ export const CreatePreBookingForm: React.FC<Props> = ({
 }) => {
   const { plants } = usePlantMaster();
   const { customers: customersList } = useCustomers({ pageSize: 500 });
+  const notify = useNotify();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
   
   const [customerId, setCustomerId] = React.useState('');
   const [deliveryCharges, setDeliveryCharges] = React.useState('0');
@@ -61,7 +63,6 @@ export const CreatePreBookingForm: React.FC<Props> = ({
       setSgstPercent('0');
       setExpectedDeliveryDate('');
       setItems([{ ...EMPTY_ITEM }]);
-      setErrorMessage(null);
     }
   }, [open]);
 
@@ -92,18 +93,15 @@ export const CreatePreBookingForm: React.FC<Props> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setErrorMessage(null);
 
     try {
       if (!customerId) {
-        setErrorMessage('Please select a customer');
-        setIsSubmitting(false);
+        notify.error('Please select a customer');
         return;
       }
 
       if (!expectedDeliveryDate) {
-        setErrorMessage('Please select expected delivery date');
-        setIsSubmitting(false);
+        notify.error('Please select expected delivery date');
         return;
       }
 
@@ -114,8 +112,7 @@ export const CreatePreBookingForm: React.FC<Props> = ({
       });
 
       if (validItems.length === 0) {
-        setErrorMessage('Please fill in at least one complete order item');
-        setIsSubmitting(false);
+        notify.error('Please fill in at least one complete order item');
         return;
       }
 
@@ -162,8 +159,8 @@ export const CreatePreBookingForm: React.FC<Props> = ({
 
       await onSubmit(payload);
       onClose();
-    } catch (error: any) {
-      setErrorMessage(error?.response?.data?.message || error?.message || 'Failed to create pre-booking');
+    } catch (error: unknown) {
+      notify.error(extractApiErrorMessage(error) || 'Failed to create pre-booking');
     } finally {
       setIsSubmitting(false);
     }
@@ -178,18 +175,6 @@ export const CreatePreBookingForm: React.FC<Props> = ({
           </DialogHeader>
 
           <div className="py-4 space-y-4 overflow-y-auto flex-1 min-h-0">
-            {errorMessage && (
-              <div className="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
-                <span className="text-red-600 text-base font-medium flex-1">{errorMessage}</span>
-                <button
-                  type="button"
-                  onClick={() => setErrorMessage(null)}
-                  className="text-red-400 hover:text-red-600 text-lg leading-none"
-                >
-                  ×
-                </button>
-              </div>
-            )}
 
             <div className="grid grid-cols-2 gap-4">
               {/* Customer */}

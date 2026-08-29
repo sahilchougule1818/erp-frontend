@@ -12,6 +12,7 @@ import { ManageInstantSaleDialog } from '../forms/ManageInstantSaleDialog';
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { useIndoorStock, useOutdoorStock } from '../../hooks/useStock';
 import { customerBookingsApi, bookingPaymentsApi, salesApi } from '../../services/salesApi';
+import { extractApiErrorMessage } from '../../../shared/services/apiClient';
 import { normalizeInstantSaleStats } from '../../utils/normalize';
 
 export const InstantSalesList: React.FC = () => {
@@ -208,15 +209,10 @@ export const InstantSalesList: React.FC = () => {
   };
 
   const handleCancelSale = async (reason?: string) => {
-    try {
-      await customerBookingsApi.cancel(selectedSale.order_id, { cancellation_reason: reason }, true);
-      notify.success('Sale cancelled successfully');
-      await fetchSales();
-      setShowManageDialog(false);
-    } catch (error: any) {
-      notify.error('Failed to cancel sale');
-      throw error;
-    }
+    await customerBookingsApi.cancel(selectedSale.order_id, { cancellation_reason: reason }, true);
+    notify.success('Sale cancelled successfully');
+    await fetchSales();
+    setShowManageDialog(false);
   };
 
   const handleUpdateSale = async () => {

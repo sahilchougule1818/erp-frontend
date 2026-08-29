@@ -15,6 +15,8 @@ import {
 import { PAYMENT_METHODS } from '../../constants/EventTypes';
 import { cn } from '../../../shared/ui/utils';
 import { customerBookingsApi, billingApi } from '../../services/salesApi';
+import { extractApiErrorMessage } from '../../../shared/services/apiClient';
+import { useNotify } from '../../../shared/hooks/useNotify';
 
 type AllocationDraft = {
   batch_code: string;
@@ -63,7 +65,7 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
   const [itemAllocations, setItemAllocations] = useState<ItemAllocation[]>([]);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [cancellationReason, setCancellationReason] = useState('');
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const notify = useNotify();
   const [isPaymentHistoryExpanded, setIsPaymentHistoryExpanded] = useState(false);
   const [isEditingFinancials, setIsEditingFinancials] = useState(false);
   const [editedItems, setEditedItems] = useState<any[]>([]);
@@ -91,7 +93,6 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
       });
       setIsEditingFinancials(false);
       setPendingUndoPayment(null);
-      setErrorMessage(null);
       setShowCancelConfirm(false);
       setCancellationReason('');
       setIsPaymentHistoryExpanded(false);
@@ -134,7 +135,6 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleSave = async () => {
-    setErrorMessage(null);
     try {
       if (pendingUndoPayment) {
         await onDeletePayment(pendingUndoPayment);
@@ -177,8 +177,8 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
         await onAddPayment(paymentPayload);
       }
       onOpenChange(false);
-    } catch (err: any) {
-      setErrorMessage(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to update');
+    } catch (err: unknown) {
+      notify.error(extractApiErrorMessage(err) || 'Failed to update');
     }
   };
 
@@ -195,18 +195,16 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
     try {
       await onCancelBooking(cancellationReason || undefined);
       onOpenChange(false);
-    } catch (err: any) {
-      setErrorMessage(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to cancel booking');
+    } catch (err: unknown) {
+      notify.error(extractApiErrorMessage(err) || 'Failed to cancel sale');
     }
   };
 
   const handleDownloadBill = async () => {
     try {
       await billingApi.downloadBill(selectedBooking.order_id);
-    } catch (err: any) {
-      const errorMsg = err.message || 'Failed to download invoice';
-      setErrorMessage(errorMsg);
-      console.error('Download error:', err);
+    } catch (err: unknown) {
+      notify.error(extractApiErrorMessage(err) || 'Failed to download invoice');
     }
   };
 
@@ -242,20 +240,11 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
                 className="text-base border-red-200 focus:border-red-400 min-h-[80px]"
               />
             </div>
-            {errorMessage && (
-              <div className="bg-red-100 border border-red-300 rounded p-2 text-base text-red-700 flex items-start gap-1">
-                <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
-                <span className="flex-1">{errorMessage}</span>
-                <button type="button" onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-700 ml-1 shrink-0">
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            )}
           </div>
         </div>
         <div className="border-t px-6 py-4 bg-gray-50" style={{ flexShrink: 0 }}>
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => { setShowCancelConfirm(false); setCancellationReason(''); setErrorMessage(null); }}>
+            <Button variant="outline" onClick={() => { setShowCancelConfirm(false); setCancellationReason(''); }}>
               Go Back
             </Button>
             <Button onClick={handleCancelBooking} className="bg-red-600 hover:bg-red-700">
@@ -279,16 +268,6 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
           <span className="text-base text-slate-600 font-medium">{selectedBooking.customer_name}</span>
         </div>
 
-        {errorMessage && (
-          <div className="bg-red-50 border border-red-200 rounded p-3 text-base text-red-700 flex items-start gap-2">
-            <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
-            <span className="flex-1">{errorMessage}</span>
-            <button type="button" onClick={() => setErrorMessage(null)} className="text-red-400 hover:text-red-700 shrink-0">
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        )}
-
         {/* ── Sale Items ────────────────────────────────────────────────────── */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -302,7 +281,6 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
 
           {items.map((item: any, itemIdx: number) => {
             const unitLabel = getUnitLabel(item);
-            console.log('Item data:', item); // DEBUG: Check if batch_code exists
 
             return (
               <div
@@ -794,7 +772,7 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
               <Button
                 variant="outline" size="sm"
                 className="text-red-600 border-red-200 hover:bg-red-50 text-base"
-                onClick={() => { setErrorMessage(null); setShowCancelConfirm(true); }}
+                onClick={() => setShowCancelConfirm(true)}
               >
                 <XCircle className="h-3 w-3 mr-1" /> Cancel
               </Button>
