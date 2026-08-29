@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 
 export function useIndoorDashboard() {
@@ -21,7 +21,7 @@ export function useIndoorDashboard() {
         indoorApi.dashboard.getDashboardStats('', labNumber),
         indoorApi.dashboard.getStageDistribution(labNumber),
         indoorApi.dashboard.getReadyForExport(labNumber),
-        indoorApi.autoclave.getPending({ lab_number: labNumber || undefined })
+        indoorApi.autoclave.getPending({ labNumber: labNumber || undefined })
       ]);
 
       setStats(statsRes || {});

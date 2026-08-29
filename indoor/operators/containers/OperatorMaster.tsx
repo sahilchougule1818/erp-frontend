@@ -92,9 +92,9 @@ export function OperatorMaster() {
             records={operators}
             columns={[
               { key: 'id', label: 'ID' },
-              { key: 'short_name', label: 'Short Name' },
-              { key: 'full_name', label: 'Full Name', render: (_: any, op: any) => [op.first_name, op.middle_name, op.last_name].filter(Boolean).join(' ') },
-              { key: 'is_active', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' }
+              { key: 'shortName', label: 'Short Name' },
+              { key: 'fullName', label: 'Full Name', render: (_: any, op: any) => [op.firstName, op.middleName, op.lastName].filter(Boolean).join(' ') },
+              { key: 'isActive', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' }
             ]}
             onEdit={handleEdit}
             onDelete={(op: any) => { setDeleteId(op.id); toggleModal('delete', true); }}
@@ -114,20 +114,20 @@ export function OperatorMaster() {
             title=""
             records={activityLogs}
             columns={[
-              { key: 'activity_date', label: 'Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
+              { key: 'activityDate', label: 'Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
               { key: 'category', label: 'Category' },
-              { key: 'reference_code', label: 'Reference' },
+              { key: 'referenceCode', label: 'Reference' },
               { key: 'phase', label: 'Activity/Phase' },
               { key: 'stage', label: 'Stage', render: (val: string) => val || '-' },
-              { key: 'lab_number', label: 'Lab', render: (val: number) => val ? `Lab ${val}` : '-' },
-              { key: 'operator_id', label: 'Operator ID' },
-              { key: 'short_name', label: 'Operator Short Name' },
+              { key: 'labNumber', label: 'Lab', render: (val: number) => val ? `Lab ${val}` : '-' },
+              { key: 'operatorId', label: 'Operator ID' },
+              { key: 'shortName', label: 'Operator Short Name' },
               { key: 'notes', label: 'Notes', render: (val: string) => val || '-' }
             ]}
             filterConfig={{
               filter1Key: 'category',
               filter1Label: 'Category',
-              filter2Key: 'reference_code',
+              filter2Key: 'referenceCode',
               filter2Label: 'Batch / Media / Task'
             }}
             exportFileName="staff_utilization_audit"

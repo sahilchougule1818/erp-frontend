@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ledgerApi } from '../services/salesApi';
+import { ledgerApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
-import { normalizeLedgerEntry } from '../utils/normalize';
 import type { LedgerEntry } from '../types';
 
 export const useLedger = (params: any) => {
@@ -21,8 +20,8 @@ export const useLedger = (params: any) => {
     try {
       setLoading(true);
       const response = await ledgerApi.getLedgerEntries({ ...params, page });
-      const { data, pagination: pageInfo } = parseSpringPage<Record<string, unknown>>(response);
-      setEntries(data.map(normalizeLedgerEntry));
+      const { data, pagination: pageInfo } = parseSpringPage<LedgerEntry>(response);
+      setEntries(data);
       setPagination({
         total: pageInfo.total,
         page: pageInfo.page,

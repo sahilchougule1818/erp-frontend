@@ -1,8 +1,7 @@
-import apiClient from '../../shared/services/apiClient';
+import apiClient from '../../shared/api/apiClient';
 import { toSpringPageParams } from '../../shared/utils/springPage';
 
 export const inventoryApi = {
-  // Item Master
   items: {
     getAll: (page?: number, limit?: number) =>
       apiClient.get('/inventory/items', { params: toSpringPageParams(page, limit ?? 10) }),
@@ -12,7 +11,6 @@ export const inventoryApi = {
     delete: (id: number) => apiClient.delete(`/inventory/items/${id}`),
   },
 
-  // Supplier Master
   suppliers: {
     getAll: (page?: number, limit?: number) =>
       apiClient.get('/inventory/suppliers', { params: toSpringPageParams(page, limit ?? 10) }),
@@ -21,10 +19,11 @@ export const inventoryApi = {
     delete: (id: number) => apiClient.delete(`/inventory/suppliers/${id}`),
   },
 
-  // Stock Usage & History
   stockUsage: {
-    getHistory: (page?: number, limit?: number) =>
-      apiClient.get('/inventory/stock-withdrawals/history', { params: toSpringPageParams(page, limit ?? 10) }),
+    getHistory: (page?: number, limit?: number, type?: 'purchase' | 'usage') =>
+      apiClient.get('/inventory/stock-withdrawals/history', {
+        params: { ...toSpringPageParams(page, limit ?? 10), ...(type ? { type } : {}) },
+      }),
     getStockLevels: (page?: number, limit?: number) =>
       apiClient.get('/inventory/stock-withdrawals/stock-levels', { params: toSpringPageParams(page, limit ?? 10) }),
     getItemsWithLastWithdrawal: (page?: number, limit?: number) =>
@@ -32,7 +31,7 @@ export const inventoryApi = {
         params: toSpringPageParams(page, limit ?? 10),
       }),
     create: (data: {
-      item_id: number;
+      itemId: number;
       quantity: number;
       date?: string;
       reason?: string | null;

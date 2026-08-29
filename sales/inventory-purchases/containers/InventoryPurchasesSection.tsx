@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Badge } from '../../../shared/ui/badge';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
-import { useInventoryPayments, useInventoryItems, useWithdrawSuppliers, useBankAccounts } from '../../hooks/useSalesApi';
+import { useInventoryPayments, useInventoryItems, useWithdrawSuppliers } from '../../hooks/useInventoryPurchases';
+import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { CreateWithdrawDialog } from '../components/CreateWithdrawDialog';
-import { inventoryPaymentsApi, inventoryPurchasesApi } from '../../services/salesApi';
+import { inventoryPaymentsApi, inventoryPurchasesApi } from '../../api/salesApi';
 import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
@@ -35,12 +36,12 @@ const InventoryPurchasesSection: React.FC = () => {
   };
 
   const handleDelete = async (record: any) => {
-    if (!confirm(`Undo inventory purchase ${record.purchase_id}?\n\nThis will:\n- Reverse the stock addition\n- Reverse the financial transaction\n- Restore bank balance\n\nNote: Only the latest purchase for an item can be undone.`)) {
+    if (!confirm(`Undo inventory purchase ${record.purchaseId}?\n\nThis will:\n- Reverse the stock addition\n- Reverse the financial transaction\n- Restore bank balance\n\nNote: Only the latest purchase for an item can be undone.`)) {
       return;
     }
     
     try {
-      await inventoryPurchasesApi.delete(record.purchase_id);
+      await inventoryPurchasesApi.delete(record.purchaseId);
       notify.success('Inventory purchase undone successfully');
       refetch();
     } catch (err: any) {
@@ -49,14 +50,14 @@ const InventoryPurchasesSection: React.FC = () => {
   };
 
   const columns = [
-    { key: 'purchase_id', label: 'Purchase ID' },
+    { key: 'purchaseId', label: 'Purchase ID' },
     {
-      key: 'purchase_date',
+      key: 'purchaseDate',
       label: 'Date',
       render: (val: string) => format(new Date(val), 'dd MMM yyyy')
     },
     {
-      key: 'item_name',
+      key: 'itemName',
       label: 'Item',
       render: (val: string, record: any) => (
         <div>
@@ -66,7 +67,7 @@ const InventoryPurchasesSection: React.FC = () => {
       )
     },
     {
-      key: 'supplier_name',
+      key: 'supplierName',
       label: 'Supplier',
       render: (val: string) => val || '—'
     },
@@ -76,16 +77,16 @@ const InventoryPurchasesSection: React.FC = () => {
       render: (val: number) => Number(val).toLocaleString()
     },
     {
-      key: 'payment_method',
+      key: 'paymentMethod',
       label: 'Payment',
       render: (val: string) => val ? (
         <Badge variant="outline">{val}</Badge>
       ) : '—'
     },
     {
-      key: 'bank_account_name',
+      key: 'bankAccountName',
       label: 'Bank Account',
-      render: (val: string, record: any) => val ? `${record.bank_name} - ${val}` : '—'
+      render: (val: string, record: any) => val ? `${record.bankName} - ${val}` : '—'
     },
     {
       key: 'price',
@@ -125,9 +126,9 @@ const InventoryPurchasesSection: React.FC = () => {
             columns={columns}
             records={payments}
             filterConfig={{
-              filter1Key: 'item_name',
+              filter1Key: 'itemName',
               filter1Label: 'Search item...',
-              filter2Key: 'supplier_name',
+              filter2Key: 'supplierName',
               filter2Label: 'Supplier'
             }}
             exportFileName="inventory_purchases"

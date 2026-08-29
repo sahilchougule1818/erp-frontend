@@ -35,9 +35,9 @@ export function OutdoorWorkerMaster() {
 
   const columns = [
     { key: 'id', label: 'ID', render: (val: number) => <span className="text-base text-slate-500 font-mono">{val}</span> },
-    { key: 'short_name', label: 'Short Name', render: (val: string) => <span className="font-bold text-base">{val}</span> },
-    { key: 'full_name', label: 'Full Name', render: (_: any, record: any) => <span className="text-base">{[record.first_name, record.middle_name, record.last_name].filter(Boolean).join(' ')}</span> },
-    { key: 'is_active', label: 'Status', render: (val: boolean) => (
+    { key: 'shortName', label: 'Short Name', render: (val: string) => <span className="font-bold text-base">{val}</span> },
+    { key: 'fullName', label: 'Full Name', render: (_: any, record: any) => <span className="text-base">{[record.firstName, record.middleName, record.lastName].filter(Boolean).join(' ')}</span> },
+    { key: 'isActive', label: 'Status', render: (val: boolean) => (
       <Badge className={val ? 'bg-green-100 text-green-700 text-base' : 'bg-gray-100 text-gray-700 text-base'}>
         {val ? 'Active' : 'Inactive'}
       </Badge>
@@ -45,7 +45,7 @@ export function OutdoorWorkerMaster() {
   ];
 
   const logColumns = [
-    { key: 'batch_code', label: 'Batch Code', render: (val: string) => <span className="font-medium text-base">{val}</span> },
+    { key: 'batchCode', label: 'Batch Code', render: (val: string) => <span className="font-medium text-base">{val}</span> },
     { key: 'activity', label: 'Activity', render: (val: string, record: any) => {
       const activity = val || record.phase;
       return (
@@ -68,8 +68,8 @@ export function OutdoorWorkerMaster() {
     }},
     { key: 'phase', label: 'Phase', render: (val: string) => <span className="capitalize text-base">{val?.replace(/_/g, ' ')}</span> },
     { key: 'tunnel', label: 'Tunnel', render: (val: string) => <span className="text-base">{val || '-'}</span> },
-    { key: 'worker_id', label: 'Worker ID', render: (val: number) => <span className="text-base">{val}</span> },
-    { key: 'worker_shortname', label: 'Worker Short Name', render: (val: string) => <span className="text-base">{val}</span> },
+    { key: 'workerId', label: 'Worker ID', render: (val: number) => <span className="text-base">{val}</span> },
+    { key: 'workerShortname', label: 'Worker Short Name', render: (val: string) => <span className="text-base">{val}</span> },
     { key: 'date', label: 'Date', render: (val: string) => <span className="text-base">{val ? new Date(val).toLocaleDateString() : ''}</span> }
   ];
 
@@ -142,7 +142,7 @@ export function OutdoorWorkerMaster() {
           <DataTable
             title="Worker Log Register"
             columns={logColumns}
-            records={workerLogs.filter((log: any) => selectedWorker === 'all' || log.worker_id.toString() === selectedWorker)}
+            records={workerLogs.filter((log: any) => selectedWorker === 'all' || log.workerId.toString() === selectedWorker)}
             exportFileName="worker_logs"
             pagination={paginationLogs}
             addButton={
@@ -155,7 +155,7 @@ export function OutdoorWorkerMaster() {
                     <SelectItem value="all">All Workers</SelectItem>
                     {workers.map((op: any) => (
                       <SelectItem key={op.id} value={op.id.toString()}>
-                      {[op.first_name, op.middle_name, op.last_name].filter(Boolean).join(' ')} ({op.short_name})
+                      {[op.firstName, op.middleName, op.lastName].filter(Boolean).join(' ')} ({op.shortName})
                       </SelectItem>
                     ))}
                   </SelectContent>

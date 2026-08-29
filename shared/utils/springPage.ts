@@ -33,35 +33,12 @@ export function resolveLabNumber(labNumber?: number) {
   return labNumber && labNumber > 0 ? labNumber : undefined;
 }
 
-function snakeToCamel(key: string): string {
-  return key.replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
-}
-
-function camelToSnake(key: string): string {
-  return key.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`);
-}
-
-/** Read a field from API rows that may use camelCase or snake_case keys. */
 export function getRecordField(record: Record<string, unknown> | null | undefined, key: string): unknown {
   if (!record || !key) return undefined;
-  if (record[key] !== undefined && record[key] !== null) return record[key];
-
-  const camel = snakeToCamel(key);
-  if (camel !== key && record[camel] !== undefined && record[camel] !== null) return record[camel];
-
-  const snake = camelToSnake(key);
-  if (snake !== key && record[snake] !== undefined && record[snake] !== null) return record[snake];
-
-  // Common Spring boolean aliases (active vs is_active)
-  if (key === 'is_active') {
-    if (record.active !== undefined && record.active !== null) return record.active;
-    if (record.isActive !== undefined && record.isActive !== null) return record.isActive;
-  }
-
   return record[key];
 }
 
-/** Normalize Spring Page<T> (or legacy { data, pagination }) for UI hooks. */
+/** Normalize Spring Page<T> for UI hooks. */
 export function parseSpringPage<T>(response: unknown): ParsedSpringPage<T> {
   const res = response as Record<string, unknown> | T[] | null | undefined;
 
@@ -79,24 +56,6 @@ export function parseSpringPage<T>(response: unknown): ParsedSpringPage<T> {
         totalPages,
         hasNext: res.last === false,
         hasPrev: res.first === false,
-      },
-    };
-  }
-
-  if (res && !Array.isArray(res) && Array.isArray(res.data)) {
-    const pagination = (res.pagination as Record<string, unknown>) ?? {};
-    const currentPage = (pagination.currentPage as number) ?? (pagination.page as number) ?? 1;
-    const totalPages = (pagination.totalPages as number) ?? 1;
-    return {
-      data: res.data as T[],
-      pagination: {
-        currentPage,
-        page: currentPage,
-        limit: (pagination.limit as number) ?? 10,
-        total: (pagination.total as number) ?? (res.data as T[]).length,
-        totalPages,
-        hasNext: currentPage < totalPages,
-        hasPrev: currentPage > 1,
       },
     };
   }

@@ -15,16 +15,16 @@ export function MediaPreparation() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
 
   const columns = [
-    { key: 'created_at', label: 'Created Date', render: (v: any) => <span>{v ? String(v).split('T')[0] : '—'}</span> },
-    { key: 'media_code', label: 'Media Code' },
-    { key: 'media_type', label: 'Media Type', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'started_at', label: 'Autoclave ON', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'media_loaded_at', label: 'Media Load Time', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'pressure_reached_at', label: 'Pressure Time', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'ended_at', label: 'Off Time', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'opened_at', label: 'Open Time', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'media_volume', label: 'Media Volume', render: (v: any) => <span>{v || '—'}</span> },
-    { key: 'bottles_count', label: 'Bottles', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'createdAt', label: 'Created Date', render: (v: any) => <span>{v ? String(v).split('T')[0] : '—'}</span> },
+    { key: 'mediaCode', label: 'Media Code' },
+    { key: 'mediaType', label: 'Media Type', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'startedAt', label: 'Autoclave ON', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'mediaLoadedAt', label: 'Media Load Time', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'pressureReachedAt', label: 'Pressure Time', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'endedAt', label: 'Off Time', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'openedAt', label: 'Open Time', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'mediaVolume', label: 'Media Volume', render: (v: any) => <span>{v || '—'}</span> },
+    { key: 'bottlesCount', label: 'Bottles', render: (v: any) => <span>{v || '—'}</span> },
     { key: 'temperature', label: 'Temp (°C)', render: (v: any) => <span>{v || '—'}</span> },
     { key: 'pressure', label: 'Pressure (PSI)', render: (v: any) => <span>{v || '—'}</span> },
     { key: 'status', label: 'State' },
@@ -49,9 +49,9 @@ export function MediaPreparation() {
         records={mediaBatches}
         onEdit={(record) => setModal({ open: true, data: record })}
         filterConfig={{
-          filter1Key: 'created_at',
+          filter1Key: 'createdAt',
           filter1Label: 'Date',
-          filter2Key: 'media_code',
+          filter2Key: 'mediaCode',
           filter2Label: 'Media Code'
         }}
         exportFileName="media_preparation"

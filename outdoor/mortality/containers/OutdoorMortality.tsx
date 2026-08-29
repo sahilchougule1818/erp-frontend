@@ -6,9 +6,9 @@ export function OutdoorMortality() {
   const { log, summary, loading, paginationLog, paginationSummary } = useMortalityData();
 
   const summaryColumns = [
-    { key: 'batch_code',      label: 'Batch Code' },
+    { key: 'batchCode',      label: 'Batch Code' },
     {
-      key: 'total_mortality',
+      key: 'totalMortality',
       label: 'Total Mortality',
       render: (val: number) => (
         <span className="font-semibold text-red-600">{val ?? 0}</span>
@@ -18,19 +18,19 @@ export function OutdoorMortality() {
 
   const logColumns = [
     {
-      key: 'recorded_at',
+      key: 'recordedAt',
       label: 'Date',
       render: (val: string) => val?.split('T')[0] ?? '—',
     },
-    { key: 'batch_code',  label: 'Batch Code' },
-    { key: 'phase_name',  label: 'Phase' },
-    { key: 'to_location',      label: 'Tunnel',
+    { key: 'batchCode',  label: 'Batch Code' },
+    { key: 'phaseName',  label: 'Phase' },
+    { key: 'toLocation',      label: 'Tunnel',
       render: (val: string | null) => val ?? '—' },
     {
-      key: 'mortality_count',
+      key: 'mortalityCount',
       label: 'Mortality Count',
     },
-    { key: 'mortality_reason',      label: 'Reason',
+    { key: 'mortalityReason',      label: 'Reason',
       render: (val: string | null) => val ?? '—' },
   ];
 
@@ -59,8 +59,8 @@ export function OutdoorMortality() {
             columns={logColumns}
             records={log}
             filterConfig={{
-              filter1Key: 'batch_code', filter1Label: 'Batch Code',
-              filter2Key: 'to_location', filter2Label: 'Tunnel',
+              filter1Key: 'batchCode', filter1Label: 'Batch Code',
+              filter2Key: 'toLocation', filter2Label: 'Tunnel',
             }}
             exportFileName="mortality-records"
             readOnly

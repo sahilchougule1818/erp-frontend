@@ -3,20 +3,20 @@ import { LayoutList } from 'lucide-react';
 import { Badge } from '../../../shared/ui/badge';
 import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { format } from 'date-fns';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 type Transaction = {
-  purchase_id: string;
-  item_id: number;
-  item_name: string;
+  purchaseId: string;
+  itemId: number;
+  itemName: string;
   unit: string;
   type: 'purchase' | 'withdrawal' | 'usage';
   quantity: number;
-  purchase_date?: string;
-  usage_date?: string;
-  current_stock: number;
+  purchaseDate?: string;
+  usageDate?: string;
+  currentStock: number;
   notes?: string;
 };
 
@@ -33,7 +33,7 @@ export function WithdrawalLog() {
 
   const fetchData = async () => {
     try {
-      const res = await inventoryApi.stockUsage.getHistory(currentPage, limit);
+      const res = await inventoryApi.stockUsage.getHistory(currentPage, limit, 'usage');
       const { data, pagination } = parseSpringPage<Transaction>(res);
       setTransactions(data);
       setCurrentPage(pagination.page);
@@ -48,15 +48,15 @@ export function WithdrawalLog() {
     setCurrentPage(page);
   };
 
-  const usageRecords = transactions.filter(t => t.type === 'usage');
+  const usageRecords = transactions;
 
   const columns = [
     {
-      key: 'usage_date',
+      key: 'usageDate',
       label: 'Date',
       render: (val: string) => (val ? format(new Date(val), 'dd MMM yyyy') : '—')
     },
-    { key: 'item_name', label: 'Item' },
+    { key: 'itemName', label: 'Item' },
     { key: 'quantity', label: 'Qty Used' },
     { key: 'notes', label: 'Notes' },
   ];
@@ -74,7 +74,7 @@ export function WithdrawalLog() {
             columns={columns}
             records={usageRecords}
             filterConfig={{
-              filter1Key: 'item_name',
+              filter1Key: 'itemName',
               filter1Label: 'Search item...',
             }}
             exportFileName="stock_usage_log"

@@ -19,13 +19,13 @@ export function CleaningRecord() {
 
   const cleaningColumns = [
     { key: 'date', label: 'Date', render: (val: string) => val?.split('T')[0] },
-    { key: 'area_cleaned', label: 'Area Cleaned' },
+    { key: 'areaCleaned', label: 'Area Cleaned' },
     { key: 'notes', label: 'Notes' }
   ];
 
   const deepCleaningColumns = [
     { key: 'date', label: 'Date', render: (val: string) => val?.split('T')[0] },
-    { key: 'instrument_cleaned', label: 'Instrument Cleaned' },
+    { key: 'instrumentCleaned', label: 'Instrument Cleaned' },
     { key: 'notes', label: 'Notes' }
   ];
 
@@ -68,7 +68,7 @@ export function CleaningRecord() {
             filterConfig={{
               filter1Key: 'date',
               filter1Label: 'Date',
-              filter2Key: 'area_cleaned',
+              filter2Key: 'areaCleaned',
               filter2Label: 'Area Cleaned'
             }}
             pagination={cleaningPagination}
@@ -91,7 +91,7 @@ export function CleaningRecord() {
             filterConfig={{
               filter1Key: 'date',
               filter1Label: 'Date',
-              filter2Key: 'instrument_cleaned',
+              filter2Key: 'instrumentCleaned',
               filter2Label: 'Instrument Cleaned'
             }}
             pagination={deepCleaningPagination}
@@ -135,9 +135,9 @@ export function CleaningRecord() {
 
       {editingAssignment && (
         <UnifiedOperatorEditModal
-          cleaning_record_id={editingAssignment.id}
-          cleaning_record_kind={editingAssignment.type === 'deep' ? 'deep' : 'standard'}
-          targetLabel={editingAssignment.area_cleaned ?? editingAssignment.instrument_cleaned}
+          cleaningRecordId={editingAssignment.id}
+          cleaningRecordKind={editingAssignment.type === 'deep' ? 'deep' : 'standard'}
+          targetLabel={editingAssignment.areaCleaned ?? editingAssignment.instrumentCleaned}
           onClose={() => setEditingAssignment(null)}
           onSuccess={refetch}
         />

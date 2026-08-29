@@ -5,7 +5,7 @@ import { Label } from '../../../shared/ui/label';
 import { Separator } from '../../../shared/ui/separator';
 import { Badge } from '../../../shared/ui/badge';
 import { X, Save, ChevronDown, ChevronUp, FileEdit } from 'lucide-react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
@@ -21,9 +21,9 @@ interface WorkerEditModalProps {
 
 interface StagedWorker {
   id: number;
-  short_name: string;
-  first_name: string;
-  last_name: string;
+  shortName: string;
+  firstName: string;
+  lastName: string;
   assignmentId?: number;
 }
 
@@ -45,8 +45,8 @@ export function UnifiedEditModal({
   const notify = useNotify();
 
   const getWorkerDisplayName = (w: any) => {
-    const full = `${w.first_name || ''} ${w.last_name || ''}`.trim();
-    return full || w.short_name;
+    const full = `${w.firstName || ''} ${w.lastName || ''}`.trim();
+    return full || w.shortName;
   };
 
   useEffect(() => {
@@ -70,10 +70,10 @@ export function UnifiedEditModal({
         setInitialAssignments(assignments);
         
         setStagedWorkers(assignments.map(a => ({
-          id: a.worker_id,
-          short_name: a.worker_shortname,
-          first_name: a.first_name,
-          last_name: a.last_name,
+          id: a.workerId,
+          shortName: a.workerShortname,
+          firstName: a.firstName,
+          lastName: a.lastName,
           assignmentId: a.id
         })));
       } catch (error: any) {
@@ -97,9 +97,9 @@ export function UnifiedEditModal({
 
     setStagedWorkers(prev => [...prev, {
       id: worker.id,
-      short_name: worker.short_name,
-      first_name: worker.first_name,
-      last_name: worker.last_name
+      shortName: worker.shortName,
+      firstName: worker.firstName,
+      lastName: worker.lastName
     }]);
   };
 
@@ -119,22 +119,22 @@ export function UnifiedEditModal({
     setSaving(true);
     try {
       const stagedIds = stagedWorkers.map(w => w.id);
-      const savedIds = initialAssignments.map((a: any) => a.worker_id);
+      const savedIds = initialAssignments.map((a: any) => a.workerId);
       
       // Calculate diffs
-      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.worker_id));
+      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.workerId));
       const additions = stagedWorkers.filter(w => !savedIds.includes(w.id));
 
       // Additions first to satisfy backend DB constraint (at least 1 worker must remain)
       if (additions.length > 0) {
         await Promise.all(
           additions.map(w => outdoorApi.workers.addAssignment({
-            event_code: eventCode,
-            worker_id: w.id,
+            eventCode: eventCode,
+            workerId: w.id,
             tunnel,
             phase,
-            activity_type: activityType,
-            fertilization_id: fertilizationId
+            activityType: activityType,
+            fertilizationId,
           }))
         );
       }

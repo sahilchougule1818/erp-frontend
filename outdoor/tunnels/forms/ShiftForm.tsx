@@ -9,15 +9,15 @@ import { WorkerSelector } from '../../workers/components/WorkerSelector';
 import { TrayInput } from '../../components/TrayInput';
 
 interface Batch {
-  batch_code: string;
-  available_plants: number;
-  total_plants: number;
-  current_tunnel?: string;
-  current_phase?: string;
+  batchCode: string;
+  availablePlants: number;
+  totalPlants: number;
+  currentTunnel?: string;
+  currentPhase?: string;
 }
 
 interface Tunnel {
-  tunnel_name?: string;
+  tunnelName?: string;
   name?: string;
   tunnel?: string;
 }
@@ -35,13 +35,13 @@ export function ShiftForm({ batch, tunnels, shUnits, workers, onSubmit, onClose 
   const notify = useNotify();
   const [newTunnel, setNewTunnel] = useState('');
   const [newUnit, setNewUnit] = useState('');
-  const [plants, setPlants] = useState(batch.available_plants ?? batch.total_plants);
+  const [plants, setPlants] = useState(batch.availablePlants ?? batch.totalPlants);
   const [mortalityCount, setMortalityCount] = useState(0);
   const [reason, setReason] = useState('');
   const [selectedWorkers, setSelectedWorkers] = useState<number[]>([]);
   const [trays, setTrays] = useState<{ cavityCount: number; count: number }[]>([]);
 
-  const isSecondaryHardening = batch.current_phase === 'secondary_hardening';
+  const isSecondaryHardening = batch.currentPhase === 'secondary_hardening';
 
   const handleSubmit = () => {
     if (isSecondaryHardening && !newUnit) {
@@ -64,10 +64,10 @@ export function ShiftForm({ batch, tunnels, shUnits, workers, onSubmit, onClose 
       <div className="px-6 py-4 space-y-4" style={{ flex: 1, overflowY: 'auto' }}>
         <div className="bg-gray-50 p-4 rounded-lg space-y-2">
           <p className="text-base text-gray-600">
-            Batch Code: <span className="font-semibold text-gray-900">{batch.batch_code}</span>
+            Batch Code: <span className="font-semibold text-gray-900">{batch.batchCode}</span>
           </p>
           <p className="text-base text-gray-600">
-            Current {isSecondaryHardening ? 'Unit' : 'Tunnel'}: <span className="font-semibold text-gray-900">{batch.current_tunnel || '—'}</span>
+            Current {isSecondaryHardening ? 'Unit' : 'Tunnel'}: <span className="font-semibold text-gray-900">{batch.currentTunnel || '—'}</span>
           </p>
         </div>
 
@@ -90,8 +90,8 @@ export function ShiftForm({ batch, tunnels, shUnits, workers, onSubmit, onClose 
                   <SelectTrigger><SelectValue placeholder="Select tunnel" /></SelectTrigger>
                   <SelectContent>
                     {tunnels.map(t => {
-                      const safeName = t.name || t.tunnel || t.tunnel_name;
-                      const displayName = (t as any).display_name || safeName;
+                      const safeName = t.name || t.tunnel || t.tunnelName;
+                      const displayName = (t as { displayName?: string }).displayName || safeName;
                       return (
                       <SelectItem key={safeName} value={safeName as string}>
                         {displayName}

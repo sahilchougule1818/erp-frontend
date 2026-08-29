@@ -27,10 +27,10 @@ export function OperatorForm({ initialData, onSubmit, onDelete, onCancel, isSubm
     if (initialData) {
       setForm({
         id: initialData.id,
-        firstName: initialData.first_name || initialData.firstName || '',
-        middleName: initialData.middle_name || initialData.middleName || '',
-        lastName: initialData.last_name || initialData.lastName || '',
-        isActive: initialData.is_active ?? initialData.isActive ?? true
+        firstName: initialData.firstName || initialData.firstName || '',
+        middleName: initialData.middleName || '',
+        lastName: initialData.lastName || initialData.lastName || '',
+        isActive: initialData.isActive ?? initialData.isActive ?? true
       });
     } else {
       setForm(INITIAL_FORM);

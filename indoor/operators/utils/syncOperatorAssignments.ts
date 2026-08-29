@@ -1,20 +1,20 @@
 export interface StagedOperator {
   id: number;
-  short_name?: string;
-  first_name?: string;
-  last_name?: string;
+  shortName?: string;
+  firstName?: string;
+  lastName?: string;
   role?: string;
   assignmentId?: number;
 }
 
 export interface InitialAssignment {
   id: number;
-  operator_id?: number;
+  operatorId?: number;
   operatorId?: number;
 }
 
 function initialOperatorId(a: InitialAssignment): number {
-  return a.operator_id ?? a.operatorId ?? 0;
+  return a.operatorId ?? a.operatorId ?? 0;
 }
 
 export async function syncOperatorAssignments(

@@ -21,37 +21,37 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
 }) => {
   const notify = useNotify();
   const [formData, setFormData] = useState({
-    item_id: '',
-    supplier_id: 'none',
+    itemId: '',
+    supplierId: 'none',
     quantity: '',
     purpose: '',
     notes: '',
     amount: '',
-    withdraw_date: new Date().toISOString().split('T')[0],
-    payment_method: 'Cash',
-    bank_account_id: '',
-    payment_reference: ''
+    withdrawDate: new Date().toISOString().split('T')[0],
+    paymentMethod: 'Cash',
+    bankAccountId: '',
+    paymentReference: ''
   });
 
   const handleSubmit = async () => {
-    if (!formData.item_id || !formData.purpose || !formData.amount) {
+    if (!formData.itemId || !formData.purpose || !formData.amount) {
       notify.error('Please fill all required fields');
       return;
     }
     const payload = {
       ...formData,
-      item_id: parseInt(formData.item_id),
-      supplier_id: formData.supplier_id === 'none' ? null : parseInt(formData.supplier_id),
+      itemId: parseInt(formData.itemId),
+      supplierId: formData.supplierId === 'none' ? null : parseInt(formData.supplierId),
       quantity: formData.quantity ? parseFloat(formData.quantity) : null,
       amount: parseFloat(formData.amount),
-      bank_account_id: formData.payment_method === 'Cash' ? null : parseInt(formData.bank_account_id),
+      bankAccountId: formData.paymentMethod === 'Cash' ? null : parseInt(formData.bankAccountId),
     };
     await onSubmit(payload);
     onOpenChange(false);
     setFormData({
-      item_id: '', supplier_id: 'none', quantity: '', purpose: '', notes: '',
-      amount: '', withdraw_date: new Date().toISOString().split('T')[0],
-      payment_method: 'Cash', bank_account_id: '', payment_reference: ''
+      itemId: '', supplierId: 'none', quantity: '', purpose: '', notes: '',
+      amount: '', withdrawDate: new Date().toISOString().split('T')[0],
+      paymentMethod: 'Cash', bankAccountId: '', paymentReference: ''
     });
   };
 
@@ -69,7 +69,7 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Category / Item *</Label>
-              <Select value={formData.item_id} onValueChange={(val) => setFormData({ ...formData, item_id: val })}>
+              <Select value={formData.itemId} onValueChange={(val) => setFormData({ ...formData, itemId: val })}>
                 <SelectTrigger><SelectValue placeholder="Select item" /></SelectTrigger>
                 <SelectContent>
                   {items.map((i) => (
@@ -82,7 +82,7 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
             </div>
             <div className="space-y-2">
               <Label>Supplier</Label>
-              <Select value={formData.supplier_id} onValueChange={(val) => setFormData({ ...formData, supplier_id: val })}>
+              <Select value={formData.supplierId} onValueChange={(val) => setFormData({ ...formData, supplierId: val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None / Local / Direct</SelectItem>
@@ -138,13 +138,13 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
               <Label>Payment Date</Label>
               <Input 
                 type="date"
-                value={formData.withdraw_date}
-                onChange={(e) => setFormData({ ...formData, withdraw_date: e.target.value })}
+                value={formData.withdrawDate}
+                onChange={(e) => setFormData({ ...formData, withdrawDate: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>Payment Mode</Label>
-              <Select value={formData.payment_method} onValueChange={(val) => setFormData({ ...formData, payment_method: val })}>
+              <Select value={formData.paymentMethod} onValueChange={(val) => setFormData({ ...formData, paymentMethod: val })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {PAYMENT_METHODS.map((m) => (
@@ -153,15 +153,15 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
                 </SelectContent>
               </Select>
             </div>
-            {formData.payment_method !== 'Cash' && (
+            {formData.paymentMethod !== 'Cash' && (
               <div className="space-y-2">
                 <Label>Debit Account</Label>
-                <Select value={formData.bank_account_id} onValueChange={(val) => setFormData({ ...formData, bank_account_id: val })}>
+                <Select value={formData.bankAccountId} onValueChange={(val) => setFormData({ ...formData, bankAccountId: val })}>
                   <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                   <SelectContent>
-                    {accounts.filter((a) => a.is_active).map((a) => (
+                    {accounts.filter((a) => a.isActive).map((a) => (
                       <SelectItem key={a.id} value={String(a.id)}>
-                        {a.account_name} ({a.bank_name})
+                        {a.accountName} ({a.bankName})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -171,8 +171,8 @@ export const CreateWithdrawDialog: React.FC<Props> = ({
             <div className="col-span-2 space-y-2">
               <Label>Internal Ref / TXN #</Label>
               <Input 
-                value={formData.payment_reference}
-                onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })}
+                value={formData.paymentReference}
+                onChange={(e) => setFormData({ ...formData, paymentReference: e.target.value })}
                 placeholder="Reference number"
               />
             </div>

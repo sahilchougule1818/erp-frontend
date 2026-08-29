@@ -9,9 +9,9 @@ import { Plus, Trash2, Save } from 'lucide-react';
 interface PlantTermsDialogProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: { plant_name: string; terms: string[] }) => Promise<void>;
+  onSubmit: (data: { plantName: string; terms: string[] }) => Promise<void>;
   onDelete?: (plantName: string) => Promise<void>;
-  defaultValues?: { plant_name: string; terms: string };
+  defaultValues?: { plantName: string; terms: string };
 }
 
 export const PlantTermsDialog: React.FC<PlantTermsDialogProps> = ({
@@ -28,7 +28,7 @@ export const PlantTermsDialog: React.FC<PlantTermsDialogProps> = ({
 
   useEffect(() => {
     if (open && defaultValues) {
-      setPlantName(defaultValues.plant_name);
+      setPlantName(defaultValues.plantName);
       const termsArray = defaultValues.terms.split('\n').filter(t => t.trim());
       setTerms(termsArray);
     } else if (open && !defaultValues) {
@@ -61,7 +61,7 @@ export const PlantTermsDialog: React.FC<PlantTermsDialogProps> = ({
 
     try {
       setLoading(true);
-      await onSubmit({ plant_name: plantName, terms });
+      await onSubmit({ plantName: plantName, terms });
       onClose();
     } catch (error) {
       console.error(error);
@@ -72,11 +72,11 @@ export const PlantTermsDialog: React.FC<PlantTermsDialogProps> = ({
 
   const handleDelete = async () => {
     if (!defaultValues) return;
-    if (!window.confirm(`Delete all terms for "${defaultValues.plant_name}"?`)) return;
+    if (!window.confirm(`Delete all terms for "${defaultValues.plantName}"?`)) return;
     
     try {
       setLoading(true);
-      await onDelete?.(defaultValues.plant_name);
+      await onDelete?.(defaultValues.plantName);
       onClose();
     } catch (error) {
       console.error(error);

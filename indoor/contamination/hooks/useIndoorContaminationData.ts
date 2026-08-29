@@ -1,8 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { applySpringPage } from '../../../shared/utils/springPage';
-import { ContaminationRecord } from '../types';
+import { ContaminationRecord } from '../../types';
 
 export const useIndoorContaminationData = () => {
   const [records, setRecords] = useState<ContaminationRecord[]>([]);

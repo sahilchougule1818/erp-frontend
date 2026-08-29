@@ -114,7 +114,7 @@ function renderTrays(val: unknown) {
   if (trays.length === 0) return '—';
 
   return trays.map((tray, index) => {
-    const cavityCount = tray.cavityCount ?? (tray as { cavity_count?: number }).cavity_count;
+    const cavityCount = tray.cavityCount ?? (tray as { cavityCount?: number }).cavityCount;
     const count = tray.count;
     return (
       <div key={index}>

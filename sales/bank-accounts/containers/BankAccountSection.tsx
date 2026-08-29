@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useBankAccounts } from '../../hooks/useSalesApi';
+import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
-import { BankAccount, bankAccountsApi } from '../../services/salesApi';
+import { BankAccount, bankAccountsApi } from '../../api/salesApi';
 import { Plus, Pencil, Trash2, Lock } from 'lucide-react';
 import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
@@ -18,10 +18,10 @@ const BankAccountSection: React.FC = () => {
   const notify = useNotify();
 
   const hasTransactions = (a: BankAccount) =>
-    Number(a.total_credits || 0) > 0 || Number(a.total_debits || 0) > 0;
+    Number(a.totalCredits || 0) > 0 || Number(a.totalDebits || 0) > 0;
 
   const handleDelete = async (account: BankAccount) => {
-    if (!window.confirm(`Permanently delete "${account.account_name}"?`)) return;
+    if (!window.confirm(`Permanently delete "${account.accountName}"?`)) return;
     try {
       await bankAccountsApi.delete(account.id);
       notify.success('Account deleted');
@@ -32,31 +32,31 @@ const BankAccountSection: React.FC = () => {
   };
 
   const columns = [
-    { key: 'account_name', label: 'Account Name' },
-    { key: 'bank_name', label: 'Bank' },
+    { key: 'accountName', label: 'Account Name' },
+    { key: 'bankName', label: 'Bank' },
     {
       key: 'branch',
       label: 'Branch',
       render: (val: string) => val || 'Main Branch'
     },
-    { key: 'account_number', label: 'Account No.' },
+    { key: 'accountNumber', label: 'Account No.' },
     {
-      key: 'ifsc_code',
+      key: 'ifscCode',
       label: 'IFSC',
       render: (val: string) => val || '—'
     },
     {
-      key: 'total_credits',
+      key: 'totalCredits',
       label: 'Funds In (₹)',
       render: (val: number) => `₹${Number(val).toLocaleString()}`
     },
     {
-      key: 'total_debits',
+      key: 'totalDebits',
       label: 'Funds Out (₹)',
       render: (val: number) => `₹${Number(val).toLocaleString()}`
     },
     {
-      key: 'is_active',
+      key: 'isActive',
       label: 'Status',
       render: (val: boolean) => (
         <Badge variant="outline">
@@ -112,9 +112,9 @@ const BankAccountSection: React.FC = () => {
             columns={columns}
             records={accounts}
             filterConfig={{
-              filter1Key: 'bank_name',
+              filter1Key: 'bankName',
               filter1Label: 'Bank',
-              filter2Key: 'account_name',
+              filter2Key: 'accountName',
               filter2Label: 'Search Account'
             }}
             addButton={

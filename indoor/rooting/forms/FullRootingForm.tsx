@@ -56,7 +56,7 @@ export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: Full
             </div>
             <div>
               <div className="text-sm text-gray-600">Available Bottles</div>
-              <div className="font-semibold text-green-600">{record.qty_available ?? record.current_qty_in}</div>
+              <div className="font-semibold text-green-600">{record.qtyAvailable}</div>
             </div>
           </div>
         </div>

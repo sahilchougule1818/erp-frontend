@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { DataTable } from '../../../shared/components/DataTable';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { applySpringPage } from '../../../shared/utils/springPage';
@@ -72,26 +72,26 @@ export function Sampling() {
   };
 
   const summaryColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'current_stage', label: 'Stage' },
-    { key: 'current_phase', label: 'Phase' },
-    { key: 'plant_age_at_sampling', label: 'Plant Age at Sampling', render: (val: number) => val !== null && val !== undefined ? `${val} days` : '-' },
-    { key: 'sample_date', label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'currentStage', label: 'Stage' },
+    { key: 'currentPhase', label: 'Phase' },
+    { key: 'plantAgeAtSampling', label: 'Plant Age at Sampling', render: (val: number) => val !== null && val !== undefined ? `${val} days` : '-' },
+    { key: 'sampleDate', label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     { key: 'result', label: 'Result' },
-    { key: 'received_date', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
-    { key: 'seed_certificate_number', label: 'Seed Cert. No', render: (val: string) => val || '-' }
+    { key: 'receivedDate', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
+    { key: 'seedCertificateNumber', label: 'Seed Cert. No', render: (val: string) => val || '-' }
   ];
 
   const createColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'current_stage', label: 'Stage' },
-    { key: 'current_phase', label: 'Phase' },
-    { key: 'plant_age_at_sampling', label: 'Plant Age at Sampling', render: (val: number) => val !== null && val !== undefined ? `${val} days` : '-' },
-    { key: 'sample_date', label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'currentStage', label: 'Stage' },
+    { key: 'currentPhase', label: 'Phase' },
+    { key: 'plantAgeAtSampling', label: 'Plant Age at Sampling', render: (val: number) => val !== null && val !== undefined ? `${val} days` : '-' },
+    { key: 'sampleDate', label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     { key: 'notes', label: 'Notes', render: (val: string) => val || '-' },
     { key: 'actions', label: 'Actions', render: (_: any, record: any) => (
       <Button size="sm" variant="destructive" onClick={() => handleDeleteCreate(record.id)}>Delete</Button>
@@ -99,11 +99,11 @@ export function Sampling() {
   ];
 
   const reportColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'received_date', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'receivedDate', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '-' },
     { key: 'result', label: 'Result' },
-    { key: 'seed_certificate_number', label: 'Seed Cert. No', render: (val: string) => val || '-' },
+    { key: 'seedCertificateNumber', label: 'Seed Cert. No', render: (val: string) => val || '-' },
     { key: 'reason', label: 'Reason', render: (val: string) => val || '-' },
     { key: 'actions', label: 'Actions', render: (_: any, record: any) => (
       <Button size="sm" variant="destructive" onClick={() => handleDeleteReport(record.id)}>Delete</Button>
@@ -125,7 +125,7 @@ export function Sampling() {
             columns={summaryColumns}
             records={samples || []}
             filterConfig={{
-              filter1Key: 'batch_code',
+              filter1Key: 'batchCode',
               filter1Label: 'Batch Code',
               filter2Key: 'status',
               filter2Label: 'Status'
@@ -144,9 +144,9 @@ export function Sampling() {
             columns={createColumns}
             records={samples || []}
             filterConfig={{
-              filter1Key: 'batch_code',
+              filter1Key: 'batchCode',
               filter1Label: 'Batch Code',
-              filter2Key: 'plant_name',
+              filter2Key: 'plantName',
               filter2Label: 'Plant Name'
             }}
             exportFileName="sampling_submissions"
@@ -163,7 +163,7 @@ export function Sampling() {
             columns={reportColumns}
             records={samples || []}
             filterConfig={{
-              filter1Key: 'batch_code',
+              filter1Key: 'batchCode',
               filter1Label: 'Batch Code',
               filter2Key: 'status',
               filter2Label: 'Status'

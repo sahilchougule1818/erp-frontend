@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { parseSpringPage } from '../../../shared/utils/springPage';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 import type { Batch, Tunnel, Worker } from '../../types/outdoor.types';
 
 function normalizeIndoorBatch(raw: any) {
@@ -17,10 +17,10 @@ function normalizeIndoorBatch(raw: any) {
   }
   return {
     id: raw?.id != null ? Number(raw.id) : raw?.indoorBatchId != null ? Number(raw.indoorBatchId) : undefined,
-    batchCode: raw?.batchCode ?? raw?.batch_code,
-    plantName: raw?.plantName ?? raw?.plant_name,
-    createdAt: raw?.createdAt ?? raw?.created_at,
-    sourceType: raw?.sourceType ?? raw?.source_type,
+    batchCode: raw?.batchCode ?? raw?.batchCode,
+    plantName: raw?.plantName ?? raw?.plantName,
+    createdAt: raw?.createdAt ?? raw?.createdAt,
+    sourceType: raw?.sourceType ?? raw?.sourceType,
   };
 }
 
@@ -42,8 +42,8 @@ export function useBatchMaster() {
     try {
       const [batchesRes, phUnitsRes, shUnitsRes, workersRes] = await Promise.all([
         outdoorApi.dashboard.getAllBatches(page, limit),
-        outdoorApi.phUnits.getAll(),
-        outdoorApi.shUnits.getAll(),
+        outdoorApi.settings.getPhTunnels(),
+        outdoorApi.settings.getShUnits(),
         outdoorApi.workers.getAll(1, 500),
       ]);
 

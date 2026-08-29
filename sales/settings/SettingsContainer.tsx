@@ -4,7 +4,7 @@ import { Plus } from 'lucide-react';
 import { DataTable } from '../../shared/components/DataTable';
 import { SharedForm } from '../components/SharedForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../shared/ui/tabs';
-import { useCompanySettings, usePlantTerms } from '../hooks/useSalesApi';
+import { useCompanySettings, usePlantTerms } from '../hooks/useSettings';
 import { PlantTermsDialog } from './PlantTermsDialog';
 
 const SettingsContainer: React.FC = () => {
@@ -24,9 +24,9 @@ const SettingsContainer: React.FC = () => {
     }
   };
 
-  const handlePlantSubmit = async (data: { plant_name: string; terms: string[] }) => {
+  const handlePlantSubmit = async (data: { plantName: string; terms: string[] }) => {
     try {
-      await upsertPlantTerms(data.plant_name, data.terms);
+      await upsertPlantTerms(data.plantName, data.terms);
       setIsPlantFormOpen(false);
       setSelectedPlant(null);
     } catch (error) {
@@ -46,7 +46,7 @@ const SettingsContainer: React.FC = () => {
   };
 
   const plantColumns = [
-    { key: 'plant_name', label: 'Plant Name' },
+    { key: 'plantName', label: 'Plant Name' },
     {
       key: 'terms',
       label: 'Terms Count',
@@ -78,10 +78,10 @@ const SettingsContainer: React.FC = () => {
           <DataTable
             title=""
             columns={[
-              { key: 'company_name', label: 'Company Name' },
-              { key: 'gst_number', label: 'GST Number' },
+              { key: 'companyName', label: 'Company Name' },
+              { key: 'gstNumber', label: 'GST Number' },
               { key: 'email', label: 'Email' },
-              { key: 'contact_number', label: 'Contact' },
+              { key: 'contactNumber', label: 'Contact' },
               { key: 'village', label: 'Village' },
               { key: 'district', label: 'District' }
             ]}
@@ -123,9 +123,9 @@ const SettingsContainer: React.FC = () => {
               </Button>
             }
             filterConfig={{
-              filter1Key: 'plant_name',
+              filter1Key: 'plantName',
               filter1Label: 'Plant Name',
-              filter2Key: 'plant_name',
+              filter2Key: 'plantName',
               filter2Label: 'Search'
             }}
             exportFileName="plant_terms"
@@ -139,15 +139,15 @@ const SettingsContainer: React.FC = () => {
         title={settings ? 'Edit Company Details' : 'Add Company Details'}
         onClose={() => setIsCompanyFormOpen(false)}
         fields={[
-          { name: 'company_name', label: 'Company Name', type: 'text', required: true, gridColumn: 'col-span-2' },
-          { name: 'gst_number', label: 'GST Number', type: 'text' },
-          { name: 'dbt_number', label: 'DBT Number', type: 'text' },
+          { name: 'companyName', label: 'Company Name', type: 'text', required: true, gridColumn: 'col-span-2' },
+          { name: 'gstNumber', label: 'GST Number', type: 'text' },
+          { name: 'dbtNumber', label: 'DBT Number', type: 'text' },
           { name: 'village', label: 'Village / Area', type: 'text', gridColumn: 'col-span-2' },
           { name: 'tal', label: 'Tal (Taluka)', type: 'text' },
           { name: 'district', label: 'District', type: 'text' },
           { name: 'pincode', label: 'Pincode', type: 'text' },
           { name: 'email', label: 'Email Address', type: 'email' },
-          { name: 'contact_number', label: 'Contact Number', type: 'text' }
+          { name: 'contactNumber', label: 'Contact Number', type: 'text' }
         ]}
         defaultValues={settings}
         onSubmit={handleCompanySubmit}

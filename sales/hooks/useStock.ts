@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { stockApi } from '../services/salesApi';
+import { stockApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
-import { normalizeStockRow } from '../utils/normalize';
 
 export const useIndoorStock = (phase?: string) => {
   const [stock, setStock] = useState<any[]>([]);
@@ -11,8 +10,8 @@ export const useIndoorStock = (phase?: string) => {
     try {
       setLoading(true);
       const res = await stockApi.getIndoorStock(phase ? { phase } : undefined);
-      const { data } = parseSpringPage<Record<string, unknown>>(res);
-      setStock(data.map(normalizeStockRow));
+      const { data } = parseSpringPage(res);
+      setStock(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -33,8 +32,8 @@ export const useOutdoorStock = () => {
     try {
       setLoading(true);
       const res = await stockApi.getOutdoorStock();
-      const { data } = parseSpringPage<Record<string, unknown>>(res);
-      setStock(data.map(normalizeStockRow));
+      const { data } = parseSpringPage(res);
+      setStock(data);
     } catch (err) {
       console.error(err);
     } finally {

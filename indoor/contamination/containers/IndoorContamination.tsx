@@ -12,19 +12,19 @@ export function IndoorContamination() {
   }, [fetchRecords, fetchSummary]);
 
   const summaryColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'total_qty_contaminated', label: 'Total Contamination' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'totalQtyContaminated', label: 'Total Contamination' },
   ];
 
   const recordsColumns = [
-    { key: 'recorded_at', label: 'Recorded At', render: (val: string) => val?.split('T')[0] },
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'recordedAt', label: 'Recorded At', render: (val: string) => val?.split('T')[0] },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
     { key: 'stage', label: 'Stage' },
-    { key: 'qty_contaminated', label: 'Contamination' },
+    { key: 'qtyContaminated', label: 'Contamination' },
     { key: 'notes', label: 'Notes' },
     { key: 'state', label: 'State' }
   ];
@@ -52,9 +52,9 @@ export function IndoorContamination() {
             columns={recordsColumns}
             records={records}
             filterConfig={{
-              filter1Key: 'plant_name',
+              filter1Key: 'plantName',
               filter1Label: 'Plant Name',
-              filter2Key: 'batch_code',
+              filter2Key: 'batchCode',
               filter2Label: 'Batch Name'
             }}
             exportFileName="indoor_contamination_records"

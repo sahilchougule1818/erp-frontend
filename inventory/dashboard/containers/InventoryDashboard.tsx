@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Box, AlertTriangle } from 'lucide-react';
 import { DataTable } from '../../../shared/components/DataTable';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 export function InventoryDashboard() {
   const [stockLevels, setStockLevels] = useState<any[]>([]);
-  const [stats, setStats] = useState<{ total_items: number; low_stock_items: number } | null>(null);
+  const [stats, setStats] = useState<{ totalItems: number; lowStockItems: number } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
@@ -40,9 +40,9 @@ export function InventoryDashboard() {
   };
 
   const stockColumns = [
-    { label: 'Item Name', key: 'item_name' },
-    { label: 'Current Stock', key: 'current_stock' },
-    { label: 'Min Stock', key: 'min_stock' }
+    { label: 'Item Name', key: 'itemName' },
+    { label: 'Current Stock', key: 'currentStock' },
+    { label: 'Min Stock', key: 'minStock' }
   ];
 
   return (
@@ -54,7 +54,7 @@ export function InventoryDashboard() {
             <Box style={{ color: '#3B6D11', width: '20px', height: '20px' }} />
           </div>
           <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#27500A', marginTop: '8px' }}>
-            {stats ? Number(stats.total_items) : 0}
+            {stats ? Number(stats.totalItems) : 0}
           </div>
         </div>
 
@@ -64,7 +64,7 @@ export function InventoryDashboard() {
             <AlertTriangle style={{ color: '#A32D2D', width: '20px', height: '20px' }} />
           </div>
           <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#791F1F', marginTop: '8px' }}>
-            {stats ? Number(stats.low_stock_items) : 0}
+            {stats ? Number(stats.lowStockItems) : 0}
           </div>
         </div>
       </div>

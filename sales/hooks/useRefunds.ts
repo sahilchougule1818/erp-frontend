@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { refundDisbursementsApi } from '../services/salesApi';
+import { refundDisbursementsApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
 import type { Refund, RefundDetail } from '../types';
 

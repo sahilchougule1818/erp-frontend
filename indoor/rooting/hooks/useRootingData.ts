@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 

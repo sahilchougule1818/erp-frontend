@@ -60,7 +60,7 @@ export function OperatorSelector({ operators, selectedIds, onChange }: OperatorS
                 variant="secondary" 
                 className="text-base px-2 py-1 flex items-center gap-1"
               >
-                {operator.short_name}
+                {operator.shortName}
                 <button
                   type="button"
                   onClick={() => removeOperator(operator.id)}
@@ -93,7 +93,7 @@ export function OperatorSelector({ operators, selectedIds, onChange }: OperatorS
                     className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                   />
                   <span className="text-base flex-1">
-                    {operator.short_name} ({operator.first_name} {operator.last_name})
+                    {operator.shortName} ({operator.firstName} {operator.lastName})
                   </span>
                 </label>
               ))}

@@ -58,7 +58,7 @@ export function SubcultureForm({ initialData, selectedBatch, operators, records,
       ? records.find((r: any) => r.id === initialData.id) ?? initialData
       : null;
     if (record?.operators) {
-      const operatorIds = record.operators.map((op: any) => parseInt(op.operatorId ?? op.operator_id));
+      const operatorIds = record.operators.map((op: any) => parseInt(op.operatorId ?? op.operatorId));
       setForm((prev: any) => ({ ...prev, operatorIds }));
     }
   }, [initialData, selectedBatch, records]);

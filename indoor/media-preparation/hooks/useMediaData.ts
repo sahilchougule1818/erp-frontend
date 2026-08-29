@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNotify } from '../../../shared/hooks/useNotify';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
-import { indoorApi } from '../../services/indoorApi';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
+import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 import type { Operator } from '../../types';
@@ -60,13 +60,13 @@ export function useMediaData() {
   const saveMediaBatch = async (formData: any) => {
     setLoading(true);
     try {
-      const { operator_ids: operatorIds, ...rest } = formData;
+      const { operatorIds: operatorIds, ...rest } = formData;
 
       if (formData.id) {
         await indoorApi.autoclave.update(formData.id, rest);
       } else {
-        const created = await indoorApi.autoclave.create(rest) as { media_code?: string; mediaCode?: string };
-        const mediaCode = created?.media_code || created?.mediaCode || rest.media_code;
+        const created = await indoorApi.autoclave.create(rest) as { mediaCode?: string; mediaCode?: string };
+        const mediaCode = created?.mediaCode || created?.mediaCode || rest.mediaCode;
         if (operatorIds?.length && mediaCode) {
           await Promise.all(
             operatorIds.map((operatorId: number) =>

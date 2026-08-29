@@ -5,20 +5,20 @@ import { Input } from '../../../shared/ui/input';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import { FULFILLMENT_TYPES } from '../../constants/EventTypes';
-import { Customer } from '../../services/salesApi';
-import { usePlantMaster } from '../../../indoor/settings/hooks/usePlantMaster';
+import { Customer } from '../../api/salesApi';
+import { usePlantOptions } from '../../hooks/usePlantOptions';
 import { useCustomers } from '../../hooks/useCustomers';
 import { useNotify } from '../../../shared/hooks/useNotify';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 
 type OrderItemRow = {
-  plant_id: string;
-  plant_name: string;
-  unit_amount: string;
+  plantId: string;
+  plantName: string;
+  unitAmount: string;
   quantity: string;
-  stock_source?: string;
-  source_stage?: string;
-  source_phase?: string;
+  stockSource?: string;
+  sourceStage?: string;
+  sourcePhase?: string;
 };
 
 interface Props {
@@ -28,19 +28,19 @@ interface Props {
 }
 
 const EMPTY_ITEM: OrderItemRow = { 
-  plant_id: '',
-  plant_name: '', 
-  unit_amount: '', 
+  plantId: '',
+  plantName: '', 
+  unitAmount: '', 
   quantity: '',
-  stock_source: FULFILLMENT_TYPES.STOCK_FROM_INDOOR,
-  source_stage: '',
-  source_phase: '',
+  stockSource: FULFILLMENT_TYPES.STOCK_FROM_INDOOR,
+  sourceStage: '',
+  sourcePhase: '',
 };
 
 export const CreatePreBookingForm: React.FC<Props> = ({
   open, onClose, onSubmit,
 }) => {
-  const { plants } = usePlantMaster();
+  const { plants } = usePlantOptions();
   const { customers: customersList } = useCustomers({ pageSize: 500 });
   const notify = useNotify();
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -67,7 +67,7 @@ export const CreatePreBookingForm: React.FC<Props> = ({
   }, [open]);
 
   const calculateItemTotal = (item: OrderItemRow): number => {
-    const unitAmount = parseFloat(item.unit_amount) || 0;
+    const unitAmount = parseFloat(item.unitAmount) || 0;
     const qty = parseFloat(item.quantity) || 0;
     return unitAmount * qty;
   };
@@ -106,7 +106,7 @@ export const CreatePreBookingForm: React.FC<Props> = ({
       }
 
       const validItems = items.filter(item => {
-        if (!item.plant_id || !item.plant_name || !item.unit_amount || parseFloat(item.unit_amount) <= 0) return false;
+        if (!item.plantId || !item.plantName || !item.unitAmount || parseFloat(item.unitAmount) <= 0) return false;
         if (!item.quantity || parseFloat(item.quantity) <= 0) return false;
         return true;
       });
@@ -117,24 +117,24 @@ export const CreatePreBookingForm: React.FC<Props> = ({
       }
 
       const payload: any = {
-        customer_id: customerId,
-        order_date: new Date().toISOString().split('T')[0],
-        expected_delivery_date: expectedDeliveryDate,
-        delivery_charges: parseFloat(deliveryCharges) || 0,
-        cgst_percent: parseFloat(cgstPercent) || 0,
-        sgst_percent: parseFloat(sgstPercent) || 0,
+        customerId: customerId,
+        orderDate: new Date().toISOString().split('T')[0],
+        expectedDeliveryDate: expectedDeliveryDate,
+        deliveryCharges: parseFloat(deliveryCharges) || 0,
+        cgstPercent: parseFloat(cgstPercent) || 0,
+        sgstPercent: parseFloat(sgstPercent) || 0,
         items: validItems.map((item) => {
-          const stockSource = item.stock_source || FULFILLMENT_TYPES.STOCK_FROM_INDOOR;
-          let source_phase = null;
-          let source_stage = null;
+          const stockSource = item.stockSource || FULFILLMENT_TYPES.STOCK_FROM_INDOOR;
+          let sourcePhase = null;
+          let sourceStage = null;
 
           if (stockSource === FULFILLMENT_TYPES.STOCK_FROM_INDOOR) {
-            if (item.source_stage === 'Rooting') {
-              source_phase = 'Rooting';
-              source_stage = null;
-            } else if (item.source_stage?.startsWith('Stage-')) {
-              source_phase = 'Incubation';
-              source_stage = item.source_stage;
+            if (item.sourceStage === 'Rooting') {
+              sourcePhase = 'Rooting';
+              sourceStage = null;
+            } else if (item.sourceStage?.startsWith('Stage-')) {
+              sourcePhase = 'Incubation';
+              sourceStage = item.sourceStage;
             }
           } else if (stockSource === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR) {
             const phaseMap: Record<string, string> = {
@@ -142,17 +142,17 @@ export const CreatePreBookingForm: React.FC<Props> = ({
               'Secondary': 'Secondary Hardening',
               'Holding': 'Holding Area'
             };
-            source_phase = phaseMap[item.source_phase || ''] || null;
-            source_stage = null;
+            sourcePhase = phaseMap[item.sourcePhase || ''] || null;
+            sourceStage = null;
           }
 
           return {
-            plant_name: item.plant_name,
-            unit_amount: parseFloat(item.unit_amount),
-            stock_source: stockSource,
+            plantName: item.plantName,
+            unitAmount: parseFloat(item.unitAmount),
+            stockSource: stockSource,
             quantity: parseFloat(item.quantity),
-            source_phase,
-            source_stage,
+            sourcePhase,
+            sourceStage,
           };
         }),
       };
@@ -185,9 +185,9 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                     <SelectValue placeholder="Select customer..." />
                   </SelectTrigger>
                   <SelectContent>
-                    {(customers || []).filter((c) => !c.is_deleted).map((c) => (
-                      <SelectItem key={c.customer_id} value={c.customer_id}>
-                        {c.name} ({c.customer_id})
+                    {(customers || []).filter((c) => !c.isDeleted).map((c) => (
+                      <SelectItem key={c.customerId} value={c.customerId}>
+                        {c.name} ({c.customerId})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -229,12 +229,12 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                       <div className="space-y-1">
                         <label className="text-sm font-medium">Plant Name *</label>
                         <Select 
-                          value={item.plant_id} 
+                          value={item.plantId} 
                           onValueChange={(value) => {
                             const selectedPlant = plants.find(p => p.id.toString() === value);
                             updateItem(itemIdx, { 
-                              plant_id: value, 
-                              plant_name: selectedPlant?.plant_name || '',
+                              plantId: value, 
+                              plantName: selectedPlant?.plantName || '',
                             });
                           }}
                         >
@@ -242,9 +242,9 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                             <SelectValue placeholder="Select plant" />
                           </SelectTrigger>
                           <SelectContent>
-                            {(plants || []).filter(p => p.is_active).map((plant) => (
+                            {(plants || []).filter(p => p.isActive).map((plant) => (
                               <SelectItem key={plant.id} value={plant.id.toString()}>
-                                {plant.plant_name}
+                                {plant.plantName}
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -256,13 +256,13 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                         <div className="space-y-1">
                           <label className="text-sm font-medium">Stock Source *</label>
                           <Select 
-                            value={item.stock_source || FULFILLMENT_TYPES.STOCK_FROM_INDOOR}
+                            value={item.stockSource || FULFILLMENT_TYPES.STOCK_FROM_INDOOR}
                             onValueChange={(value) => updateItem(itemIdx, { 
-                              stock_source: value,
-                              source_stage: '',
-                              source_phase: '',
+                              stockSource: value,
+                              sourceStage: '',
+                              sourcePhase: '',
                             })}
-                            disabled={!item.plant_id}
+                            disabled={!item.plantId}
                           >
                             <SelectTrigger>
                               <SelectValue placeholder="Select source" />
@@ -275,24 +275,24 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                         </div>
                         <div className="space-y-1">
                           <label className="text-sm font-medium">
-                            {item.stock_source === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? 'Source Phase *' : 'Source Stage *'}
+                            {item.stockSource === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? 'Source Phase *' : 'Source Stage *'}
                           </label>
                           <Select 
-                            value={item.stock_source === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? item.source_phase : item.source_stage}
+                            value={item.stockSource === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? item.sourcePhase : item.sourceStage}
                             onValueChange={(value) => {
-                              if (item.stock_source === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR) {
-                                updateItem(itemIdx, { source_phase: value });
+                              if (item.stockSource === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR) {
+                                updateItem(itemIdx, { sourcePhase: value });
                               } else {
-                                updateItem(itemIdx, { source_stage: value });
+                                updateItem(itemIdx, { sourceStage: value });
                               }
                             }}
-                            disabled={!item.stock_source || !item.plant_id}
+                            disabled={!item.stockSource || !item.plantId}
                           >
                             <SelectTrigger>
-                              <SelectValue placeholder={item.plant_id ? "Select stage/phase" : "Select plant first"} />
+                              <SelectValue placeholder={item.plantId ? "Select stage/phase" : "Select plant first"} />
                             </SelectTrigger>
                             <SelectContent>
-                              {item.stock_source === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? (
+                              {item.stockSource === FULFILLMENT_TYPES.STOCK_FROM_OUTDOOR ? (
                                 <>
                                   <SelectItem value="Primary">Primary Hardening</SelectItem>
                                   <SelectItem value="Secondary">Secondary Hardening</SelectItem>
@@ -335,8 +335,8 @@ export const CreatePreBookingForm: React.FC<Props> = ({
                             type="number"
                             step="0.01"
                             placeholder="0.00"
-                            value={item.unit_amount}
-                            onChange={(e) => updateItem(itemIdx, { unit_amount: e.target.value })}
+                            value={item.unitAmount}
+                            onChange={(e) => updateItem(itemIdx, { unitAmount: e.target.value })}
                           />
                         </div>
                       </div>

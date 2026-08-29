@@ -11,14 +11,14 @@ export function Subculturing() {
   const [showAll, setShowAll] = useState(false);
 
   const columns = [
-    { key: 'subculture_date', label: 'Subculture Date', render: (val: string) => val?.split('T')[0] },
-    { key: 'to_stage', label: 'Stage Number' },
-    { key: 'batch_code', label: 'Batch Name' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'media_code', label: 'Media Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'qty_inherited', label: 'Current Bottles (Before)' },
-    { key: 'qty_in', label: 'New Bottles (After)' },
+    { key: 'subcultureDate', label: 'Subculture Date', render: (val: string) => val?.split('T')[0] },
+    { key: 'toStage', label: 'Stage Number' },
+    { key: 'batchCode', label: 'Batch Name' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'mediaCode', label: 'Media Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'qtyInherited', label: 'Current Bottles (Before)' },
+    { key: 'qtyIn', label: 'New Bottles (After)' },
     { key: 'notes', label: 'Notes' },
     { key: 'state', label: 'State' },
   ];
@@ -37,9 +37,9 @@ export function Subculturing() {
             records={showAll ? records : records.filter((r: any) => r.state === 'ACTIVE')}
             onEdit={(record) => { if (record.state === 'ACTIVE') setEditingRecord(record); }}
             filterConfig={{
-              filter1Key: 'plant_name',
+              filter1Key: 'plantName',
               filter1Label: 'Plant Name',
-              filter2Key: 'batch_code',
+              filter2Key: 'batchCode',
               filter2Label: 'Batch Name'
             }}
             exportFileName="subculturing_records"
@@ -63,9 +63,9 @@ export function Subculturing() {
 
       {editingRecord && (
         <UnifiedOperatorEditModal
-          eventCode={editingRecord.event_code}
-          batchCode={editingRecord.batch_code}
-          stage={editingRecord.to_stage}
+          eventCode={editingRecord.eventCode}
+          batchCode={editingRecord.batchCode}
+          stage={editingRecord.toStage}
           activityType="event"
           onClose={() => setEditingRecord(null)}
           onSuccess={refetch}

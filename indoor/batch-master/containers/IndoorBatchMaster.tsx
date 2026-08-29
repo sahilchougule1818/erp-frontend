@@ -40,8 +40,8 @@ import { MakeAvailableConfirm } from '../forms/MakeAvailableConfirm';
 import { RecordContaminationModal } from '../../contamination/components/RecordContaminationModal';
 import { PartialRootingForm } from '../../rooting/forms/PartialRootingForm';
 import { FullRootingForm } from '../../rooting/forms/FullRootingForm';
-import { indoorApi } from '../../services/indoorApi';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
+import { indoorApi } from '../../api/indoorApi';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 import { useLabContext } from '../../contexts/LabContext';
 import { useAuth } from '../../../auth/AuthContext';
 import { Batch } from '../../types';
@@ -257,8 +257,8 @@ const IndoorBatchMaster: React.FC = () => {
     const preview = await previewUndo(batch.batchCode);
     if (preview.success) {
       const d = preview.data as Record<string, unknown>;
-      const reasons: string[] = (d.lockReasons ?? d.lock_reasons) as string[] ?? (
-        (!d.canUndo || d.isUndoLocked || d.is_undo_locked) ? [String(d.message ?? 'Undo locked')] : []
+      const reasons: string[] = (d.lockReasons ?? []) as string[] ?? (
+        (!d.canUndo || d.isUndoLocked) ? [String(d.message ?? 'Undo locked')] : []
       );
       setUndoLockReasons(prev => ({ ...prev, [batch.batchCode]: reasons }));
     } else if (batch.isSampled === 'c') {
@@ -981,7 +981,7 @@ const columns = [
             selectedBatch={{
               ...selectedBatch,
               // pre-fill media code from rooted batch if available
-              latest_media_code: selectedBatch.latestMediaCode
+              latestMediaCode: selectedBatch.latestMediaCode
             }}
             operators={operators}
             isTerminalIncubation={true}

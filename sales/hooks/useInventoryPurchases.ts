@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { inventoryPurchasesApi, inventoryPaymentsApi } from '../services/salesApi';
+import { inventoryPurchasesApi, inventoryPaymentsApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
 import type { WithdrawEntry, InventoryItem, Supplier } from '../types';
 

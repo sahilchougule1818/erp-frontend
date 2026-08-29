@@ -1,11 +1,9 @@
 import axios from 'axios';
-import { normalizeApiData } from '../utils/apiNormalize';
-import { toApiPayload } from '../utils/apiDenormalize';
 
 const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
   headers: { 'Content-Type': 'application/json' },
-  withCredentials: true
+  withCredentials: true,
 });
 
 const getCsrfTokenFromCookie = (): string | null => {
@@ -16,7 +14,7 @@ const getCsrfTokenFromCookie = (): string | null => {
 const fetchCsrfToken = async () => {
   try {
     await axios.get(`${import.meta.env.VITE_API_URL || '/api'}/csrf-token`, {
-      withCredentials: true
+      withCredentials: true,
     });
   } catch (error) {
     console.error('Failed to fetch CSRF token:', error);
@@ -26,21 +24,11 @@ const fetchCsrfToken = async () => {
 fetchCsrfToken();
 
 apiClient.interceptors.request.use((config) => {
-  // Add JWT token from localStorage
   const token = localStorage.getItem('auth-token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
   }
 
-  // Convert snake_case payloads/params to camelCase for Spring Boot
-  if (config.data && !(config.data instanceof FormData) && !(config.data instanceof Blob)) {
-    config.data = toApiPayload(config.data);
-  }
-  if (config.params) {
-    config.params = toApiPayload(config.params);
-  }
-
-  // Add CSRF token for state-changing operations
   if (['post', 'put', 'delete', 'patch'].includes(config.method?.toLowerCase() || '')) {
     const csrfToken = getCsrfTokenFromCookie();
     if (csrfToken) {
@@ -52,11 +40,10 @@ apiClient.interceptors.request.use((config) => {
 
 apiClient.interceptors.response.use(
   (response) => {
-    // For blob responses, return the full response so the caller can access response.data as a blob
     if (response.config.responseType === 'blob') {
       return response.data;
     }
-    return normalizeApiData(response.data);
+    return response.data;
   },
   async (error) => {
     if (error.response?.status === 401) {
@@ -74,7 +61,6 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // Handle blob error responses (backend might return JSON error in blob request)
     if (error.config?.responseType === 'blob' && error.response?.data instanceof Blob) {
       try {
         const text = await error.response.data.text();
@@ -82,7 +68,7 @@ apiClient.interceptors.response.use(
         const errorMessage = jsonError.message || jsonError.error || error.message;
         return Promise.reject({ message: errorMessage, error: errorMessage });
       } catch {
-        // If parsing fails, use default error handling
+        // fall through to default error handling
       }
     }
 

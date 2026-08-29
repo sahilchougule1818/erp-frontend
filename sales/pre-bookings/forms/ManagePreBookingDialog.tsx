@@ -14,11 +14,11 @@ import {
 } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../constants/EventTypes';
 import { cn } from '../../../shared/ui/utils';
-import { billingApi } from '../../services/salesApi';
+import { billingApi } from '../../api/salesApi';
 import { preBookingApi } from '../api/preBookingApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
-import { usePlantMaster } from '../../../indoor/settings/hooks/usePlantMaster';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
+import { usePlantOptions } from '../../hooks/usePlantOptions';
 
 const DELIVERY_STATUS_STYLES: Record<string, string> = {
   Pending: 'bg-amber-50 text-amber-700 border-amber-200',
@@ -28,7 +28,7 @@ const DELIVERY_STATUS_STYLES: Record<string, string> = {
 };
 
 type ItemWithBatch = {
-  batch_code: string;
+  batchCode: string;
   quantity: string;
 };
 
@@ -48,7 +48,7 @@ interface ManagePreBookingDialogProps {
   onUpdate?: () => Promise<void>;
 }
 
-const EMPTY_BATCH: ItemWithBatch = { batch_code: '', quantity: '' };
+const EMPTY_BATCH: ItemWithBatch = { batchCode: '', quantity: '' };
 
 const EMPTY_ITEM_ALLOCATIONS: ItemBatchAllocations = [{ ...EMPTY_BATCH }];
 
@@ -57,11 +57,11 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
   indoorBatches = [], outdoorBatches = [],
   onAddPayment, onDeletePayment, onCancelBooking, onUpdate,
 }) => {
-  const { plants } = usePlantMaster();
+  const { plants } = usePlantOptions();
   const [formData, setFormData] = useState({
-    amount: '', payment_type: 'REGULAR', payment_method: 'Cash',
-    payment_date: new Date().toISOString().split('T')[0],
-    bank_account_id: '', payment_reference: '',
+    amount: '', paymentType: 'REGULAR', paymentMethod: 'Cash',
+    paymentDate: new Date().toISOString().split('T')[0],
+    bankAccountId: '', paymentReference: '',
   });
   const [activeDeliverItemIdx, setActiveDeliverItemIdx] = useState<number | null>(null);
   const [itemsWithBatches, setItemsWithBatches] = useState<ItemBatchAllocations[]>([]);
@@ -73,10 +73,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
   const [isEditingFinancials, setIsEditingFinancials] = useState(false);
   const [editedItems, setEditedItems] = useState<any[]>([]);
   const [editedFinancials, setEditedFinancials] = useState({
-    delivery_charges: '',
-    cgst_percent: '',
-    sgst_percent: '',
-    expected_delivery_date: '',
+    deliveryCharges: '',
+    cgstPercent: '',
+    sgstPercent: '',
+    expectedDeliveryDate: '',
   });
   const [pendingUndoPayment, setPendingUndoPayment] = useState<string | null>(null);
 
@@ -88,10 +88,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
       setActiveDeliverItemIdx(null);
       setDeliveringItemIdx(null);
       setEditedFinancials({
-        delivery_charges: selectedBooking.delivery_charges || '',
-        cgst_percent: selectedBooking.cgst_percent || '',
-        sgst_percent: selectedBooking.sgst_percent || '',
-        expected_delivery_date: selectedBooking.expected_delivery_date || '',
+        deliveryCharges: selectedBooking.deliveryCharges || '',
+        cgstPercent: selectedBooking.cgstPercent || '',
+        sgstPercent: selectedBooking.sgstPercent || '',
+        expectedDeliveryDate: selectedBooking.expectedDeliveryDate || '',
       });
       setIsEditingFinancials(false);
       setPendingUndoPayment(null);
@@ -99,9 +99,9 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
       setCancellationReason('');
       setIsPaymentHistoryExpanded(false);
       setFormData({
-        amount: '', payment_type: 'REGULAR', payment_method: 'Cash',
-        payment_date: new Date().toISOString().split('T')[0],
-        bank_account_id: accounts[0]?.id?.toString() || '', payment_reference: '',
+        amount: '', paymentType: 'REGULAR', paymentMethod: 'Cash',
+        paymentDate: new Date().toISOString().split('T')[0],
+        bankAccountId: accounts[0]?.id?.toString() || '', paymentReference: '',
       });
     }
   }, [open, selectedBooking, accounts]);
@@ -109,44 +109,44 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
   if (!open || !selectedBooking) return null;
 
   const items = selectedBooking.items || [];
-  const isFirstPayment = payments.length === 0 && Number(selectedBooking.paid_amount) <= 0;
+  const isFirstPayment = payments.length === 0 && Number(selectedBooking.paidAmount) <= 0;
   const mostRecent = payments[payments.length - 1];
-  const isCancelled = selectedBooking.delivery_status === 'Cancelled';
-  const hasPayments = Number(selectedBooking.paid_amount) > 0;
+  const isCancelled = selectedBooking.deliveryStatus === 'Cancelled';
+  const hasPayments = Number(selectedBooking.paidAmount) > 0;
   const canEditFinancials = !hasPayments
-    && selectedBooking.delivery_status !== 'Delivered'
-    && selectedBooking.delivery_status !== 'Cancelled';
+    && selectedBooking.deliveryStatus !== 'Delivered'
+    && selectedBooking.deliveryStatus !== 'Cancelled';
 
   const isLineDelivered = (item: any) =>
-    item.delivery_status === 'Delivered'
-    || Number(item.delivered_quantity ?? 0) >= Number(item.quantity);
+    item.deliveryStatus === 'Delivered'
+    || Number(item.deliveredQuantity ?? 0) >= Number(item.quantity);
 
   const lineAllocationsValid = (itemIdx: number) => {
     const item = items[itemIdx];
     const allocations = itemsWithBatches[itemIdx] || [];
     if (!item) return false;
     const totalAllocated = allocations.reduce((sum, alloc) => sum + (Number(alloc.quantity) || 0), 0);
-    const allHaveBatches = allocations.every(alloc => alloc.batch_code && Number(alloc.quantity) > 0);
+    const allHaveBatches = allocations.every(alloc => alloc.batchCode && Number(alloc.quantity) > 0);
     return allHaveBatches && totalAllocated === Number(item.quantity);
   };
 
   const calculateFinancials = () => {
     const baseAmount = editedItems.reduce((sum, item) => {
       const qty = Number(item.quantity) || 0;
-      const amount = Number(item.unit_amount) || 0;
+      const amount = Number(item.unitAmount) || 0;
       return sum + (qty * amount);
     }, 0);
-    const deliveryCharges = Number(editedFinancials.delivery_charges) || 0;
+    const deliveryCharges = Number(editedFinancials.deliveryCharges) || 0;
     const taxableAmount = baseAmount + deliveryCharges;
-    const cgst = taxableAmount * (Number(editedFinancials.cgst_percent) || 0) / 100;
-    const sgst = taxableAmount * (Number(editedFinancials.sgst_percent) || 0) / 100;
+    const cgst = taxableAmount * (Number(editedFinancials.cgstPercent) || 0) / 100;
+    const sgst = taxableAmount * (Number(editedFinancials.sgstPercent) || 0) / 100;
     const totalAmount = taxableAmount + cgst + sgst;
     return { baseAmount, deliveryCharges, taxableAmount, cgst, sgst, totalAmount };
   };
 
   const financials = calculateFinancials();
 
-  const hasPaymentToSave = Number(formData.amount) > 0 && Number(selectedBooking.remaining_amount) > 0;
+  const hasPaymentToSave = Number(formData.amount) > 0 && Number(selectedBooking.remainingAmount) > 0;
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
@@ -159,30 +159,30 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
       if (isEditingFinancials && canEditFinancials) {
         const hasChanges = editedItems.some((item, idx) =>
-          item.plant_name !== items[idx].plant_name ||
+          item.plantName !== items[idx].plantName ||
           item.quantity !== items[idx].quantity || 
-          item.stock_source !== items[idx].stock_source || 
-          String(item.unit_amount) !== String(items[idx].unit_amount)
+          item.stockSource !== items[idx].stockSource || 
+          String(item.unitAmount) !== String(items[idx].unitAmount)
         ) ||
-          editedFinancials.delivery_charges !== selectedBooking.delivery_charges ||
-          editedFinancials.cgst_percent !== selectedBooking.cgst_percent ||
-          editedFinancials.sgst_percent !== selectedBooking.sgst_percent ||
-          editedFinancials.expected_delivery_date !== selectedBooking.expected_delivery_date;
+          editedFinancials.deliveryCharges !== selectedBooking.deliveryCharges ||
+          editedFinancials.cgstPercent !== selectedBooking.cgstPercent ||
+          editedFinancials.sgstPercent !== selectedBooking.sgstPercent ||
+          editedFinancials.expectedDeliveryDate !== selectedBooking.expectedDeliveryDate;
 
         if (hasChanges) {
-          await preBookingApi.update(selectedBooking.order_id, {
+          await preBookingApi.update(selectedBooking.orderId, {
             items: editedItems.map((item) => ({
-              plant_name: item.plant_name,
+              plantName: item.plantName,
               quantity: Number(item.quantity),
-              unit_amount: Number(item.unit_amount),
-              stock_source: item.stock_source,
-              source_stage: item.source_stage || null,
-              source_phase: item.source_phase || null,
+              unitAmount: Number(item.unitAmount),
+              stockSource: item.stockSource,
+              sourceStage: item.sourceStage || null,
+              sourcePhase: item.sourcePhase || null,
             })),
-            delivery_charges: Number(editedFinancials.delivery_charges),
-            cgst_percent: Number(editedFinancials.cgst_percent),
-            sgst_percent: Number(editedFinancials.sgst_percent),
-            expected_delivery_date: editedFinancials.expected_delivery_date || null,
+            deliveryCharges: Number(editedFinancials.deliveryCharges),
+            cgstPercent: Number(editedFinancials.cgstPercent),
+            sgstPercent: Number(editedFinancials.sgstPercent),
+            expectedDeliveryDate: editedFinancials.expectedDeliveryDate || null,
           });
           if (onUpdate) await onUpdate();
         }
@@ -190,7 +190,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
       if (hasPaymentToSave) {
         const paymentPayload = { ...formData };
-        if (paymentPayload.payment_method === 'Cash') paymentPayload.bank_account_id = '';
+        if (paymentPayload.paymentMethod === 'Cash') paymentPayload.bankAccountId = '';
         await onAddPayment(paymentPayload);
       }
       onOpenChange(false);
@@ -206,14 +206,14 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
     try {
       setDeliveringItemIdx(itemIdx);
       const allocations = itemsWithBatches[itemIdx] || [];
-      await preBookingApi.deliver(selectedBooking.order_id, {
-        items_with_batches: allocations.map(alloc => ({
-          item_number: item.item_number || itemIdx + 1,
-          batch_code: alloc.batch_code,
+      await preBookingApi.deliver(selectedBooking.orderId, {
+        itemsWithBatches: allocations.map(alloc => ({
+          itemNumber: item.itemNumber || itemIdx + 1,
+          batchCode: alloc.batchCode,
           quantity: Number(alloc.quantity),
         })),
       });
-      notify.success(`Item ${item.item_number || itemIdx + 1} delivered`);
+      notify.success(`Item ${item.itemNumber || itemIdx + 1} delivered`);
       setActiveDeliverItemIdx(null);
       setItemsWithBatches(prev => prev.map((row, idx) => (idx === itemIdx ? [{ ...EMPTY_BATCH }] : row)));
       if (onUpdate) await onUpdate();
@@ -230,10 +230,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
     try {
       setDeliveringItemIdx(itemIdx);
-      await preBookingApi.undeliver(selectedBooking.order_id, {
-        item_number: item.item_number || itemIdx + 1,
+      await preBookingApi.undeliver(selectedBooking.orderId, {
+        itemNumber: item.itemNumber || itemIdx + 1,
       });
-      notify.success(`Item ${item.item_number || itemIdx + 1} undelivered`);
+      notify.success(`Item ${item.itemNumber || itemIdx + 1} undelivered`);
       if (onUpdate) await onUpdate();
     } catch (err: any) {
       notify.error(extractApiErrorMessage(err) || 'Failed to undeliver item');
@@ -244,10 +244,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
   const handleUndoPayment = () => {
     if (!mostRecent) return;
-    if (pendingUndoPayment === mostRecent.transaction_number) {
+    if (pendingUndoPayment === mostRecent.transactionNumber) {
       setPendingUndoPayment(null);
     } else {
-      setPendingUndoPayment(mostRecent.transaction_number);
+      setPendingUndoPayment(mostRecent.transactionNumber);
     }
   };
 
@@ -262,7 +262,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
   const handleDownloadBill = async () => {
     try {
-      await billingApi.downloadBill(selectedBooking.order_id);
+      await billingApi.downloadBill(selectedBooking.orderId);
     } catch (err: any) {
       alert('Failed to download invoice');
       console.error('Download error:', err);
@@ -294,21 +294,21 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
   };
 
   const getBatchesForItem = (item: any) => {
-    const allBatches = item.stock_source === 'STOCK_FROM_OUTDOOR' ? outdoorBatches : indoorBatches;
+    const allBatches = item.stockSource === 'STOCK_FROM_OUTDOOR' ? outdoorBatches : indoorBatches;
     
     return allBatches.filter((b: any) => {
       // Filter by plant name (stock API doesn't return plant_id)
-      if (item.plant_name && b.plant_name !== item.plant_name) return false;
+      if (item.plantName && b.plantName !== item.plantName) return false;
       
       // Filter by stage/phase based on stock source
-      if (item.stock_source === 'STOCK_FROM_INDOOR') {
-        // For indoor items, check if source_phase is Rooting or if source_stage is specified
-        if (item.source_phase === 'Rooting' || item.source_stage === 'Rooting') {
+      if (item.stockSource === 'STOCK_FROM_INDOOR') {
+        // For indoor items, check if sourcePhase is Rooting or if sourceStage is specified
+        if (item.sourcePhase === 'Rooting' || item.sourceStage === 'Rooting') {
           return b.stage === 'Rooting';
-        } else if (item.source_stage) {
-          return b.stage === item.source_stage;
+        } else if (item.sourceStage) {
+          return b.stage === item.sourceStage;
         }
-      } else if (item.stock_source === 'STOCK_FROM_OUTDOOR' && item.source_phase) {
+      } else if (item.stockSource === 'STOCK_FROM_OUTDOOR' && item.sourcePhase) {
         const PHASE_MAP: Record<string, string> = {
           'Primary Hardening': 'primary_hardening',
           'Secondary Hardening': 'secondary_hardening',
@@ -317,8 +317,8 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
           'Secondary': 'secondary_hardening',
           'Holding': 'holding_area',
         };
-        const dbPhase = PHASE_MAP[item.source_phase] ?? item.source_phase;
-        const batchPhase = b.current_phase ?? b.phase_name;
+        const dbPhase = PHASE_MAP[item.sourcePhase] ?? item.sourcePhase;
+        const batchPhase = b.currentPhase ?? b.phaseName;
         return dbPhase ? batchPhase === dbPhase : false;
       }
       
@@ -327,21 +327,21 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
   };
 
   const getUnitLabel = (item: any) =>
-    item.stock_source === 'STOCK_FROM_OUTDOOR' ? 'plants' : 'bottles';
+    item.stockSource === 'STOCK_FROM_OUTDOOR' ? 'plants' : 'bottles';
 
   const renderBatchOption = (b: any, stockSource: string) => {
     if (stockSource === 'STOCK_FROM_OUTDOOR') {
-      const available = Number(b.available_plants ?? b.bookable_plants);
+      const available = Number(b.availablePlants ?? b.bookablePlants);
       return (
-        <SelectItem key={b.batch_code} value={b.batch_code}>
-          {b.batch_code} — {b.plant_name} ({available.toLocaleString()} available)
+        <SelectItem key={b.batchCode} value={b.batchCode}>
+          {b.batchCode} — {b.plantName} ({available.toLocaleString()} available)
         </SelectItem>
       );
     }
-    const available = Number(b.available_bottles);
+    const available = Number(b.availableBottles);
     return (
-      <SelectItem key={b.batch_code} value={b.batch_code}>
-        {b.batch_code} — {b.plant_name} — {b.stage} ({available.toLocaleString()} available)
+      <SelectItem key={b.batchCode} value={b.batchCode}>
+        {b.batchCode} — {b.plantName} — {b.stage} ({available.toLocaleString()} available)
       </SelectItem>
     );
   };
@@ -355,15 +355,15 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
           <div className="space-y-3 bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-red-600" />
-              <h3 className="font-semibold text-base text-red-700">Cancel Booking {selectedBooking.order_id}?</h3>
+              <h3 className="font-semibold text-base text-red-700">Cancel Booking {selectedBooking.orderId}?</h3>
             </div>
             <div className="space-y-2">
-              <Badge variant="outline" className="text-base font-medium border-slate-300 text-slate-600">{selectedBooking.order_id}</Badge>
-              <span className="text-base text-slate-600 font-medium ml-2">{selectedBooking.customer_name}</span>
+              <Badge variant="outline" className="text-base font-medium border-slate-300 text-slate-600">{selectedBooking.orderId}</Badge>
+              <span className="text-base text-slate-600 font-medium ml-2">{selectedBooking.customerName}</span>
             </div>
-            {Number(selectedBooking.paid_amount) > 0 && (
+            {Number(selectedBooking.paidAmount) > 0 && (
               <p className="text-base text-red-600">
-                A refund of <span className="font-bold">₹{Number(selectedBooking.paid_amount).toLocaleString()}</span> will be created automatically.
+                A refund of <span className="font-bold">₹{Number(selectedBooking.paidAmount).toLocaleString()}</span> will be created automatically.
               </p>
             )}
             <div className="space-y-2">
@@ -397,10 +397,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
     <ModalLayout title="Manage Pre-booking" width="w-[700px]">
       <div className="px-6 py-4 space-y-4" style={{ flex: 1, overflowY: 'auto' }}>
         <div className="flex items-center gap-2 -mt-2 flex-wrap">
-          <Badge variant="outline" className="text-base font-medium border-slate-300 text-slate-600">{selectedBooking.order_id}</Badge>
-          <span className="text-base text-slate-600 font-medium">{selectedBooking.customer_name}</span>
-          <Badge className={cn('border text-sm', DELIVERY_STATUS_STYLES[selectedBooking.delivery_status] || 'bg-slate-50 text-slate-500 border-slate-200')}>
-            {selectedBooking.delivery_status}
+          <Badge variant="outline" className="text-base font-medium border-slate-300 text-slate-600">{selectedBooking.orderId}</Badge>
+          <span className="text-base text-slate-600 font-medium">{selectedBooking.customerName}</span>
+          <Badge className={cn('border text-sm', DELIVERY_STATUS_STYLES[selectedBooking.deliveryStatus] || 'bg-slate-50 text-slate-500 border-slate-200')}>
+            {selectedBooking.deliveryStatus}
           </Badge>
         </div>
 
@@ -420,7 +420,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
             const lineDelivered = isLineDelivered(item);
             const isDeliveringThisLine = activeDeliverItemIdx === itemIdx;
             const currentQty = editedItems[itemIdx]?.quantity ?? item.quantity;
-            const currentStockSource = editedItems[itemIdx]?.stock_source ?? item.stock_source;
+            const currentStockSource = editedItems[itemIdx]?.stockSource ?? item.stockSource;
             const canEditThisLine = isEditingFinancials && canEditFinancials && !lineDelivered;
 
             return (
@@ -434,7 +434,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <h4 className="font-semibold text-base">Item {item.item_number || itemIdx + 1}</h4>
+                    <h4 className="font-semibold text-base">Item {item.itemNumber || itemIdx + 1}</h4>
                     <Badge className={cn(
                       'border text-xs',
                       lineDelivered
@@ -458,7 +458,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                             type="button"
                             onClick={() => {
                               const updated = [...editedItems];
-                              updated[itemIdx] = { ...updated[itemIdx], stock_source: value };
+                              updated[itemIdx] = { ...updated[itemIdx], stockSource: value };
                               setEditedItems(updated);
                             }}
                             className={cn(
@@ -475,13 +475,13 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                   ) : (
                     <Badge
                       variant="outline"
-                      className={item.stock_source === 'STOCK_FROM_OUTDOOR'
+                      className={item.stockSource === 'STOCK_FROM_OUTDOOR'
                         ? 'bg-green-50 text-green-700 border-green-200'
                         : 'bg-blue-50 text-blue-700 border-blue-200'}
                     >
-                      {item.stock_source === 'STOCK_FROM_OUTDOOR' 
-                        ? `Outdoor - ${item.source_phase || 'Unknown'}` 
-                        : `Indoor - ${item.source_phase || 'Unknown'}`}
+                      {item.stockSource === 'STOCK_FROM_OUTDOOR' 
+                        ? `Outdoor - ${item.sourcePhase || 'Unknown'}` 
+                        : `Indoor - ${item.sourcePhase || 'Unknown'}`}
                     </Badge>
                   )}
                   {!isCancelled && !lineDelivered && !isDeliveringThisLine && (
@@ -515,10 +515,10 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                     <p className="text-base text-gray-500 mb-1 font-medium">Plant Name</p>
                     {canEditThisLine ? (
                       <Select
-                        value={editedItems[itemIdx]?.plant_name ?? item.plant_name}
+                        value={editedItems[itemIdx]?.plantName ?? item.plantName}
                         onValueChange={(value) => {
                           const updated = [...editedItems];
-                          updated[itemIdx] = { ...updated[itemIdx], plant_name: value };
+                          updated[itemIdx] = { ...updated[itemIdx], plantName: value };
                           setEditedItems(updated);
                         }}
                       >
@@ -526,23 +526,23 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                           <SelectValue placeholder="Select plant" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(plants || []).filter(p => p.is_active).map((plant) => (
-                            <SelectItem key={plant.id} value={plant.plant_name}>
-                              {plant.plant_name}
+                          {(plants || []).filter(p => p.isActive).map((plant) => (
+                            <SelectItem key={plant.id} value={plant.plantName}>
+                              {plant.plantName}
                             </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     ) : (
-                      <p className="text-base font-semibold text-gray-900">{item.plant_name}</p>
+                      <p className="text-base font-semibold text-gray-900">{item.plantName}</p>
                     )}
                   </div>
 
                   <div className="border-l pl-4">
                     <p className="text-base text-gray-500 mb-1 font-medium">Stage</p>
                     <p className="text-base font-semibold text-gray-900">
-                      {item.stock_source === 'STOCK_FROM_INDOOR' && item.source_stage && item.source_phase === 'Incubation'
-                        ? item.source_stage
+                      {item.stockSource === 'STOCK_FROM_INDOOR' && item.sourceStage && item.sourcePhase === 'Incubation'
+                        ? item.sourceStage
                         : '—'}
                     </p>
                   </div>
@@ -604,29 +604,29 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                             type="number"
                             min="0"
                             step="0.01"
-                            value={editedItems[itemIdx]?.unit_amount ?? item.unit_amount}
+                            value={editedItems[itemIdx]?.unitAmount ?? item.unitAmount}
                             onChange={(e) => {
                               const updated = [...editedItems];
-                              updated[itemIdx] = { ...updated[itemIdx], unit_amount: e.target.value };
+                              updated[itemIdx] = { ...updated[itemIdx], unitAmount: e.target.value };
                               setEditedItems(updated);
                             }}
                             className="h-7 pl-6 text-sm font-semibold"
                           />
                         </div>
                         <p className="text-xs text-amber-600 font-medium mt-0.5 tabular-nums">
-                          = ₹{(Number(currentQty) * Number(editedItems[itemIdx]?.unit_amount ?? item.unit_amount)).toLocaleString()}
+                          = ₹{(Number(currentQty) * Number(editedItems[itemIdx]?.unitAmount ?? item.unitAmount)).toLocaleString()}
                         </p>
                       </>
                     ) : (
-                      <p className="text-base font-semibold text-gray-900">₹{Number(item.unit_amount).toLocaleString()}</p>
+                      <p className="text-base font-semibold text-gray-900">₹{Number(item.unitAmount).toLocaleString()}</p>
                     )}
                   </div>
                 </div>
 
-                {lineDelivered && item.batch_code && (
+                {lineDelivered && item.batchCode && (
                   <div className="pt-2 border-t border-slate-100">
                     <p className="text-base text-gray-500 mb-1 font-medium">Batch Code</p>
-                    <p className="text-base font-semibold text-blue-700 font-mono">{item.batch_code}</p>
+                    <p className="text-base font-semibold text-blue-700 font-mono">{item.batchCode}</p>
                   </div>
                 )}
 
@@ -669,14 +669,14 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
 
                           <div className="space-y-2">
                             <Select
-                              value={batchAlloc.batch_code}
-                              onValueChange={(val: string) => updateBatch(itemIdx, batchIdx, { batch_code: val })}
+                              value={batchAlloc.batchCode}
+                              onValueChange={(val: string) => updateBatch(itemIdx, batchIdx, { batchCode: val })}
                             >
                               <SelectTrigger className="bg-white">
                                 <SelectValue placeholder="Choose batch" />
                               </SelectTrigger>
                               <SelectContent>
-                                {getBatchesForItem(item).map((b: any) => renderBatchOption(b, item.stock_source))}
+                                {getBatchesForItem(item).map((b: any) => renderBatchOption(b, item.stockSource))}
                               </SelectContent>
                             </Select>
 
@@ -777,14 +777,14 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                 {isEditingFinancials ? (
                   <Input
                     type="date"
-                    value={editedFinancials.expected_delivery_date}
-                    onChange={(e) => setEditedFinancials({ ...editedFinancials, expected_delivery_date: e.target.value })}
+                    value={editedFinancials.expectedDeliveryDate}
+                    onChange={(e) => setEditedFinancials({ ...editedFinancials, expectedDeliveryDate: e.target.value })}
                     className="h-8 w-44 text-sm"
                   />
                 ) : (
                   <span className="text-sm font-semibold text-slate-900">
-                    {selectedBooking.expected_delivery_date
-                      ? format(new Date(selectedBooking.expected_delivery_date), 'do MMM yyyy')
+                    {selectedBooking.expectedDeliveryDate
+                      ? format(new Date(selectedBooking.expectedDeliveryDate), 'do MMM yyyy')
                       : '—'}
                   </span>
                 )}
@@ -804,8 +804,8 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">₹</span>
                     <Input
                       type="number"
-                      value={editedFinancials.delivery_charges}
-                      onChange={(e) => setEditedFinancials({ ...editedFinancials, delivery_charges: e.target.value })}
+                      value={editedFinancials.deliveryCharges}
+                      onChange={(e) => setEditedFinancials({ ...editedFinancials, deliveryCharges: e.target.value })}
                       className="h-8 pl-6 text-sm text-right"
                       placeholder="0"
                     />
@@ -821,7 +821,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                   <span className="text-sm text-slate-500">CGST</span>
                   {!isEditingFinancials && (
                     <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded px-1.5 py-0.5">
-                      {editedFinancials.cgst_percent || 0}%
+                      {editedFinancials.cgstPercent || 0}%
                     </span>
                   )}
                 </div>
@@ -830,8 +830,8 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                     <div className="relative w-24">
                       <Input
                         type="number"
-                        value={editedFinancials.cgst_percent}
-                        onChange={(e) => setEditedFinancials({ ...editedFinancials, cgst_percent: e.target.value })}
+                        value={editedFinancials.cgstPercent}
+                        onChange={(e) => setEditedFinancials({ ...editedFinancials, cgstPercent: e.target.value })}
                         className="h-8 pr-7 text-sm text-right"
                         placeholder="0"
                       />
@@ -852,7 +852,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                   <span className="text-sm text-slate-500">SGST</span>
                   {!isEditingFinancials && (
                     <span className="text-xs font-medium text-slate-400 bg-slate-100 rounded px-1.5 py-0.5">
-                      {editedFinancials.sgst_percent || 0}%
+                      {editedFinancials.sgstPercent || 0}%
                     </span>
                   )}
                 </div>
@@ -861,8 +861,8 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                     <div className="relative w-24">
                       <Input
                         type="number"
-                        value={editedFinancials.sgst_percent}
-                        onChange={(e) => setEditedFinancials({ ...editedFinancials, sgst_percent: e.target.value })}
+                        value={editedFinancials.sgstPercent}
+                        onChange={(e) => setEditedFinancials({ ...editedFinancials, sgstPercent: e.target.value })}
                         className="h-8 pr-7 text-sm text-right"
                         placeholder="0"
                       />
@@ -896,12 +896,12 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
             <div className="divide-y divide-slate-100">
               <div className="flex items-center justify-between px-4 py-3">
                 <span className="text-sm text-slate-500">Total Paid</span>
-                <span className="text-sm font-semibold text-green-600">₹{Number(selectedBooking.paid_amount).toLocaleString()}</span>
+                <span className="text-sm font-semibold text-green-600">₹{Number(selectedBooking.paidAmount).toLocaleString()}</span>
               </div>
               <div className="flex items-center justify-between px-4 py-3 bg-slate-50">
                 <span className="text-sm font-semibold text-slate-700">Balance Due</span>
                 <span className="text-sm font-bold text-red-600 tabular-nums">
-                  ₹{Math.max(0, financials.totalAmount - Number(selectedBooking.paid_amount)).toLocaleString()}
+                  ₹{Math.max(0, financials.totalAmount - Number(selectedBooking.paidAmount)).toLocaleString()}
                 </span>
               </div>
             </div>
@@ -926,7 +926,7 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                   <span className="ml-2 text-xs font-medium text-slate-400">
                     {payments.length} transaction{payments.length > 1 ? 's' : ''}
                     {' · '}
-                    <span className="text-green-600 font-semibold">₹{Number(selectedBooking.paid_amount).toLocaleString()} paid</span>
+                    <span className="text-green-600 font-semibold">₹{Number(selectedBooking.paidAmount).toLocaleString()} paid</span>
                   </span>
                 ) : (
                   <span className="ml-2 text-xs text-slate-400">No transactions yet</span>
@@ -957,12 +957,12 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
               ) : (
                 [...payments].reverse().map((payment, idx) => {
                   const isLatest = idx === 0;
-                  const isAdvance = payment.entry_type === 'ADVANCE_RECEIVED';
-                  const isPendingUndo = pendingUndoPayment === payment.transaction_number;
+                  const isAdvance = payment.entryType === 'ADVANCE_RECEIVED';
+                  const isPendingUndo = pendingUndoPayment === payment.transactionNumber;
 
                   return (
                     <div
-                      key={payment.transaction_number}
+                      key={payment.transactionNumber}
                       className={cn(
                         'flex items-center gap-3 px-4 py-3 transition-colors',
                         isPendingUndo ? 'bg-red-50' : isLatest ? 'bg-white' : 'bg-white hover:bg-slate-50',
@@ -978,11 +978,11 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <span className="text-base font-bold text-slate-900 tabular-nums">
-                            ₹{Number(payment.credit_amount).toLocaleString()}
+                            ₹{Number(payment.creditAmount).toLocaleString()}
                           </span>
                           {/* Method pill */}
                           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">
-                            {payment.payment_method}
+                            {payment.paymentMethod}
                           </span>
                           {isAdvance && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200">
@@ -1002,21 +1002,21 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
                           <span className="text-xs text-slate-400">
-                            {format(new Date(payment.entry_date), 'do MMM yyyy')}
+                            {format(new Date(payment.entryDate), 'do MMM yyyy')}
                           </span>
-                          {payment.transaction_number && (
+                          {payment.transactionNumber && (
                             <>
                               <span className="text-slate-200">·</span>
                               <span className="text-xs text-slate-400 font-mono truncate">
-                                {payment.transaction_number}
+                                {payment.transactionNumber}
                               </span>
                             </>
                           )}
-                          {payment.payment_reference && (
+                          {payment.paymentReference && (
                             <>
                               <span className="text-slate-200">·</span>
                               <span className="text-xs text-slate-400 truncate">
-                                Ref: {payment.payment_reference}
+                                Ref: {payment.paymentReference}
                               </span>
                             </>
                           )}
@@ -1052,11 +1052,11 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
           <div className="bg-red-50 border border-red-200 rounded-md p-4 text-center space-y-1">
             <XCircle className="h-6 w-6 text-red-400 mx-auto" />
             <p className="font-semibold text-base text-red-700">Booking Cancelled</p>
-            {selectedBooking.cancellation_reason && (
-              <p className="text-base text-red-500">Reason: {selectedBooking.cancellation_reason}</p>
+            {selectedBooking.cancellationReason && (
+              <p className="text-base text-red-500">Reason: {selectedBooking.cancellationReason}</p>
             )}
           </div>
-        ) : Number(selectedBooking.remaining_amount) <= 0 ? (
+        ) : Number(selectedBooking.remainingAmount) <= 0 ? (
           <div className="bg-green-50 border border-green-200 rounded-md p-5 text-center space-y-2">
             <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto" />
             <p className="font-semibold text-base text-green-800">Payment Complete</p>
@@ -1075,11 +1075,11 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                   ].map(({ val, label }, i) => (
                     <button
                       key={val} type="button"
-                      onClick={() => setFormData({ ...formData, payment_type: val })}
+                      onClick={() => setFormData({ ...formData, paymentType: val })}
                       className={cn(
                         'px-3 py-1 text-xs font-medium transition-colors',
                         i > 0 && 'border-l border-slate-200',
-                        formData.payment_type === val ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-50',
+                        formData.paymentType === val ? 'bg-green-600 text-white' : 'text-slate-500 hover:bg-slate-50',
                       )}
                     >
                       {label}
@@ -1109,8 +1109,8 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
                 <div className="space-y-1.5">
                   <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Method</Label>
                   <Select
-                    value={formData.payment_method}
-                    onValueChange={(val: string) => setFormData({ ...formData, payment_method: val, bank_account_id: val === 'Cash' ? '' : formData.bank_account_id })}
+                    value={formData.paymentMethod}
+                    onValueChange={(val: string) => setFormData({ ...formData, paymentMethod: val, bankAccountId: val === 'Cash' ? '' : formData.bankAccountId })}
                   >
                     <SelectTrigger className="h-10"><SelectValue /></SelectTrigger>
                     <SelectContent>{PAYMENT_METHODS.map((m) => <SelectItem key={m} value={m}>{m}</SelectItem>)}</SelectContent>
@@ -1119,18 +1119,18 @@ export const ManagePreBookingDialog: React.FC<ManagePreBookingDialogProps> = ({
               </div>
 
               {/* Bank + Ref — only for non-cash */}
-              {formData.payment_method !== 'Cash' && (
+              {formData.paymentMethod !== 'Cash' && (
                 <div className="grid grid-cols-2 gap-3 pt-1 border-t border-slate-100">
                   <div className="space-y-1.5">
                     <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">Bank Account</Label>
-                    <Select value={formData.bank_account_id} onValueChange={(val: string) => setFormData({ ...formData, bank_account_id: val })}>
+                    <Select value={formData.bankAccountId} onValueChange={(val: string) => setFormData({ ...formData, bankAccountId: val })}>
                       <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Select account" /></SelectTrigger>
-                      <SelectContent>{accounts.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.bank_name} · {a.account_name}</SelectItem>)}</SelectContent>
+                      <SelectContent>{accounts.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.bankName} · {a.accountName}</SelectItem>)}</SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs text-slate-500 font-medium uppercase tracking-wide">TXN / Reference</Label>
-                    <Input className="h-9 text-sm" placeholder="Ref ID" value={formData.payment_reference} onChange={(e) => setFormData({ ...formData, payment_reference: e.target.value })} />
+                    <Input className="h-9 text-sm" placeholder="Ref ID" value={formData.paymentReference} onChange={(e) => setFormData({ ...formData, paymentReference: e.target.value })} />
                   </div>
                 </div>
               )}

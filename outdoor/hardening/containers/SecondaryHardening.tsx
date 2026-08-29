@@ -23,7 +23,7 @@ export function SecondaryHardening() {
             title=""
             columns={columns}
             records={records}
-            filterConfig={{ filter1Key: 'plant_name', filter1Label: 'Plant Name', filter2Key: 'batch_code', filter2Label: 'Batch Code' }}
+            filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}
             exportFileName="secondary-hardening"
             onEdit={onEditRecord}
             pagination={pagination}
@@ -33,9 +33,9 @@ export function SecondaryHardening() {
 
       {editingRecord && (
         <UnifiedEditModal
-          eventCode={editingRecord.event_code}
-          batchCode={editingRecord.batch_code}
-          tunnel={editingRecord.current_tunnel ?? ''}
+          eventCode={editingRecord.eventCode}
+          batchCode={editingRecord.batchCode}
+          tunnel={editingRecord.currentTunnel ?? ''}
           phase={'secondary_hardening'}
           onClose={closeEdit}
         />

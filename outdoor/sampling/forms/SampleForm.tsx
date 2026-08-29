@@ -6,7 +6,7 @@ import { Button } from '../../../shared/ui/button';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 
 interface SampleFormProps {
-  batch: { batch_code: string; current_phase: string; current_tunnel: string };
+  batch: { batchCode: string; currentPhase: string; currentTunnel: string };
   onClose: () => void;
   onSubmit: (data: { sampleDate: string; sampleNotes: string }) => void;
 }
@@ -27,13 +27,13 @@ export const SampleForm: React.FC<SampleFormProps> = ({ batch, onClose, onSubmit
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Batch Information</p>
             <div className="bg-gray-50 p-3 rounded-md space-y-1">
               <p className="text-base text-gray-600">
-                Batch Code: <span className="font-semibold text-gray-900">{batch.batch_code}</span>
+                Batch Code: <span className="font-semibold text-gray-900">{batch.batchCode}</span>
               </p>
               <p className="text-base text-gray-600">
-                Phase: <span className="font-semibold text-gray-900">{batch.current_phase}</span>
+                Phase: <span className="font-semibold text-gray-900">{batch.currentPhase}</span>
               </p>
               <p className="text-base text-gray-600">
-                Tunnel: <span className="font-semibold text-gray-900">{batch.current_tunnel}</span>
+                Tunnel: <span className="font-semibold text-gray-900">{batch.currentTunnel}</span>
               </p>
             </div>
           </div>

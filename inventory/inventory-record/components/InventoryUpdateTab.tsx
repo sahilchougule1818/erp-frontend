@@ -11,18 +11,18 @@ import { Label } from '../../../shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 type Item = { 
   id: number; 
   name: string; 
   unit: string; 
-  min_stock: number;
-  current_stock: number;
-  last_withdrawal_id: number | null;
-  last_withdrawal_quantity: number | null;
-  last_withdrawal_date: string | null;
+  minStock: number;
+  currentStock: number;
+  lastWithdrawalId: number | null;
+  lastWithdrawalQuantity: number | null;
+  lastWithdrawalDate: string | null;
 };
 
 type Props = {
@@ -44,17 +44,17 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
   const notify = useNotify();
   const [withdrawItem, setWithdrawItem] = useState<Item | null>(null);
   const [addItemOpen, setAddItemOpen] = useState(false);
-  const [itemForm, setItemForm] = useState({ name: '', unit: '', min_stock: '' });
+  const [itemForm, setItemForm] = useState({ name: '', unit: '', minStock: '' });
   const [saving, setSaving] = useState(false);
   const [withdrawForm, setWithdrawForm] = useState({ quantity: '', date: new Date().toISOString().split('T')[0], notes: '' });
   const [withdrawSaving, setWithdrawSaving] = useState(false);
 
   const handleUndoLastWithdrawal = async (item: Item) => {
-    if (!item.last_withdrawal_id) {
+    if (!item.lastWithdrawalId) {
       notify.error('No withdrawal to undo');
       return;
     }
-    const detail = `${Number(item.last_withdrawal_quantity).toLocaleString()} ${item.unit}`;
+    const detail = `${Number(item.lastWithdrawalQuantity).toLocaleString()} ${item.unit}`;
     if (!confirm(`Undo last withdrawal for "${item.name}"?\n\nStock Withdrawn — ${detail}\n\nThis cannot be reversed.`)) return;
     try {
       await inventoryApi.stockUsage.undoLast(item.id);
@@ -70,7 +70,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
     setWithdrawSaving(true);
     try {
       await inventoryApi.stockUsage.create({
-        item_id: withdrawItem.id,
+        itemId: withdrawItem.id,
         quantity: parseFloat(withdrawForm.quantity),
         date: withdrawForm.date,
         notes: withdrawForm.notes || null,
@@ -92,10 +92,10 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
       await inventoryApi.items.create({
         name: itemForm.name,
         unit: itemForm.unit,
-        min_stock: itemForm.min_stock ? parseFloat(itemForm.min_stock) : 0,
+        minStock: itemForm.minStock ? parseFloat(itemForm.minStock) : 0,
       });
       notify.success(`Item "${itemForm.name}" added`);
-      setItemForm({ name: '', unit: '', min_stock: '' });
+      setItemForm({ name: '', unit: '', minStock: '' });
       setAddItemOpen(false);
       onItemAdded();
     } catch (err: any) {
@@ -107,9 +107,9 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
 
   // Build records with computed fields for DataTable
   const records = items.map(item => {
-    const current_stock = item.current_stock || 0;
-    const is_low = current_stock <= item.min_stock;
-    return { ...item, current_stock, is_low };
+    const currentStock = item.currentStock || 0;
+    const isLow = currentStock <= item.minStock;
+    return { ...item, currentStock, isLow };
   });
 
   const columns = [
@@ -119,8 +119,8 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
       render: (val: string) => <span>{val}</span>
     },
     { key: 'unit', label: 'Unit' },
-    { key: 'min_stock', label: 'Min Stock' },
-    { key: 'current_stock', label: 'Current Stock' },
+    { key: 'minStock', label: 'Min Stock' },
+    { key: 'currentStock', label: 'Current Stock' },
     {
       key: 'id',
       label: '',
@@ -129,11 +129,11 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
           id: record.id, 
           name: record.name, 
           unit: record.unit, 
-          min_stock: record.min_stock,
-          current_stock: record.current_stock || 0,
-          last_withdrawal_id: record.last_withdrawal_id || null,
-          last_withdrawal_quantity: record.last_withdrawal_quantity || null,
-          last_withdrawal_date: record.last_withdrawal_date || null
+          minStock: record.minStock,
+          currentStock: record.currentStock || 0,
+          lastWithdrawalId: record.lastWithdrawalId || null,
+          lastWithdrawalQuantity: record.lastWithdrawalQuantity || null,
+          lastWithdrawalDate: record.lastWithdrawalDate || null
         };
         return (
           <DropdownMenu>
@@ -152,7 +152,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="flex items-center gap-2 cursor-pointer"
-                disabled={!record.last_withdrawal_id}
+                disabled={!record.lastWithdrawalId}
                 onClick={() => handleUndoLastWithdrawal(record)}
               >
                 <RotateCcw className="h-3.5 w-3.5" />
@@ -183,7 +183,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
               <Button
                 size="sm"
                 className="bg-green-600 hover:bg-green-700 text-white text-base"
-                onClick={() => { setItemForm({ name: '', unit: '', min_stock: '' }); setAddItemOpen(true); }}
+                onClick={() => { setItemForm({ name: '', unit: '', minStock: '' }); setAddItemOpen(true); }}
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />Add Item
               </Button>
@@ -264,8 +264,8 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
                 <Label>Min Stock</Label>
                 <Input
                   type="number" placeholder="0"
-                  value={itemForm.min_stock}
-                  onChange={e => setItemForm({ ...itemForm, min_stock: e.target.value })}
+                  value={itemForm.minStock}
+                  onChange={e => setItemForm({ ...itemForm, minStock: e.target.value })}
                 />
               </div>
             </div>

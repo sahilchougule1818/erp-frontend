@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 export interface Tunnel {
   id: number;
   name: string;
   capacity: number;
-  current_occupancy?: number;
-  is_active: boolean;
-  created_at: string;
-  display_name?: string;
+  currentOccupancy?: number;
+  isActive: boolean;
+  createdAt: string;
+  displayName?: string;
 }
 
 export const usePHTunnels = () => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { indoorApi } from '../../services/indoorApi';
+import { cleaningApi } from '../api/cleaningApi';
 import { applySpringPage } from '../../../shared/utils/springPage';
 import { useLabContext } from '../../contexts/LabContext';
 
@@ -18,8 +18,8 @@ export function useCleaningData() {
     setLoading(true);
     try {
       const [stdRes, deepRes] = await Promise.all([
-        indoorApi.cleaning.getAll({ type: 'standard', page: cleaningPage, labNumber: labNumber || undefined }),
-        indoorApi.cleaning.getAll({ type: 'deep', page: deepCleaningPage, labNumber: labNumber || undefined })
+        cleaningApi.getAll({ type: 'standard', page: cleaningPage, labNumber: labNumber || undefined }),
+        cleaningApi.getAll({ type: 'deep', page: deepCleaningPage, labNumber: labNumber || undefined })
       ]);
       applySpringPage(stdRes, setCleaningRecords, setCleaningPagination);
       applySpringPage(deepRes, setDeepCleaningRecords, setDeepCleaningPagination);
@@ -55,9 +55,9 @@ export function useCleaningData() {
       };
 
       if (formData.id) {
-        await indoorApi.cleaning.update(formData.id, payload);
+        await cleaningApi.update(formData.id, payload);
       } else {
-        await indoorApi.cleaning.create(payload);
+        await cleaningApi.create(payload);
       }
       await fetchRecords();
       return true;
@@ -79,9 +79,9 @@ export function useCleaningData() {
       };
 
       if (formData.id) {
-        await indoorApi.cleaning.update(formData.id, payload);
+        await cleaningApi.update(formData.id, payload);
       } else {
-        await indoorApi.cleaning.create(payload);
+        await cleaningApi.create(payload);
       }
       await fetchRecords();
       return true;
@@ -96,7 +96,7 @@ export function useCleaningData() {
   const deleteCleaningRecord = async (id: number) => {
     setLoading(true);
     try {
-      await indoorApi.cleaning.delete(id, 'standard');
+      await cleaningApi.delete(id, 'standard');
       await fetchRecords();
       return true;
     } catch (err) {
@@ -110,7 +110,7 @@ export function useCleaningData() {
   const deleteDeepCleaningRecord = async (id: number) => {
     setLoading(true);
     try {
-      await indoorApi.cleaning.delete(id, 'deep');
+      await cleaningApi.delete(id, 'deep');
       await fetchRecords();
       return true;
     } catch (err) {

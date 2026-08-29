@@ -6,7 +6,7 @@ import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
 import { Badge } from '../../../shared/ui/badge';
 import { Save, Users, Sprout, ChevronDown, ChevronUp } from 'lucide-react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
@@ -18,9 +18,9 @@ interface FertilizationEditModalProps {
 
 interface StagedWorker {
   id: number;
-  short_name: string;
-  first_name?: string;
-  last_name?: string;
+  shortName: string;
+  firstName?: string;
+  lastName?: string;
   assignmentId?: number;
 }
 
@@ -38,12 +38,12 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
 
   // Fertilization details state
   const [fertilizationDetails, setFertilizationDetails] = useState({
-    fertilizerName: record?.fertilizer_name || '',
+    fertilizerName: record?.fertilizerName || '',
     quantity: record?.quantity || 0
   });
 
   const getWorkerDisplayName = (worker: any) => {
-    return worker.short_name;
+    return worker.shortName;
   };
 
   useEffect(() => {
@@ -59,7 +59,7 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
         // Load assignments
         try {
           const assignmentsRes = await outdoorApi.workers.getAssignments(
-            record.event_code,
+            record.eventCode,
             'fertilization',
             record.id
           );
@@ -69,10 +69,10 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
           setInitialAssignments(assignments);
           
           setStagedWorkers(assignments.map((a: any) => ({
-            id: a.worker_id,
-            short_name: a.short_name,
-            first_name: a.first_name,
-            last_name: a.last_name,
+            id: a.workerId,
+            shortName: a.shortName,
+            firstName: a.firstName,
+            lastName: a.lastName,
             assignmentId: a.id
           })));
         } catch (assignError) {
@@ -90,7 +90,7 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
     }
     loadWorkers();
     return () => { active = false; };
-  }, [record.event_code, record.id, notify]);
+  }, [record.eventCode, record.id, notify]);
 
   const toggleWorker = (workerId: number) => {
     if (stagedWorkers.some(w => w.id === workerId)) {
@@ -100,9 +100,9 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
       if (!worker) return;
       setStagedWorkers(prev => [...prev, {
         id: worker.id,
-        short_name: worker.short_name,
-        first_name: worker.first_name,
-        last_name: worker.last_name
+        shortName: worker.shortName,
+        firstName: worker.firstName,
+        lastName: worker.lastName
       }]);
     }
   };
@@ -111,9 +111,9 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
     setSaving(true);
     try {
       const stagedIds = stagedWorkers.map(w => w.id);
-      const savedIds = initialAssignments.map((a: any) => a.worker_id);
+      const savedIds = initialAssignments.map((a: any) => a.workerId);
       
-      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.worker_id));
+      const removals = initialAssignments.filter((a: any) => !stagedIds.includes(a.workerId));
       const additions = stagedWorkers.filter(w => !savedIds.includes(w.id));
 
       // If no changes, just close
@@ -126,13 +126,13 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
       if (additions.length > 0) {
         await Promise.all(
           additions.map(w => outdoorApi.workers.addAssignment({
-            event_code: record.event_code,
-            worker_id: w.id,
-            activity_type: 'fertilization',
-            fertilization_id: record.id,
-            batch_code: record.batch_code,
-            phase: record.current_phase,
-            tunnel: record.current_tunnel
+            eventCode: record.eventCode,
+            workerId: w.id,
+            activityType: 'fertilization',
+            fertilizationId: record.id,
+            batchCode: record.batchCode,
+            phase: record.currentPhase,
+            tunnel: record.currentTunnel
           }))
         );
       }
@@ -157,7 +157,7 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
     setSaving(true);
     try {
       await outdoorApi.fertilization.update(record.id, {
-        fertilizer_name: fertilizationDetails.fertilizerName,
+        fertilizerName: fertilizationDetails.fertilizerName,
         quantity: fertilizationDetails.quantity
       });
       notify.success('Fertilization details updated successfully');
@@ -175,7 +175,7 @@ export function FertilizationEditModal({ record, onClose, onSuccess }: Fertiliza
       isOpen={true}
       onClose={() => !saving && onClose()}
       title="Edit Fertilization Record"
-      subtitle={`Batch: ${record.batch_code} · Phase: ${record.current_phase}`}
+      subtitle={`Batch: ${record.batchCode} · Phase: ${record.currentPhase}`}
       maxWidth="650px"
     >
       <div className="flex-1 overflow-y-auto">

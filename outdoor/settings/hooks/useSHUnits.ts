@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 export interface SHUnit {
   id: number;
   name: string;
   capacity: number;
-  is_active: boolean;
-  created_at: string;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export const useSHUnits = () => {
@@ -36,11 +36,11 @@ export const useSHUnits = () => {
     await fetchUnits();
   };
 
-  const updateUnit = async (id: number, data: { name: string; capacity: number; is_active: boolean }) => {
+  const updateUnit = async (id: number, data: { name: string; capacity: number; isActive: boolean }) => {
     await outdoorApi.settings.updateShUnit(id, {
       name: data.name,
       capacity: data.capacity,
-      active: data.is_active,
+      active: data.isActive,
     });
     await fetchUnits();
   };

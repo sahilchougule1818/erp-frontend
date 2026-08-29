@@ -8,9 +8,9 @@ import { Button } from '../../../shared/ui/button';
 import { Trash2 } from 'lucide-react';
 
 type FormValues = {
-  application_date: string;
-  batch_code: string;
-  fertilizer_name: string;
+  applicationDate: string;
+  batchCode: string;
+  fertilizerName: string;
   quantity: string;
   notes: string;
 };
@@ -26,9 +26,9 @@ interface EditFertilizationFormProps {
 export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete, onCancel }: EditFertilizationFormProps) {
   const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
-      application_date: new Date().toISOString().split('T')[0],
-      batch_code: '',
-      fertilizer_name: '',
+      applicationDate: new Date().toISOString().split('T')[0],
+      batchCode: '',
+      fertilizerName: '',
       quantity: '',
       notes: ''
     }
@@ -37,9 +37,9 @@ export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete
   useEffect(() => {
     if (initialData) {
       reset({
-        application_date: initialData.application_date?.split('T')[0] || new Date().toISOString().split('T')[0],
-        batch_code: initialData.batch_code || '',
-        fertilizer_name: initialData.fertilizer_name || '',
+        applicationDate: initialData.applicationDate?.split('T')[0] || new Date().toISOString().split('T')[0],
+        batchCode: initialData.batchCode || '',
+        fertilizerName: initialData.fertilizerName || '',
         quantity: initialData.quantity || '',
         notes: initialData.notes || ''
       });
@@ -61,7 +61,7 @@ export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete
           <div className="space-y-2">
             <Label>Application Date *</Label>
             <Controller
-              name="application_date"
+              name="applicationDate"
               control={control}
               rules={{ required: true }}
               render={({ field }) => <Input type="date" {...field} />}
@@ -70,7 +70,7 @@ export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete
           <div className="space-y-2">
             <Label>Batch Code *</Label>
             <Controller
-              name="batch_code"
+              name="batchCode"
               control={control}
               rules={{ required: true }}
               render={({ field }) => (
@@ -78,8 +78,8 @@ export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete
                   <SelectTrigger><SelectValue placeholder="Select batch" /></SelectTrigger>
                   <SelectContent>
                     {batches.map((batch: any) => (
-                      <SelectItem key={batch.batch_code} value={batch.batch_code}>
-                        {batch.batch_code}
+                      <SelectItem key={batch.batchCode} value={batch.batchCode}>
+                        {batch.batchCode}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -93,7 +93,7 @@ export function EditFertilizationForm({ initialData, batches, onSubmit, onDelete
           <div className="space-y-2">
             <Label>Fertilizer Name *</Label>
             <Controller
-              name="fertilizer_name"
+              name="fertilizerName"
               control={control}
               rules={{ required: true }}
               render={({ field }) => <Input {...field} placeholder="Enter fertilizer name" />}

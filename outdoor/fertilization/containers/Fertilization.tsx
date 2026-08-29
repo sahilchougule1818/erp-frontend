@@ -14,12 +14,12 @@ export function Fertilization() {
   const notify = useNotify();
 
   const columns = [
-    { key: 'created_at', label: 'Date', render: (val: string) => val?.split('T')[0] || '' },
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'current_phase', label: 'Phase' },
-    { key: 'current_tunnel', label: 'Tunnel' },
-    { key: 'fertilizer_name', label: 'Fertilizer' },
+    { key: 'createdAt', label: 'Date', render: (val: string) => val?.split('T')[0] || '' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'currentPhase', label: 'Phase' },
+    { key: 'currentTunnel', label: 'Tunnel' },
+    { key: 'fertilizerName', label: 'Fertilizer' },
     { key: 'quantity', label: 'Quantity' }
   ];
 
@@ -54,7 +54,7 @@ export function Fertilization() {
             columns={columns}
             records={records}
             onEdit={handleEdit}
-            filterConfig={{ filter1Key: 'plant_name', filter1Label: 'Plant Name', filter2Key: 'batch_code', filter2Label: 'Batch Code' }}
+            filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}
             exportFileName="fertilization"
             pagination={pagination}
           />

@@ -7,13 +7,12 @@ import { Badge } from '../../../shared/ui/badge';
 import { Plus as PlusIcon, Clock, IndianRupee } from 'lucide-react';
 import { cn } from '../../../shared/ui/utils';
 import { useNotify } from '../../../shared/hooks/useNotify';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 import { CreatePreBookingForm } from '../forms/CreatePreBookingForm';
 import { ManagePreBookingDialog } from '../forms/ManagePreBookingDialog';
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { useIndoorStock, useOutdoorStock } from '../../hooks/useStock';
-import { bookingPaymentsApi, salesApi } from '../../services/salesApi';
-import { normalizePreBookingStats } from '../../utils/normalize';
+import { bookingPaymentsApi, salesApi } from '../../api/salesApi';
 
 export const PreBookingsList: React.FC = () => {
   const [bookings, setBookings] = useState<PreBooking[]>([]);
@@ -37,7 +36,7 @@ export const PreBookingsList: React.FC = () => {
         salesApi.dashboard.getPreBookingStats()
       ]);
       setBookings(data);
-      setStats(normalizePreBookingStats((statsData ?? {}) as Record<string, unknown>));
+      setStats(statsData ?? null);
     } catch (error: any) {
       notify.error(extractApiErrorMessage(error) || 'Failed to fetch pre-bookings');
     } finally {
@@ -55,9 +54,9 @@ export const PreBookingsList: React.FC = () => {
     : `₹${n.toLocaleString()}`;
 
   const columns = [
-    { key: 'order_id', label: 'Order ID' },
+    { key: 'orderId', label: 'Order ID' },
     {
-      key: 'booking_date',
+      key: 'bookingDate',
       label: 'Booking Date',
       render: (val: string) => (
         <span className="text-base">
@@ -65,19 +64,19 @@ export const PreBookingsList: React.FC = () => {
         </span>
       )
     },
-    { key: 'customer_name', label: 'Customer Name' },
-    { key: 'phone_number', label: 'Phone' },
+    { key: 'customerName', label: 'Customer Name' },
+    { key: 'phoneNumber', label: 'Phone' },
     {
       key: 'items',
       label: 'Items',
       render: (_val: any, row: PreBooking) => {
         if (!row.items || row.items.length === 0) return <span className="text-base">—</span>;
-        const summary = row.items.map((i) => `${i.plant_name} × ${i.quantity}`).join(', ');
+        const summary = row.items.map((i) => `${i.plantName} × ${i.quantity}`).join(', ');
         return <span className="text-base" title={summary}>{summary}</span>;
       }
     },
     {
-      key: 'expected_delivery_date',
+      key: 'expectedDeliveryDate',
       label: 'Expected Delivery',
       render: (val: string) => (
         <span className="text-base">
@@ -86,42 +85,42 @@ export const PreBookingsList: React.FC = () => {
       )
     },
     {
-      key: 'base_amount',
+      key: 'baseAmount',
       label: 'Base Amount',
       render: (val: number) => <span className="text-base">{`₹${Number(val || 0).toLocaleString()}`}</span>
     },
     {
-      key: 'delivery_charges',
+      key: 'deliveryCharges',
       label: 'Delivery Charges',
       render: (val: number) => <span className="text-base">{`₹${Number(val || 0).toLocaleString()}`}</span>
     },
     {
-      key: 'cgst_percent',
+      key: 'cgstPercent',
       label: 'CGST',
       render: (val: number) => <span className="text-base">{`${Number(val || 0)}%`}</span>
     },
     {
-      key: 'sgst_percent',
+      key: 'sgstPercent',
       label: 'SGST',
       render: (val: number) => <span className="text-base">{`${Number(val || 0)}%`}</span>
     },
     {
-      key: 'total_amount',
+      key: 'totalAmount',
       label: 'Total Amount',
       render: (val: number) => <span className="text-base font-semibold">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'paid_amount',
+      key: 'paidAmount',
       label: 'Paid',
       render: (val: number) => <span className="text-base">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'remaining_amount',
+      key: 'remainingAmount',
       label: 'Remaining',
       render: (val: number) => <span className="text-base">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'payment_status',
+      key: 'paymentStatus',
       label: 'Payment',
       render: (val: string) => {
         const styles: any = {
@@ -133,7 +132,7 @@ export const PreBookingsList: React.FC = () => {
       }
     },
     {
-      key: 'delivery_status',
+      key: 'deliveryStatus',
       label: 'Delivery',
       render: (val: string) => {
         const styles: any = {
@@ -162,7 +161,7 @@ export const PreBookingsList: React.FC = () => {
   const handleEditBooking = async (booking: PreBooking) => {
     try {
       setSelectedBooking(booking);
-      const orderId = booking.order_id;
+      const orderId = booking.orderId;
       const bookingPayments = await bookingPaymentsApi.getByBooking(orderId);
       setPayments(bookingPayments);
       setShowManageDialog(true);
@@ -173,8 +172,8 @@ export const PreBookingsList: React.FC = () => {
 
   const handleAddPayment = async (data: any) => {
     try {
-      const orderId = selectedBooking.order_id;
-      await bookingPaymentsApi.create({ ...data, order_id: orderId });
+      const orderId = selectedBooking.orderId;
+      await bookingPaymentsApi.create({ ...data, orderId: orderId });
       notify.success('Payment added successfully');
       await fetchBookings();
       const updatedPayments = await bookingPaymentsApi.getByBooking(orderId);
@@ -192,7 +191,7 @@ export const PreBookingsList: React.FC = () => {
       await bookingPaymentsApi.delete(transactionNumber);
       notify.success('Payment deleted successfully');
       await fetchBookings();
-      const orderId = selectedBooking.order_id;
+      const orderId = selectedBooking.orderId;
       const updatedPayments = await bookingPaymentsApi.getByBooking(orderId);
       setPayments(updatedPayments);
       // Update selected booking with fresh data
@@ -205,8 +204,8 @@ export const PreBookingsList: React.FC = () => {
 
   const handleCancelBooking = async (reason?: string) => {
     try {
-      const orderId = selectedBooking.order_id;
-      await preBookingApi.cancel(orderId, { cancellation_reason: reason });
+      const orderId = selectedBooking.orderId;
+      await preBookingApi.cancel(orderId, { cancellationReason: reason });
       notify.success('Booking cancelled successfully');
       await fetchBookings();
       setShowManageDialog(false);
@@ -218,7 +217,7 @@ export const PreBookingsList: React.FC = () => {
   const handleUpdateBooking = async () => {
     try {
       await fetchBookings();
-      const orderId = selectedBooking.order_id;
+      const orderId = selectedBooking.orderId;
       const updatedBooking = await preBookingApi.getById(orderId);
       setSelectedBooking(updatedBooking);
     } catch (error: any) {
@@ -243,7 +242,7 @@ export const PreBookingsList: React.FC = () => {
             <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#92400E', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Pending Deliveries</span>
             <Clock style={{ color: '#92400E', width: '20px', height: '20px' }} />
           </div>
-          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#78350F', marginTop: '8px' }}>{stats?.pending_deliveries || 0}</div>
+          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#78350F', marginTop: '8px' }}>{stats?.pendingDeliveries || 0}</div>
           <div style={{ fontSize: '0.7rem', color: '#92400E', fontWeight: '600', textTransform: 'uppercase', marginTop: '4px' }}>
             Awaiting fulfillment
           </div>
@@ -254,7 +253,7 @@ export const PreBookingsList: React.FC = () => {
             <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#854F0B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Outstanding Amount</span>
             <IndianRupee style={{ color: '#854F0B', width: '20px', height: '20px' }} />
           </div>
-          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#633806', marginTop: '8px' }}>{fmt(Number(stats?.outstanding_amount) || 0)}</div>
+          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#633806', marginTop: '8px' }}>{fmt(Number(stats?.outstandingAmount) || 0)}</div>
           <div style={{ fontSize: '0.7rem', color: '#854F0B', fontWeight: '600', textTransform: 'uppercase', marginTop: '4px' }}>
             From customers
           </div>
@@ -275,9 +274,9 @@ export const PreBookingsList: React.FC = () => {
           </Button>
         }
         filterConfig={{
-          filter1Key: 'customer_name',
+          filter1Key: 'customerName',
           filter1Label: 'Search customer...',
-          filter2Key: 'order_id',
+          filter2Key: 'orderId',
           filter2Label: 'Order ID'
         }}
         exportFileName="pre_bookings_export"

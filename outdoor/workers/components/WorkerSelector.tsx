@@ -60,7 +60,7 @@ export function WorkerSelector({ workers, selectedIds, onChange }: WorkerSelecto
                 variant="secondary" 
                 className="text-base px-2 py-1 flex items-center gap-1"
               >
-                {worker.name || worker.short_name}
+                {worker.name || worker.shortName}
                 <button
                   type="button"
                   onClick={() => removeWorker(worker.id)}
@@ -85,7 +85,7 @@ export function WorkerSelector({ workers, selectedIds, onChange }: WorkerSelecto
                   className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                 />
                 <span className="text-base flex-1">
-                  {worker.name || worker.short_name}
+                  {worker.name || worker.shortName}
                 </span>
               </label>
             ))}

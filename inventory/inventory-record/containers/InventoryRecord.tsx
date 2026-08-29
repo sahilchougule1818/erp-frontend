@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LayoutDashboard } from 'lucide-react';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { InventoryUpdateTab } from '../components/InventoryUpdateTab';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
@@ -8,12 +8,12 @@ type ItemWithLastWithdrawal = {
   id: number;
   name: string;
   unit: string;
-  min_stock: number;
-  current_stock: number;
-  last_withdrawal_id: number | null;
-  last_withdrawal_quantity: number | null;
-  last_withdrawal_date: string | null;
-  last_withdrawal_notes: string | null;
+  minStock: number;
+  currentStock: number;
+  lastWithdrawalId: number | null;
+  lastWithdrawalQuantity: number | null;
+  lastWithdrawalDate: string | null;
+  lastWithdrawalNotes: string | null;
 };
 
 export function InventoryRecord() {

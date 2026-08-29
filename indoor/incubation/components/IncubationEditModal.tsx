@@ -6,7 +6,7 @@ import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
 import { Badge } from '../../../shared/ui/badge';
 import { Save, Users, Thermometer, ChevronDown, ChevronUp } from 'lucide-react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { syncOperatorAssignments, toggleStagedOperator, type StagedOperator } from '../../operators/utils/syncOperatorAssignments';
 
@@ -31,14 +31,14 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
 
   // Incubation details state
   const [incubationDetails, setIncubationDetails] = useState({
-    incubationPeriod: record?.incubation_period || 7,
+    incubationPeriod: record?.incubationPeriod || 7,
     temperature: record?.temperature || '',
     humidity: record?.humidity || '',
-    lightIntensity: record?.light_intensity || ''
+    lightIntensity: record?.lightIntensity || ''
   });
 
   const getOperatorDisplayName = (op: any) => {
-    return op.short_name;
+    return op.shortName;
   };
 
   useEffect(() => {
@@ -47,8 +47,8 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
       try {
         const [assignmentsRes, operatorsRes] = await Promise.all([
           indoorApi.operators.getAssignments({ 
-            event_code: record.event_code,
-            activity_type: 'event'
+            eventCode: record.eventCode,
+            activityType: 'event'
           }),
           indoorApi.operators.getActive()
         ]);
@@ -62,10 +62,10 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
         freedAssignmentIds.current = [];
         
         setStagedOperators(assignments.map((a: any) => ({
-          id: a.operator_id ?? a.operatorId,
-          short_name: a.short_name ?? a.shortName,
-          first_name: a.first_name ?? a.firstName,
-          last_name: a.last_name ?? a.lastName,
+          id: a.operatorId ?? a.operatorId,
+          shortName: a.shortName ?? a.shortName,
+          firstName: a.firstName ?? a.firstName,
+          lastName: a.lastName ?? a.lastName,
           assignmentId: a.id
         })));
       } catch (error: any) {
@@ -77,7 +77,7 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
     }
     loadOperators();
     return () => { active = false; };
-  }, [record.event_code, notify]);
+  }, [record.eventCode, notify]);
 
   const toggleOperator = (operatorId: number) => {
     const operator = allOperators.find(op => op.id === operatorId);
@@ -88,9 +88,9 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
       operatorId,
       operator ? {
         id: operator.id,
-        short_name: operator.short_name,
-        first_name: operator.first_name,
-        last_name: operator.last_name,
+        shortName: operator.shortName,
+        firstName: operator.firstName,
+        lastName: operator.lastName,
       } : { id: operatorId },
       freedAssignmentIds.current
     );
@@ -107,14 +107,14 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
 
       await syncOperatorAssignments(initialAssignments, stagedOperators, {
         add: (operatorId) => indoorApi.operators.addAssignment({
-          event_code: record.event_code,
-          operator_id: operatorId,
-          activity_type: 'event',
-          batch_code: record.batch_code,
+          eventCode: record.eventCode,
+          operatorId: operatorId,
+          activityType: 'event',
+          batchCode: record.batchCode,
           stage: record.stage,
         }),
         update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, {
-          operator_id: operatorId,
+          operatorId: operatorId,
           stage: record.stage,
         }),
         remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
@@ -133,7 +133,7 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
   const handleSaveIncubationDetails = async () => {
     setSaving(true);
     try {
-      await indoorApi.phaseViews.updateIncubationDetails(record.event_code, incubationDetails);
+      await indoorApi.phaseViews.updateIncubationDetails(record.eventCode, incubationDetails);
       notify.success('Incubation details updated successfully');
       onSuccess();
       onClose();
@@ -149,7 +149,7 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
       isOpen={true}
       onClose={() => !saving && onClose()}
       title="Edit Incubation Record"
-      subtitle={`Batch: ${record.batch_code} · Stage: ${record.stage}`}
+      subtitle={`Batch: ${record.batchCode} · Stage: ${record.stage}`}
       maxWidth="650px"
     >
       <div className="flex-1 overflow-y-auto">

@@ -29,9 +29,9 @@ export function CleaningRecordForm({ initialData, operators, type, onSubmit, onD
       setForm({
         id: initialData.id,
         date: initialData.date?.split('T')[0] || '',
-        operatorId: initialData.operator_id?.toString() || '',
-        areaCleaned: initialData.area_cleaned || '',
-        instrumentCleaned: initialData.instrument_cleaned || '',
+        operatorId: initialData.operatorId?.toString() || '',
+        areaCleaned: initialData.areaCleaned || '',
+        instrumentCleaned: initialData.instrumentCleaned || '',
         notes: initialData.notes || ''
       });
     }
@@ -57,7 +57,7 @@ export function CleaningRecordForm({ initialData, operators, type, onSubmit, onD
             <SelectTrigger><SelectValue placeholder="Select operator" /></SelectTrigger>
             <SelectContent>
               {operators.map((op: any) => (
-                <SelectItem key={op.id} value={op.id.toString()}>{op.short_name} ({op.first_name} {op.last_name})</SelectItem>
+                <SelectItem key={op.id} value={op.id.toString()}>{op.shortName} ({op.firstName} {op.lastName})</SelectItem>
               ))}
             </SelectContent>
           </Select>

@@ -53,9 +53,9 @@ export function PHTunnelsTab() {
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Tunnel Name' },
           { key: 'capacity', label: 'Capacity' },
-          { key: 'current_occupancy', label: 'Current Occupancy' },
-          { key: 'is_active', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' },
-          { key: 'created_at', label: 'Created', render: (val: string) => new Date(val).toLocaleDateString() }
+          { key: 'currentOccupancy', label: 'Current Occupancy' },
+          { key: 'isActive', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' },
+          { key: 'createdAt', label: 'Created', render: (val: string) => new Date(val).toLocaleDateString() }
         ]}
         onEdit={handleEdit}
         exportFileName="ph_tunnels"

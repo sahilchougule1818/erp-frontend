@@ -3,7 +3,7 @@ import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
 import { Button } from '../../../shared/ui/button';
-import { BankAccount, bankAccountsApi } from '../../services/salesApi';
+import { BankAccount, bankAccountsApi } from '../../api/salesApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface Props {
@@ -16,30 +16,30 @@ interface Props {
 const EditBankAccountDialog: React.FC<Props> = ({ account, open, onOpenChange, onSuccess }) => {
   const notify = useNotify();
   const [formData, setFormData] = useState({
-    account_name: '',
-    account_number: '',
-    bank_name: '',
+    accountName: '',
+    accountNumber: '',
+    bankName: '',
     branch: '',
-    ifsc_code: '',
-    is_active: true
+    ifscCode: '',
+    isActive: true
   });
 
   useEffect(() => {
     if (account) {
       setFormData({
-        account_name: account.account_name || '',
-        account_number: account.account_number || '',
-        bank_name: account.bank_name || '',
+        accountName: account.accountName || '',
+        accountNumber: account.accountNumber || '',
+        bankName: account.bankName || '',
         branch: account.branch || '',
-        ifsc_code: account.ifsc_code || '',
-        is_active: account.is_active !== false
+        ifscCode: account.ifscCode || '',
+        isActive: account.isActive !== false
       });
     }
   }, [account]);
 
   const handleSubmit = async () => {
     if (!account) return;
-    if (!formData.account_name || !formData.account_number || !formData.bank_name) {
+    if (!formData.accountName || !formData.accountNumber || !formData.bankName) {
       notify.error('Please fill all required fields');
       return;
     }
@@ -64,15 +64,15 @@ const EditBankAccountDialog: React.FC<Props> = ({ account, open, onOpenChange, o
             <div className="space-y-2">
               <Label>Display Name *</Label>
               <Input 
-                value={formData.account_name}
-                onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
+                value={formData.accountName}
+                onChange={(e) => setFormData({ ...formData, accountName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
               <Label>Account Number *</Label>
               <Input 
-                value={formData.account_number}
-                onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                value={formData.accountNumber}
+                onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
               />
             </div>
           </div>
@@ -84,8 +84,8 @@ const EditBankAccountDialog: React.FC<Props> = ({ account, open, onOpenChange, o
             <div className="col-span-2 space-y-2">
               <Label>Bank Name *</Label>
               <Input 
-                value={formData.bank_name}
-                onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                value={formData.bankName}
+                onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
               />
             </div>
             <div className="space-y-2">
@@ -98,8 +98,8 @@ const EditBankAccountDialog: React.FC<Props> = ({ account, open, onOpenChange, o
             <div className="space-y-2">
               <Label>IFSC Code</Label>
               <Input 
-                value={formData.ifsc_code}
-                onChange={(e) => setFormData({ ...formData, ifsc_code: e.target.value })}
+                value={formData.ifscCode}
+                onChange={(e) => setFormData({ ...formData, ifscCode: e.target.value })}
               />
             </div>
           </div>
@@ -110,12 +110,12 @@ const EditBankAccountDialog: React.FC<Props> = ({ account, open, onOpenChange, o
           <div className="flex items-center space-x-2">
             <input
               type="checkbox"
-              id="is_active"
-              checked={formData.is_active}
-              onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+              id="isActive"
+              checked={formData.isActive}
+              onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="rounded border-gray-300 text-green-600 focus:ring-green-500"
             />
-            <Label htmlFor="is_active" className="cursor-pointer">Account is operational</Label>
+            <Label htmlFor="isActive" className="cursor-pointer">Account is operational</Label>
           </div>
         </div>
       </div>

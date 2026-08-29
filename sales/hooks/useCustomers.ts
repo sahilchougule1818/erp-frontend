@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { customersApi } from '../services/salesApi';
+import { customersApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
-import { normalizeCustomer } from '../utils/normalize';
 import type { Customer } from '../types';
 
 export const useCustomers = (options?: { pageSize?: number }) => {
@@ -21,8 +20,8 @@ export const useCustomers = (options?: { pageSize?: number }) => {
     try {
       setLoading(true);
       const response = await customersApi.getAll({ page, size: pageSize });
-      const { data, pagination: pageInfo } = parseSpringPage<Record<string, unknown>>(response);
-      setCustomers(data.map(normalizeCustomer));
+      const { data, pagination: pageInfo } = parseSpringPage<Customer>(response);
+      setCustomers(data);
       setPagination({
         total: pageInfo.total,
         page: pageInfo.page,

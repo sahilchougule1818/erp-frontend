@@ -15,11 +15,11 @@ export function SHUnitsTab() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedUnit, setSelectedUnit] = useState<SHUnit | null>(null);
   const [deleteUnitId, setDeleteUnitId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ name: '', capacity: 0, is_active: true });
+  const [formData, setFormData] = useState({ name: '', capacity: 0, isActive: true });
 
   const handleEdit = (unit: SHUnit) => {
     setSelectedUnit(unit);
-    setFormData({ name: unit.name, capacity: unit.capacity || 0, is_active: unit.is_active });
+    setFormData({ name: unit.name, capacity: unit.capacity || 0, isActive: unit.isActive });
     setShowModal(true);
   };
 
@@ -43,7 +43,7 @@ export function SHUnitsTab() {
 
     try {
       if (selectedUnit) {
-        await updateUnit(selectedUnit.id, { name: formData.name, capacity: formData.capacity, is_active: formData.is_active });
+        await updateUnit(selectedUnit.id, { name: formData.name, capacity: formData.capacity, isActive: formData.isActive });
       } else {
         await createUnit({ name: formData.name, capacity: formData.capacity });
       }
@@ -56,7 +56,7 @@ export function SHUnitsTab() {
   const closeModal = () => {
     setShowModal(false);
     setSelectedUnit(null);
-    setFormData({ name: '', capacity: 0, is_active: true });
+    setFormData({ name: '', capacity: 0, isActive: true });
   };
 
   return (
@@ -68,8 +68,8 @@ export function SHUnitsTab() {
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Unit Name' },
           { key: 'capacity', label: 'Capacity' },
-          { key: 'is_active', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' },
-          { key: 'created_at', label: 'Created', render: (val: string) => new Date(val).toLocaleDateString() }
+          { key: 'isActive', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' },
+          { key: 'createdAt', label: 'Created', render: (val: string) => new Date(val).toLocaleDateString() }
         ]}
         onEdit={handleEdit}
         onDelete={(unit: SHUnit) => { setDeleteUnitId(unit.id); setShowDeleteDialog(true); }}
@@ -131,8 +131,8 @@ export function SHUnitsTab() {
                 <div className="space-y-2">
                   <Label>Status</Label>
                   <Select
-                    value={formData.is_active ? 'active' : 'inactive'}
-                    onValueChange={(value) => setFormData({ ...formData, is_active: value === 'active' })}
+                    value={formData.isActive ? 'active' : 'inactive'}
+                    onValueChange={(value) => setFormData({ ...formData, isActive: value === 'active' })}
                   >
                     <SelectTrigger>
                       <SelectValue />

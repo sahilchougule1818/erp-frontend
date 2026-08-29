@@ -8,7 +8,7 @@ import { Button } from '../../../shared/ui/button';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 
 interface ReportSampleFormProps {
-  batch: { batch_code: string };
+  batch: { batchCode: string };
   onClose: () => void;
   onSubmit: (data: { resultDate: string; status: string; seedCertificateNumber: string; notes: string }) => void;
 }
@@ -40,7 +40,7 @@ export const ReportSampleForm: React.FC<ReportSampleFormProps> = ({ batch, onClo
             <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Batch Information</p>
             <div className="bg-gray-50 p-3 rounded-md">
               <p className="text-base text-gray-600">
-                Batch Code: <span className="font-semibold text-gray-900">{batch.batch_code}</span>
+                Batch Code: <span className="font-semibold text-gray-900">{batch.batchCode}</span>
               </p>
             </div>
           </div>

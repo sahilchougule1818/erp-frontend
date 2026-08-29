@@ -4,7 +4,7 @@ import { Button } from '../shared/ui/button';
 import { Input } from '../shared/ui/input';
 import { Label } from '../shared/ui/label';
 import { Shield, AlertCircle, CheckCircle } from 'lucide-react';
-import apiClient from '../shared/services/apiClient';
+import apiClient from '../shared/api/apiClient';
 
 export function TwoFactorSetup({ onClose }: { onClose: () => void }) {
   const [step, setStep] = useState<'enable' | 'verify'>('enable');

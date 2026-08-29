@@ -5,7 +5,7 @@ import { Label } from '../../../shared/ui/label';
 import { Separator } from '../../../shared/ui/separator';
 import { Badge } from '../../../shared/ui/badge';
 import { X, Save, ChevronDown, ChevronUp, Users } from 'lucide-react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { syncOperatorAssignments, toggleStagedOperator, type StagedOperator } from '../utils/syncOperatorAssignments';
 
@@ -14,8 +14,8 @@ interface OperatorEditModalProps {
   eventCode?: string;
   batchCode?: string;
   mediaCode?: string;
-  cleaning_record_id?: number;
-  cleaning_record_kind?: 'standard' | 'deep';
+  cleaningRecordId?: number;
+  cleaningRecordKind?: 'standard' | 'deep';
   targetLabel?: string;
   activityType?: string;
   stage?: string;
@@ -27,8 +27,8 @@ export function UnifiedOperatorEditModal({
   eventCode,
   batchCode,
   mediaCode,
-  cleaning_record_id,
-  cleaning_record_kind = 'standard',
+  cleaningRecordId,
+  cleaningRecordKind = 'standard',
   targetLabel,
   activityType = 'event',
   stage,
@@ -45,26 +45,26 @@ export function UnifiedOperatorEditModal({
   const notify = useNotify();
 
   const getOperatorDisplayName = (op: any) => {
-    const full = `${op.first_name || ''} ${op.last_name || ''}`.trim();
-    return full || op.short_name;
+    const full = `${op.firstName || ''} ${op.lastName || ''}`.trim();
+    return full || op.shortName;
   };
 
   useEffect(() => {
     let active = true;
     async function loadData() {
       try {
-        if (!eventCode && !mediaCode && cleaning_record_id == null) {
+        if (!eventCode && !mediaCode && cleaningRecordId == null) {
           setLoading(false);
           return;
         }
 
         const [assignmentsRes, operatorsRes] = await Promise.all([
           indoorApi.operators.getAssignments({
-            event_code: eventCode,
-            media_code: mediaCode,
-            cleaning_record_id,
-            cleaning_record_kind,
-            activity_type: cleaning_record_id != null ? 'cleaning' : activityType
+            eventCode: eventCode,
+            mediaCode: mediaCode,
+            cleaningRecordId,
+            cleaningRecordKind,
+            activityType: cleaningRecordId != null ? 'cleaning' : activityType
           }),
           indoorApi.operators.getActive()
         ]);
@@ -78,10 +78,10 @@ export function UnifiedOperatorEditModal({
         freedAssignmentIds.current = [];
 
         setStagedOperators(assignments.map((a: any) => ({
-          id: a.operator_id ?? a.operatorId,
-          short_name: a.short_name ?? a.shortName,
-          first_name: a.first_name ?? a.firstName,
-          last_name: a.last_name ?? a.lastName,
+          id: a.operatorId ?? a.operatorId,
+          shortName: a.shortName ?? a.shortName,
+          firstName: a.firstName ?? a.firstName,
+          lastName: a.lastName ?? a.lastName,
           assignmentId: a.id
         })));
       } catch (error: any) {
@@ -93,7 +93,7 @@ export function UnifiedOperatorEditModal({
     }
     loadData();
     return () => { active = false; };
-  }, [eventCode, mediaCode, cleaning_record_id, cleaning_record_kind, activityType, notify]);
+  }, [eventCode, mediaCode, cleaningRecordId, cleaningRecordKind, activityType, notify]);
 
   const toggleOperator = (operatorId: number) => {
     const operator = allOperators.find(op => op.id === operatorId);
@@ -104,9 +104,9 @@ export function UnifiedOperatorEditModal({
       operatorId,
       operator ? {
         id: operator.id,
-        short_name: operator.short_name,
-        first_name: operator.first_name,
-        last_name: operator.last_name,
+        shortName: operator.shortName,
+        firstName: operator.firstName,
+        lastName: operator.lastName,
         role: '',
       } : { id: operatorId },
       freedAssignmentIds.current
@@ -124,16 +124,16 @@ export function UnifiedOperatorEditModal({
 
       await syncOperatorAssignments(initialAssignments, stagedOperators, {
         add: (operatorId) => indoorApi.operators.addAssignment({
-          event_code: eventCode,
-          media_code: mediaCode,
-          cleaning_record_id,
-          cleaning_record_kind,
-          operator_id: operatorId,
-          activity_type: cleaning_record_id != null ? 'cleaning' : activityType,
-          batch_code: batchCode,
+          eventCode: eventCode,
+          mediaCode: mediaCode,
+          cleaningRecordId,
+          cleaningRecordKind,
+          operatorId: operatorId,
+          activityType: cleaningRecordId != null ? 'cleaning' : activityType,
+          batchCode: batchCode,
           stage: stage,
         }),
-        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operator_id: operatorId }),
+        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operatorId: operatorId }),
         remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
       });
 

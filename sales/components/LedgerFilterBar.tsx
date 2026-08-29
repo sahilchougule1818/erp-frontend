@@ -6,15 +6,15 @@ import { RotateCcw } from 'lucide-react';
 
 interface AccountOption {
   id: number;
-  account_name: string;
+  accountName: string;
 }
 
 interface LedgerFilterBarProps {
   filters: {
-    bank_account_id: string;
+    bankAccountId: string;
     type: string;
-    from_date: string;
-    to_date: string;
+    fromDate: string;
+    toDate: string;
   };
   accounts: AccountOption[];
   onChange: (key: string, value: string) => void;
@@ -24,14 +24,14 @@ interface LedgerFilterBarProps {
 export const LedgerFilterBar: React.FC<LedgerFilterBarProps> = ({ filters, accounts = [], onChange, onReset }) => {
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <Select value={filters.bank_account_id} onValueChange={(v) => onChange('bank_account_id', v)}>
+      <Select value={filters.bankAccountId} onValueChange={(v) => onChange('bankAccountId', v)}>
         <SelectTrigger className="h-9 w-44 text-base font-semibold">
           <SelectValue placeholder="All Accounts" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all" className="text-base font-semibold">All Accounts</SelectItem>
           {accounts.map(a => (
-            <SelectItem key={a.id} value={String(a.id)} className="text-base">{a.account_name}</SelectItem>
+            <SelectItem key={a.id} value={String(a.id)} className="text-base">{a.accountName}</SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -50,14 +50,14 @@ export const LedgerFilterBar: React.FC<LedgerFilterBarProps> = ({ filters, accou
       <Input
         type="date"
         className="h-9 w-36 text-base font-semibold"
-        value={filters.from_date}
-        onChange={(e) => onChange('from_date', e.target.value)}
+        value={filters.fromDate}
+        onChange={(e) => onChange('fromDate', e.target.value)}
       />
       <Input
         type="date"
         className="h-9 w-36 text-base font-semibold"
-        value={filters.to_date}
-        onChange={(e) => onChange('to_date', e.target.value)}
+        value={filters.toDate}
+        onChange={(e) => onChange('toDate', e.target.value)}
       />
 
       <Button variant="outline" size="sm" className="h-9 px-3 text-base" onClick={onReset}>

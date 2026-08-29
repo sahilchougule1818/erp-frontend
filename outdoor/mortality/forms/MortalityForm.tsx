@@ -4,11 +4,11 @@ import { Input } from '../../../shared/ui/input';
 import { Button } from '../../../shared/ui/button';
 import { CardContent } from '../../../shared/ui/card';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface MortalityFormProps {
-  batch: { batch_code: string; current_phase: string; current_tunnel: string; available_plants: number };
+  batch: { batchCode: string; currentPhase: string; currentTunnel: string; availablePlants: number };
   onClose: () => void;
   onSuccess: () => void;
 }
@@ -21,30 +21,30 @@ export function MortalityForm({ batch, onClose, onSuccess }: MortalityFormProps)
   const [loading, setLoading]                     = useState(true);
   const notify = useNotify();
 
-  // available_plants from batch is already reduced by current mortality.
-  // So max we can SET = available_plants + currentMortality (adding back what's already counted).
-  const maxAllowed = batch.available_plants + currentMortality;
+  // availablePlants from batch is already reduced by current mortality.
+  // So max we can SET = availablePlants + currentMortality (adding back what's already counted).
+  const maxAllowed = batch.availablePlants + currentMortality;
 
   // Pre-fill current tunnel stay mortality
   useEffect(() => {
-    outdoorApi.mortality.getCurrentStay(batch.batch_code)
+    outdoorApi.mortality.getCurrentStay(batch.batchCode)
       .then((res: any) => {
         const data = res.data ?? res;
-        const fetched = Number(data.mortality_count ?? 0);
+        const fetched = Number(data.mortalityCount ?? 0);
         setCurrentMortality(fetched);
         setCount(fetched);
-        setReason(data.mortality_reason ?? '');
+        setReason(data.mortalityReason ?? '');
       })
       .catch(() => { /* no stay or error — defaults stay at 0 */ })
       .finally(() => setLoading(false));
-  }, [batch.batch_code]);
+  }, [batch.batchCode]);
 
   const handleSubmit = async () => {
     if (count < 0) { notify.error('Mortality count must be 0 or greater'); return; }
     if (count > maxAllowed) { notify.error(`Cannot exceed ${maxAllowed} plants`); return; }
     setSaving(true);
     try {
-      await outdoorApi.mortality.recordMortality(batch.batch_code, count, reason || undefined, currentMortality);
+      await outdoorApi.mortality.recordMortality(batch.batchCode, count, reason || undefined, currentMortality);
       notify.success('Mortality updated');
       onSuccess();
       onClose();
@@ -59,9 +59,9 @@ export function MortalityForm({ batch, onClose, onSuccess }: MortalityFormProps)
     <ModalLayout title="Record Mortality">
       <CardContent className="space-y-4 py-4">
         <div className="bg-gray-50 p-3 rounded-md space-y-1 text-base text-gray-600">
-          <p>Batch: <span className="font-semibold text-gray-900">{batch.batch_code}</span></p>
-          <p>Tunnel: <span className="font-semibold text-gray-900">{batch.current_tunnel}</span></p>
-          <p>Available: <span className="font-semibold text-green-700">{batch.available_plants}</span></p>
+          <p>Batch: <span className="font-semibold text-gray-900">{batch.batchCode}</span></p>
+          <p>Tunnel: <span className="font-semibold text-gray-900">{batch.currentTunnel}</span></p>
+          <p>Available: <span className="font-semibold text-green-700">{batch.availablePlants}</span></p>
           {!loading && currentMortality > 0 && (
             <p>Current Mortality: <span className="font-semibold text-red-600">{currentMortality}</span></p>
           )}

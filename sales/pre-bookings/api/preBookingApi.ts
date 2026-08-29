@@ -1,47 +1,41 @@
-import apiClient from '../../../shared/services/apiClient';
+import apiClient from '../../../shared/api/apiClient';
 import { parseSpringPage } from '../../../shared/utils/springPage';
-import { normalizePreBooking } from '../../utils/normalize';
 import { PreBooking, CreatePreBookingRequest, UpdatePreBookingRequest, DeliverPreBookingRequest, UndeliverPreBookingRequest, CancelPreBookingRequest } from '../types/preBooking.types';
 
 const BASE_URL = '/sales/pre-bookings';
 
 const toList = (response: unknown) => {
   if (Array.isArray(response)) return response;
-  return parseSpringPage<Record<string, unknown>>(response).data;
+  return parseSpringPage<PreBooking>(response).data;
 };
 
 export const preBookingApi = {
   getAll: async (limit = 200, offset = 0): Promise<PreBooking[]> => {
     const res = await apiClient.get(`${BASE_URL}?limit=${limit}&offset=${offset}`);
-    return toList(res).map((item) => normalizePreBooking(item));
+    return toList(res);
   },
 
   getById: async (orderId: string): Promise<PreBooking> => {
-    const res = await apiClient.get(`${BASE_URL}/${orderId}`);
-    return normalizePreBooking(res as Record<string, unknown>);
+    return await apiClient.get(`${BASE_URL}/${orderId}`);
   },
 
-  create: async (bookingData: CreatePreBookingRequest): Promise<{ order_id: string; message: string }> => {
+  create: async (bookingData: CreatePreBookingRequest): Promise<{ orderId: string; message: string }> => {
     return await apiClient.post(BASE_URL, bookingData);
   },
 
   update: async (orderId: string, updateData: UpdatePreBookingRequest): Promise<PreBooking> => {
-    const res = await apiClient.put(`${BASE_URL}/${orderId}`, updateData);
-    return normalizePreBooking(res as Record<string, unknown>);
+    return await apiClient.put(`${BASE_URL}/${orderId}`, updateData);
   },
 
   deliver: async (orderId: string, deliveryData: DeliverPreBookingRequest): Promise<PreBooking> => {
-    const res = await apiClient.post(`${BASE_URL}/${orderId}/deliver`, deliveryData);
-    return normalizePreBooking(res as Record<string, unknown>);
+    return await apiClient.post(`${BASE_URL}/${orderId}/deliver`, deliveryData);
   },
 
   undeliver: async (orderId: string, data?: UndeliverPreBookingRequest): Promise<PreBooking> => {
-    const res = await apiClient.post(`${BASE_URL}/${orderId}/undeliver`, data ?? {});
-    return normalizePreBooking(res as Record<string, unknown>);
+    return await apiClient.post(`${BASE_URL}/${orderId}/undeliver`, data ?? {});
   },
 
   cancel: async (orderId: string, cancelData: CancelPreBookingRequest): Promise<PreBooking> => {
-    const res = await apiClient.post(`${BASE_URL}/${orderId}/cancel`, cancelData);
-    return normalizePreBooking(res as Record<string, unknown>);
+    return await apiClient.post(`${BASE_URL}/${orderId}/cancel`, cancelData);
   },
 };

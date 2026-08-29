@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/ui/card';
 import { Package, FlaskConical, Boxes } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useIndoorDashboard } from '../hooks/useIndoorDashboard';
 
 export function IndoorDashboard() {
@@ -82,10 +81,10 @@ export function IndoorDashboard() {
                     ) : (
                       mediaBatches.map((media: any, idx: number) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.media_code}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.media_type || '—'}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.media_total || '—'}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.completed_date ? new Date(media.completed_date).toLocaleDateString() : '—'}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.mediaCode}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.mediaType || '—'}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.mediaTotal || '—'}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{media.completedDate ? new Date(media.completedDate).toLocaleDateString() : '—'}</td>
                         </tr>
                       ))
                     )}
@@ -124,12 +123,12 @@ export function IndoorDashboard() {
                     ) : (
                       activeBatches.map((batch: any, idx: number) => (
                         <tr key={idx} className="border-b hover:bg-gray-50">
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.batch_code}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.plant_name || '—'}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.batchCode}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.plantName || '—'}</td>
                           <td className="px-4 py-3 text-base whitespace-nowrap">{batch.stage || '—'}</td>
                           <td className="px-4 py-3 text-base whitespace-nowrap">{batch.phase || '—'}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.lab_number || '—'}</td>
-                          <td className="px-4 py-3 text-base whitespace-nowrap">{(batch.available_bottles || 0).toLocaleString()}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{batch.labNumber || '—'}</td>
+                          <td className="px-4 py-3 text-base whitespace-nowrap">{(batch.availableBottles || 0).toLocaleString()}</td>
                         </tr>
                       ))
                     )}

@@ -14,7 +14,7 @@ interface IndoorBatch {
 }
 
 interface Tunnel {
-  tunnel_name?: string;
+  tunnelName?: string;
   name?: string;
   tunnel?: string;
   capacity?: number;
@@ -76,7 +76,7 @@ export function ImportForm({ indoorBatch, tunnels, workers, onSubmit, onClose }:
           <select value={newTunnel} onChange={(e) => setNewTunnel(e.target.value)} className="w-full border rounded px-3 py-2">
             <option value="">Select tunnel</option>
             {tunnels.map(t => {
-              const safeName = t.name || t.tunnel || t.tunnel_name || '';
+              const safeName = t.name || t.tunnel || t.tunnelName || '';
               const space = t.availableSpace ?? t.capacity ?? 0;
               return (
                 <option key={safeName} value={safeName}>

@@ -6,7 +6,8 @@ import { Label } from '../../../shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../shared/ui/dialog';
 import { DataTable } from '../../../shared/components/DataTable';
-import { useRefunds, useRefundDetail, useBankAccounts } from '../../hooks/useSalesApi';
+import { useRefunds, useRefundDetail } from '../../hooks/useRefunds';
+import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { PAYMENT_METHODS } from '../../constants/EventTypes';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
@@ -37,22 +38,22 @@ const RefundDisbursementSection: React.FC = () => {
 
   const [termForm, setTermForm] = useState({
     amount: '',
-    payment_method: 'Cash',
-    payment_date: new Date().toISOString().split('T')[0],
-    bank_account_id: '',
-    transaction_number: '',
+    paymentMethod: 'Cash',
+    paymentDate: new Date().toISOString().split('T')[0],
+    bankAccountId: '',
+    transactionNumber: '',
     notes: ''
   });
 
   const handleOpenDetail = (record: any) => {
-    setSelectedRefundId(record.refund_id);
+    setSelectedRefundId(record.refundId);
     setIsDetailOpen(true);
     setTermForm({
       amount: '',
-      payment_method: 'Cash',
-      payment_date: new Date().toISOString().split('T')[0],
-      bank_account_id: accounts[0]?.id?.toString() || '',
-      transaction_number: '',
+      paymentMethod: 'Cash',
+      paymentDate: new Date().toISOString().split('T')[0],
+      bankAccountId: accounts[0]?.id?.toString() || '',
+      transactionNumber: '',
       notes: ''
     });
   };
@@ -62,16 +63,16 @@ const RefundDisbursementSection: React.FC = () => {
     try {
       await createTerm({
         amount: parseFloat(termForm.amount),
-        payment_date: termForm.payment_date,
-        payment_method: termForm.payment_method,
-        bank_account_id: termForm.payment_method === 'Cash' ? undefined : parseInt(termForm.bank_account_id) || undefined,
-        payment_reference: termForm.transaction_number || undefined,
+        paymentDate: termForm.paymentDate,
+        paymentMethod: termForm.paymentMethod,
+        bankAccountId: termForm.paymentMethod === 'Cash' ? undefined : parseInt(termForm.bankAccountId) || undefined,
+        paymentReference: termForm.transactionNumber || undefined,
         notes: termForm.notes || undefined
       });
       notify.success('Refund term recorded');
       await refetchDetail();
       await refetch();
-      setTermForm(f => ({ ...f, amount: '', transaction_number: '', notes: '' }));
+      setTermForm(f => ({ ...f, amount: '', transactionNumber: '', notes: '' }));
     } catch (err: any) {
       notify.error(err.message || 'Failed to record refund term');
     }
@@ -90,26 +91,26 @@ const RefundDisbursementSection: React.FC = () => {
   };
 
   const columns = [
-    { key: 'refund_id', label: 'Refund ID' },
-    { key: 'order_id', label: 'Booking ID' },
-    { key: 'customer_name', label: 'Customer' },
+    { key: 'refundId', label: 'Refund ID' },
+    { key: 'orderId', label: 'Booking ID' },
+    { key: 'customerName', label: 'Customer' },
     {
-      key: 'phone_number',
+      key: 'phoneNumber',
       label: 'Phone',
       render: (val: string) => val || '—'
     },
     {
-      key: 'refund_amount',
+      key: 'refundAmount',
       label: 'Refund Amount',
       render: (val: number) => `₹${Number(val).toLocaleString()}`
     },
     {
-      key: 'amount_paid',
+      key: 'amountPaid',
       label: 'Disbursed',
       render: (val: number) => `₹${Number(val).toLocaleString()}`
     },
     {
-      key: 'amount_remaining',
+      key: 'amountRemaining',
       label: 'Remaining',
       render: (val: number) => `₹${Number(val || 0).toLocaleString()}`
     },
@@ -126,12 +127,12 @@ const RefundDisbursementSection: React.FC = () => {
       }
     },
     {
-      key: 'term_count',
+      key: 'termCount',
       label: 'Terms',
       render: (val: number) => val || '0'
     },
     {
-      key: 'created_at',
+      key: 'createdAt',
       label: 'Created',
       render: (val: string) => val ? format(new Date(val), 'dd MMM yyyy') : '—'
     }
@@ -154,9 +155,9 @@ const RefundDisbursementSection: React.FC = () => {
             records={refunds}
             onEdit={handleOpenDetail}
             filterConfig={{
-              filter1Key: 'customer_name',
+              filter1Key: 'customerName',
               filter1Label: 'Search customer...',
-              filter2Key: 'refund_id',
+              filter2Key: 'refundId',
               filter2Label: 'Refund ID'
             }}
             exportFileName="refund_disbursements"
@@ -183,8 +184,8 @@ const RefundDisbursementSection: React.FC = () => {
               {refund && (
                 <div className="text-right">
                   <p className="text-base text-gray-500">Remaining</p>
-                  <p className={`text-xl font-bold ${Number(refund.amount_remaining || 0) > 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                    ₹{Number(refund.amount_remaining || 0).toLocaleString()}
+                  <p className={`text-xl font-bold ${Number(refund.amountRemaining || 0) > 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                    ₹{Number(refund.amountRemaining || 0).toLocaleString()}
                   </p>
                 </div>
               )}
@@ -192,12 +193,12 @@ const RefundDisbursementSection: React.FC = () => {
             {refund && (
               <div className="flex items-center gap-2 pt-1">
                 <span className="text-base bg-gray-100 text-gray-600 px-2 py-0.5 rounded font-medium">
-                  {refund.refund_id}
+                  {refund.refundId}
                 </span>
                 <span className="text-base bg-red-50 text-red-600 px-2 py-0.5 rounded font-medium">
-                  Booking {refund.order_id}
+                  Booking {refund.orderId}
                 </span>
-                <span className="text-base text-gray-500">{refund.customer_name}</span>
+                <span className="text-base text-gray-500">{refund.customerName}</span>
               </div>
             )}
           </DialogHeader>
@@ -213,21 +214,21 @@ const RefundDisbursementSection: React.FC = () => {
               <div className="bg-red-50 border border-red-100 rounded-lg p-3 grid grid-cols-3 gap-3 text-center">
                 <div>
                   <p className="text-[10px] text-red-400 uppercase font-bold">Total Refund</p>
-                  <p className="text-base font-bold text-red-700">₹{Number(refund.refund_amount || 0).toLocaleString()}</p>
+                  <p className="text-base font-bold text-red-700">₹{Number(refund.refundAmount || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-green-400 uppercase font-bold">Disbursed</p>
-                  <p className="text-base font-bold text-green-700">₹{Number(refund.amount_paid || 0).toLocaleString()}</p>
+                  <p className="text-base font-bold text-green-700">₹{Number(refund.amountPaid || 0).toLocaleString()}</p>
                 </div>
                 <div>
                   <p className="text-[10px] text-amber-400 uppercase font-bold">Remaining</p>
-                  <p className="text-base font-bold text-amber-700">₹{Number(refund.amount_remaining || 0).toLocaleString()}</p>
+                  <p className="text-base font-bold text-amber-700">₹{Number(refund.amountRemaining || 0).toLocaleString()}</p>
                 </div>
               </div>
 
-              {refund.refund_reason && (
+              {refund.refundReason && (
                 <div className="text-base text-gray-500 bg-gray-50 rounded-lg p-3">
-                  <span className="font-semibold">Reason:</span> {refund.refund_reason}
+                  <span className="font-semibold">Reason:</span> {refund.refundReason}
                 </div>
               )}
 
@@ -239,7 +240,7 @@ const RefundDisbursementSection: React.FC = () => {
                   </h3>
                   {refund.payments.length > 0 && (
                     <span className="text-base text-gray-400">
-                      {refund.payments.length} term{refund.payments.length > 1 ? 's' : ''} · ₹{Number(refund.amount_paid || 0).toLocaleString()} disbursed
+                      {refund.payments.length} term{refund.payments.length > 1 ? 's' : ''} · ₹{Number(refund.amountPaid || 0).toLocaleString()} disbursed
                     </span>
                   )}
                 </div>
@@ -254,19 +255,19 @@ const RefundDisbursementSection: React.FC = () => {
                       <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 flex items-center justify-center bg-white rounded-md border border-gray-200 text-gray-500 shrink-0 text-base font-bold">
-                            #{payment.refund_term_no}
+                            #{payment.refundTermNo}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="font-semibold text-base text-gray-800">₹{Number(payment.debit_amount).toLocaleString()}</span>
-                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 font-medium">{payment.payment_method}</Badge>
+                              <span className="font-semibold text-base text-gray-800">₹{Number(payment.debitAmount).toLocaleString()}</span>
+                              <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 font-medium">{payment.paymentMethod}</Badge>
                               {idx === 0 && (
                                 <span className="text-[10px] font-semibold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">Latest</span>
                               )}
                             </div>
                             <p className="text-base text-gray-400 mt-0.5">
-                              {format(new Date(payment.entry_date), 'do MMM yyyy')}
-                              {payment.transaction_number && <span className="ml-2">TXN: {payment.transaction_number}</span>}
+                              {format(new Date(payment.entryDate), 'do MMM yyyy')}
+                              {payment.transactionNumber && <span className="ml-2">TXN: {payment.transactionNumber}</span>}
                             </p>
                           </div>
                         </div>
@@ -275,7 +276,7 @@ const RefundDisbursementSection: React.FC = () => {
                             variant="outline"
                             size="sm"
                             className="h-7 px-2.5 text-red-600 border-red-200 hover:bg-red-50 text-base font-medium"
-                            onClick={() => handleDeleteTerm(payment.refund_term_no)}
+                            onClick={() => handleDeleteTerm(payment.refundTermNo)}
                           >
                             <Trash2 className="h-3 w-3 mr-1" /> Undo
                           </Button>
@@ -287,7 +288,7 @@ const RefundDisbursementSection: React.FC = () => {
               </div>
 
               {/* Record New Disbursement or Completed Banner */}
-              {Number(refund.amount_remaining || 0) <= 0 ? (
+              {Number(refund.amountRemaining || 0) <= 0 ? (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-5 text-center space-y-2">
                   <CheckCircle2 className="h-8 w-8 text-green-500 mx-auto" />
                   <p className="font-semibold text-base text-green-800">Refund Complete</p>
@@ -315,17 +316,17 @@ const RefundDisbursementSection: React.FC = () => {
                       <Label>Date</Label>
                       <Input
                         type="date"
-                        value={termForm.payment_date}
-                        onChange={(e) => setTermForm({ ...termForm, payment_date: e.target.value })}
+                        value={termForm.paymentDate}
+                        onChange={(e) => setTermForm({ ...termForm, paymentDate: e.target.value })}
                       />
                     </div>
 
                     <div className="space-y-2">
                       <Label>Payment Method</Label>
                       <Select
-                        value={termForm.payment_method}
+                        value={termForm.paymentMethod}
                         onValueChange={(val) =>
-                          setTermForm({ ...termForm, payment_method: val, bank_account_id: val === 'Cash' ? '' : termForm.bank_account_id })
+                          setTermForm({ ...termForm, paymentMethod: val, bankAccountId: val === 'Cash' ? '' : termForm.bankAccountId })
                         }
                       >
                         <SelectTrigger><SelectValue /></SelectTrigger>
@@ -335,18 +336,18 @@ const RefundDisbursementSection: React.FC = () => {
                       </Select>
                     </div>
 
-                    {termForm.payment_method !== 'Cash' && (
+                    {termForm.paymentMethod !== 'Cash' && (
                       <>
                         <div className="space-y-2">
                           <Label>Bank Account</Label>
                           <Select
-                            value={termForm.bank_account_id}
-                            onValueChange={(val) => setTermForm({ ...termForm, bank_account_id: val })}
+                            value={termForm.bankAccountId}
+                            onValueChange={(val) => setTermForm({ ...termForm, bankAccountId: val })}
                           >
                             <SelectTrigger><SelectValue placeholder="Select account" /></SelectTrigger>
                             <SelectContent>
                               {accounts.map(a => (
-                                <SelectItem key={a.id} value={String(a.id)}>{a.bank_name} · {a.account_name}</SelectItem>
+                                <SelectItem key={a.id} value={String(a.id)}>{a.bankName} · {a.accountName}</SelectItem>
                               ))}
                             </SelectContent>
                           </Select>
@@ -355,8 +356,8 @@ const RefundDisbursementSection: React.FC = () => {
                           <Label>TXN / Reference</Label>
                           <Input
                             placeholder="Ref ID"
-                            value={termForm.transaction_number}
-                            onChange={(e) => setTermForm({ ...termForm, transaction_number: e.target.value })}
+                            value={termForm.transactionNumber}
+                            onChange={(e) => setTermForm({ ...termForm, transactionNumber: e.target.value })}
                           />
                         </div>
                       </>

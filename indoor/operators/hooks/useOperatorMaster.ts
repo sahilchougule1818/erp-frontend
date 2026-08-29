@@ -1,13 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import { indoorApi } from '../../services/indoorApi';
-import apiClient from '../../../shared/services/apiClient';
+import { indoorApi } from '../../api/indoorApi';
+import apiClient from '../../../shared/api/apiClient';
 import { applySpringPage, toSpringPageParams } from '../../../shared/utils/springPage';
 
 export const useOperatorMaster = () => {
   const [operators, setOperators] = useState<any[]>([]);
-  const [batches, setBatches] = useState<Array<{batch_code: string}>>([]);
-  const [mediaBatches, setMediaBatches] = useState<Array<{media_code: string, prepared_date: string, status: string}>>([]);
-  const [cleaningTasks, setCleaningTasks] = useState<Array<{reference_code: string}>>([]);
+  const [batches, setBatches] = useState<Array<{batchCode: string}>>([]);
+  const [mediaBatches, setMediaBatches] = useState<Array<{mediaCode: string, preparedDate: string, status: string}>>([]);
+  const [cleaningTasks, setCleaningTasks] = useState<Array<{referenceCode: string}>>([]);
   const [selectedBatch, setSelectedBatch] = useState('');
   const [selectedMediaBatch, setSelectedMediaBatch] = useState('');
   const [selectedCleaningTask, setSelectedCleaningTask] = useState('');
@@ -72,7 +72,7 @@ export const useOperatorMaster = () => {
     }
   }, []);
 
-  const loadActivityLogs = useCallback(async (params: { operatorId?: number, referenceCode?: string, category?: string, page?: number, lab_number?: number } = {}) => {
+  const loadActivityLogs = useCallback(async (params: { operatorId?: number, referenceCode?: string, category?: string, page?: number, labNumber?: number } = {}) => {
     setLoading(true);
     try {
       const uiPage = params.page ?? activityLogsPage;
@@ -81,7 +81,7 @@ export const useOperatorMaster = () => {
         ...(params.operatorId != null ? { operatorId: params.operatorId } : {}),
         ...(params.referenceCode ? { referenceCode: params.referenceCode } : {}),
         ...(params.category ? { category: params.category } : {}),
-        lab_number: params.lab_number !== undefined ? params.lab_number : currentLabFilter,
+        labNumber: params.labNumber !== undefined ? params.labNumber : currentLabFilter,
       };
 
       const data = await apiClient.get('/indoor/operator-log/activity-logs', { params: requestParams });

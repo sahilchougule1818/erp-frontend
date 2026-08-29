@@ -4,7 +4,7 @@ import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
 import { Textarea } from '../../../shared/ui/textarea';
 import { Skull, Save, X } from 'lucide-react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { Batch } from '../../types';
 import { ModalLayout } from '../../../shared/components/ModalLayout';

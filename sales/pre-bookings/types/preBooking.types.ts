@@ -1,94 +1,94 @@
 export interface PreBooking {
-  order_id: string;
-  customer_id: string;
-  customer_name: string;
-  phone_number: string;
+  orderId: string;
+  customerId: string;
+  customerName: string;
+  phoneNumber: string;
   address: string;
-  
-  base_amount: number;
-  delivery_charges: number;
-  cgst_percent: number;
-  sgst_percent: number;
-  total_amount: number;
-  remaining_amount: number;
-  
-  paid_amount: number;
-  amount_paid_at_booking: number;
-  payment_status: 'Pending' | 'Partially Paid' | 'Paid';
-  
-  booking_date: string;
-  expected_delivery_date?: string;
-  delivered_at?: string;
-  
-  delivery_status: 'Pending' | 'Partially Delivered' | 'Delivered' | 'Cancelled';
-  cancelled_at?: string;
-  cancellation_reason?: string;
-  
+
+  baseAmount: number;
+  deliveryCharges: number;
+  cgstPercent: number;
+  sgstPercent: number;
+  totalAmount: number;
+  remainingAmount: number;
+
+  paidAmount: number;
+  amountPaidAtBooking: number;
+  paymentStatus: 'Pending' | 'Partially Paid' | 'Paid';
+
+  bookingDate: string;
+  expectedDeliveryDate?: string;
+  deliveredAt?: string;
+
+  deliveryStatus: 'Pending' | 'Partially Delivered' | 'Delivered' | 'Cancelled';
+  cancelledAt?: string;
+  cancellationReason?: string;
+
   notes?: string;
   items: PreBookingItem[];
-  
-  created_at: string;
-  created_by: string;
+
+  createdAt: string;
+  createdBy: string;
 }
 
 export interface PreBookingItem {
-  item_number: number;
-  plant_name: string;
+  itemNumber: number;
+  plantName: string;
   quantity: number;
-  unit_amount: number;
-  stock_source: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
-  source_stage?: string;
-  source_phase?: string;
-  batch_code?: string | null;
-  delivered_quantity?: number;
-  delivery_status?: 'Pending' | 'Partially Delivered' | 'Delivered';
-  line_total: number;
+  unitAmount: number;
+  stockSource: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
+  sourceStage?: string;
+  sourcePhase?: string;
+  batchCode?: string | null;
+  deliveredQuantity?: number;
+  deliveryStatus?: 'Pending' | 'Partially Delivered' | 'Delivered';
+  lineTotal: number;
 }
 
 export interface CreatePreBookingRequest {
-  customer_id: string;
-  booking_date?: string;
-  expected_delivery_date?: string;
+  customerId: string;
+  bookingDate?: string;
+  expectedDeliveryDate?: string;
   notes?: string;
-  delivery_charges?: number;
-  cgst_percent?: number;
-  sgst_percent?: number;
-  created_by: string;
+  deliveryCharges?: number;
+  cgstPercent?: number;
+  sgstPercent?: number;
+  createdBy: string;
   items: {
-    plant_name: string;
+    plantName: string;
     quantity: number;
-    unit_amount: number;
-    stock_source: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
+    unitAmount: number;
+    stockSource: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
   }[];
 }
 
 export interface UpdatePreBookingRequest {
-  booking_date?: string;
-  expected_delivery_date?: string;
+  bookingDate?: string;
+  expectedDeliveryDate?: string;
   notes?: string;
-  delivery_charges?: number;
-  cgst_percent?: number;
-  sgst_percent?: number;
+  deliveryCharges?: number;
+  cgstPercent?: number;
+  sgstPercent?: number;
   items?: {
-    plant_name: string;
+    plantName: string;
     quantity: number;
-    unit_amount: number;
-    stock_source: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
+    unitAmount: number;
+    stockSource: 'STOCK_FROM_INDOOR' | 'STOCK_FROM_OUTDOOR';
   }[];
 }
 
 export interface DeliverPreBookingRequest {
-  items_with_batches: {
-    item_number: number;
-    batch_code: string;
+  itemsWithBatches: {
+    itemNumber: number;
+    batchCode: string;
     quantity: number;
   }[];
 }
 
 export interface UndeliverPreBookingRequest {
-  item_number?: number;
+  itemNumber?: number;
 }
 
 export interface CancelPreBookingRequest {
-  cancellation_reason: string;
+  cancellationReason: string;
 }

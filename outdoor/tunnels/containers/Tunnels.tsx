@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../shared/ui/dialog';
 import { Plus, Pencil } from 'lucide-react';
 import { DataTable } from '../../../shared/components/DataTable';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import type { Tunnel } from '../../types/outdoor.types';
 
 const UNITS = ['A', 'B', 'C', 'D', 'E'] as const;
@@ -82,7 +82,7 @@ export function Tunnels() {
   const columns = [
     { key: 'name',      label: 'Tunnel' },
     { key: 'capacity',  label: 'Capacity', render: (v: number) => v > 0 ? v.toLocaleString() : '—' },
-    { key: 'is_active', label: 'Status',   render: (v: boolean) => v ? 'Active' : 'Inactive' },
+    { key: 'isActive', label: 'Status',   render: (v: boolean) => v ? 'Active' : 'Inactive' },
     {
       key: '_edit',
       label: '',

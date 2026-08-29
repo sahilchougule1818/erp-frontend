@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { dashboardApi } from '../services/salesApi';
-import { normalizeDashboardStats } from '../utils/normalize';
+import { dashboardApi } from '../api/salesApi';
 import type { DashboardStats } from '../types';
 
 export const useDashboardStats = () => {
@@ -10,7 +9,7 @@ export const useDashboardStats = () => {
 
   useEffect(() => {
     dashboardApi.getStats()
-      .then(data => setStats(normalizeDashboardStats((data ?? {}) as Record<string, unknown>)))
+      .then(data => setStats(data ?? null))
       .catch((err: any) => setError(err.message))
       .finally(() => setLoading(false));
   }, []);

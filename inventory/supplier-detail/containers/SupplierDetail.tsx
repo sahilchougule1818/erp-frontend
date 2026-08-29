@@ -8,7 +8,7 @@ import { Badge } from '../../../shared/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 type Supplier = {
@@ -16,7 +16,7 @@ type Supplier = {
   name: string;
   contact: string;
   location: string;
-  items_supplied: string[];
+  itemsSupplied: string[];
 };
 
 type Item = {
@@ -35,30 +35,43 @@ export function SupplierDetail() {
   const [isSupplierModalOpen, setIsSupplierModalOpen] = useState(false);
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   
-  const [supplierForm, setSupplierForm] = useState({ name: '', contact: '', location: '', items_supplied: [] as string[] });
+  const [supplierForm, setSupplierForm] = useState({ name: '', contact: '', location: '', itemsSupplied: [] as string[] });
 
   useEffect(() => {
-    fetchData();
+    fetchItems();
+  }, []);
+
+  useEffect(() => {
+    fetchSuppliers();
   }, [currentPage]);
 
-  const fetchData = async () => {
+  const fetchItems = async () => {
     try {
-      const [supRes, itemRes] = await Promise.all([
-        inventoryApi.suppliers.getAll(currentPage, limit),
-        inventoryApi.items.getAll(1, 500)
-      ]);
-      const { data: supData, pagination } = parseSpringPage<Supplier>(supRes);
+      const itemRes = await inventoryApi.items.getAll(1, 500);
       const { data: itemData } = parseSpringPage<Item>(itemRes);
-      setSuppliers(supData);
       setItems(itemData);
+    } catch (e) {
+      console.error('Fetch items error:', e);
+      setItems([]);
+    }
+  };
+
+  const fetchSuppliers = async () => {
+    try {
+      const supRes = await inventoryApi.suppliers.getAll(currentPage, limit);
+      const { data: supData, pagination } = parseSpringPage<Supplier>(supRes);
+      setSuppliers(supData);
       setCurrentPage(pagination.page);
       setTotalPages(pagination.totalPages);
       setTotal(pagination.total);
     } catch (e) {
-      console.error('Fetch error:', e);
+      console.error('Fetch suppliers error:', e);
       setSuppliers([]);
-      setItems([]);
     }
+  };
+
+  const fetchData = async () => {
+    await Promise.all([fetchItems(), fetchSuppliers()]);
   };
 
   const handlePageChange = (page: number) => {
@@ -75,7 +88,7 @@ export function SupplierDetail() {
       fetchData();
       setIsSupplierModalOpen(false);
       setEditingSupplier(null);
-      setSupplierForm({ name: '', contact: '', location: '', items_supplied: [] });
+      setSupplierForm({ name: '', contact: '', location: '', itemsSupplied: [] });
     } catch (error) {
       console.error('Failed to save supplier:', error);
     }
@@ -88,7 +101,7 @@ export function SupplierDetail() {
     { label: 'Location', key: 'location' },
     { 
       label: 'Supplies', 
-      key: 'items_supplied',
+      key: 'itemsSupplied',
       render: (val: string[]) => val?.join(', ') || '—'
     },
     {
@@ -98,7 +111,7 @@ export function SupplierDetail() {
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => {
             setEditingSupplier(record);
-            setSupplierForm({ name: record.name, contact: record.contact, location: record.location, items_supplied: record.items_supplied || [] });
+            setSupplierForm({ name: record.name, contact: record.contact, location: record.location, itemsSupplied: record.itemsSupplied || [] });
             setIsSupplierModalOpen(true);
           }}>
             <Edit className="h-4 w-4" />
@@ -138,7 +151,7 @@ export function SupplierDetail() {
             addButton={
               <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
                 setEditingSupplier(null);
-                setSupplierForm({ name: '', contact: '', location: '', items_supplied: [] });
+                setSupplierForm({ name: '', contact: '', location: '', itemsSupplied: [] });
                 setIsSupplierModalOpen(true);
               }}>
                 <Plus className="h-4 w-4 mr-2" />Add New Supplier
@@ -170,8 +183,8 @@ export function SupplierDetail() {
             <div className="space-y-1">
               <Label>Supplies (Select Items)</Label>
               <Select onValueChange={(v: string) => {
-                if (!supplierForm.items_supplied.includes(v)) {
-                  setSupplierForm({...supplierForm, items_supplied: [...supplierForm.items_supplied, v]});
+                if (!supplierForm.itemsSupplied.includes(v)) {
+                  setSupplierForm({...supplierForm, itemsSupplied: [...supplierForm.itemsSupplied, v]});
                 }
               }}>
                 <SelectTrigger><SelectValue placeholder="Add Item" /></SelectTrigger>
@@ -180,9 +193,9 @@ export function SupplierDetail() {
                 </SelectContent>
               </Select>
               <div className="flex flex-wrap gap-2 mt-2">
-                {supplierForm.items_supplied.map(item => (
+                {supplierForm.itemsSupplied.map(item => (
                   <Badge key={item} className="bg-green-50 text-green-700 border-green-200 cursor-pointer" onClick={() => {
-                    setSupplierForm({...supplierForm, items_supplied: supplierForm.items_supplied.filter(i => i !== item)});
+                    setSupplierForm({...supplierForm, itemsSupplied: supplierForm.itemsSupplied.filter(i => i !== item)});
                   }}>
                     {item} ×
                   </Badge>

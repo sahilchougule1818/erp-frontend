@@ -207,12 +207,10 @@ export const DataTable = memo(function DataTable({
                 </tr>
               ) : (
                 displayRecords.map((record: any, index: number) => {
-                  const isHistorical = getRecordField(record, 'is_active') === false || getRecordField(record, 'active') === false;
+                  const isHistorical = getRecordField(record, 'isActive') === false || getRecordField(record, 'active') === false;
                   const rowKey = getRecordField(record, 'id')
-                    ?? getRecordField(record, 'order_id')
                     ?? getRecordField(record, 'orderId')
-                    ?? getRecordField(record, 'batch_id')
-                    ?? getRecordField(record, 'batch_code')
+                    ?? getRecordField(record, 'batchId')
                     ?? getRecordField(record, 'batchCode')
                     ?? index;
                   return (
@@ -223,11 +221,11 @@ export const DataTable = memo(function DataTable({
                         <td key={col.key} className={`px-4 py-4 text-base font-normal whitespace-nowrap align-middle text-center ${col.key === '_actions' ? 'sticky right-0 bg-green-50 z-10 [box-shadow:-1px_0_0_0_#e2e8f0]' : col.highlight === 'green' ? 'bg-green-50' : col.label?.startsWith('Current') ? 'bg-yellow-50' : col.label?.startsWith('Total') ? 'bg-blue-50' : ''}`}>
                           {col.render
                             ? col.render(cellValue, record)
-                            : (col.key === 'qty_available' || col.key === 'qtyAvailable' || col.key === 'available_plants' || col.key === 'availablePlants')
+                            : (col.key === 'qtyAvailable' || col.key === 'availablePlants')
                               ? <span>{cellValue != null ? Number(cellValue).toLocaleString() : '—'}</span>
-                              : (col.key === 'mortality_count' || col.key === 'total_mortality' || col.key === 'qty_contaminated' || col.key === 'qtyContaminated' || col.key === 'total_qty_contaminated' || col.key === 'totalQtyContaminated')
+                              : (col.key === 'mortalityCount' || col.key === 'totalMortality' || col.key === 'qtyContaminated' || col.key === 'totalQtyContaminated')
                               ? <span className={Number(cellValue) > 0 ? 'text-red-600' : ''}>{Number(cellValue ?? 0).toLocaleString()}</span>
-                              : (col.key === 'current_phase' || col.key === 'currentPhase')
+                              : (col.key === 'currentPhase')
                               ? (() => { const phase = String(cellValue ?? ''); const cls = PHASE_BADGE[phase] ?? 'bg-gray-50 text-gray-700 border-gray-200'; return <span className={`px-2 py-1 rounded border text-base ${cls}`}>{PHASE_LABEL[phase] ?? phase}</span>; })()
                               : (col.key === 'state' || col.key === 'result' || col.key === 'status')
                               ? renderStatusBadge(cellValue)

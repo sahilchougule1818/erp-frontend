@@ -66,22 +66,22 @@ const getEventLabel = (event: any): string => {
     export: 'Export',
   };
 
-  if (event.event_type === 'EXPORT') {
+  if (event.eventType === 'EXPORT') {
     return 'Exported to Outdoor';
   }
-  if (event.event_type === 'CONTAMINATION') {
+  if (event.eventType === 'CONTAMINATION') {
     return 'Contamination Event';
   }
-  if (event.event_type === 'SAMPLE') {
+  if (event.eventType === 'SAMPLE') {
     return 'Sample Collection';
   }
-  if (event.event_type === 'MEDIA_PREPARE') {
+  if (event.eventType === 'MEDIA_PREPARE') {
     return 'Media Preparation';
   }
-  if (event.event_type === 'AUTOCLAVE') {
+  if (event.eventType === 'AUTOCLAVE') {
     return 'Autoclave Sterilization';
   }
-  if (event.event_type === 'CLEAN') {
+  if (event.eventType === 'CLEAN') {
     return 'Cleaning Event';
   }
 
@@ -95,18 +95,18 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
   onClose
 }) => {
   return (
-    <ModalLayout title={`Indoor Batch Timeline — ${batch.batch_code}`} width="900px">
+    <ModalLayout title={`Indoor Batch Timeline — ${batch.batchCode}`} width="900px">
       <div className="px-6 py-4 space-y-4">
         {/* Batch Summary */}
         <div className="grid grid-cols-3 gap-4 text-base bg-gray-50 p-4 rounded-lg border">
-          <div><span className="text-gray-500">Plant: </span><span className="font-medium text-gray-900">{batch.plant_name}</span></div>
+          <div><span className="text-gray-500">Plant: </span><span className="font-medium text-gray-900">{batch.plantName}</span></div>
           <div><span className="text-gray-500">Stage: </span><span className="font-medium text-gray-900">
             {!batch.stage || batch.phase === 'initialisation' ? 'Initialisation' : batch.stage}
           </span></div>
           <div><span className="text-gray-500">Phase: </span><span className="font-medium text-gray-900">{formatPhaseDisplay(batch.phase)}</span></div>
-          <div><span className="text-gray-500">Age: </span><span className="font-medium text-gray-900">{batch.current_age} days</span></div>
-          <div><span className="text-gray-500">Bottles: </span><span className="font-medium text-gray-900">{batch.qty_in}</span></div>
-          <div><span className="text-gray-500">Loss: </span><span className="font-medium text-gray-900">{batch.qty_contaminated}</span></div>
+          <div><span className="text-gray-500">Age: </span><span className="font-medium text-gray-900">{batch.currentAge} days</span></div>
+          <div><span className="text-gray-500">Bottles: </span><span className="font-medium text-gray-900">{batch.qtyIn}</span></div>
+          <div><span className="text-gray-500">Loss: </span><span className="font-medium text-gray-900">{batch.qtyContaminated}</span></div>
         </div>
 
         {timelineData.length === 0 ? (
@@ -118,15 +118,15 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
 
             <div className="space-y-4">
               {timelineData.map((event, idx) => {
-                const Icon = getEventIcon(event.event_type);
-                const colorClass = getEventColor(event.event_type);
+                const Icon = getEventIcon(event.eventType);
+                const colorClass = getEventColor(event.eventType);
                 const eventLabel = getEventLabel(event);
-                const isExport = event.event_type === 'EXPORT';
-                const isContamination = event.event_type === 'CONTAMINATION';
-                const isSample = event.event_type === 'SAMPLE';
-                const isMainEvent = ['SUBCULTURE', 'INCUBATE', 'ROOTING_PARTIAL', 'ROOTING_FULL'].includes(event.event_type);
-                const timeInStage = event.age_at_arrival !== null && event.age_at_departure !== null
-                  ? event.age_at_departure - event.age_at_arrival
+                const isExport = event.eventType === 'EXPORT';
+                const isContamination = event.eventType === 'CONTAMINATION';
+                const isSample = event.eventType === 'SAMPLE';
+                const isMainEvent = ['SUBCULTURE', 'INCUBATE', 'ROOTING_PARTIAL', 'ROOTING_FULL'].includes(event.eventType);
+                const timeInStage = event.ageAtArrival !== null && event.ageAtDeparture !== null
+                  ? event.ageAtDeparture - event.ageAtArrival
                   : null;
                 
                 return (
@@ -146,12 +146,12 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                                 </span>
                               )}
                             </div>
-                            {event.lab_number && (
-                              <span className="text-sm text-gray-500">Lab {event.lab_number}</span>
+                            {event.labNumber && (
+                              <span className="text-sm text-gray-500">Lab {event.labNumber}</span>
                             )}
                           </div>
                           <span className="text-sm text-gray-500">
-                            {new Date(event.created_at).toLocaleDateString()}
+                            {new Date(event.createdAt).toLocaleDateString()}
                           </span>
                         </div>
 
@@ -161,31 +161,31 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                             <div className="grid grid-cols-5 gap-3 py-2">
                               <div className="text-center">
                                 <div className="text-base text-gray-400 mb-1">Plants In</div>
-                                <div className="font-semibold text-gray-900 text-base">{event.plants_entered?.toLocaleString() || 0}</div>
+                                <div className="font-semibold text-gray-900 text-base">{event.plantsEntered?.toLocaleString() || 0}</div>
                               </div>
                               <div className="text-center">
-                                <div className="text-base text-gray-400 mb-1">{event.event_type === 'SUBCULTURE' ? 'Loss' : 'Contaminated'}</div>
-                                <div className="font-semibold text-gray-900 text-base">{event.mortality_count?.toLocaleString() || 0}</div>
+                                <div className="text-base text-gray-400 mb-1">{event.eventType === 'SUBCULTURE' ? 'Loss' : 'Contaminated'}</div>
+                                <div className="font-semibold text-gray-900 text-base">{event.mortalityCount?.toLocaleString() || 0}</div>
                               </div>
                               <div className="text-center">
                                 <div className="text-base text-gray-400 mb-1">Sold</div>
-                                <div className="font-semibold text-gray-900 text-base">{event.sold_count?.toLocaleString() || 0}</div>
+                                <div className="font-semibold text-gray-900 text-base">{event.soldCount?.toLocaleString() || 0}</div>
                               </div>
                               <div className="text-center">
                                 <div className="text-base text-gray-400 mb-1">Partially Rooted</div>
                                 <div>
-                                  {event.phase === 'subculturing' && event.partially_rooted_count > 0 ? (
+                                  {event.phase === 'subculturing' && event.partiallyRootedCount > 0 ? (
                                     <span className="font-semibold text-gray-900 text-base">
-                                      {event.partially_rooted_count?.toLocaleString()}
+                                      {event.partiallyRootedCount?.toLocaleString()}
                                     </span>
-                                  ) : event.partial_rootings && event.partial_rootings.length > 0 ? (
+                                  ) : event.partialRootings && event.partialRootings.length > 0 ? (
                                     <div className="space-y-1">
-                                      {event.partial_rootings.map((pr: any, prIdx: number) => (
+                                      {event.partialRootings.map((pr: any, prIdx: number) => (
                                         <div key={prIdx} className="text-sm">
-                                          <span className="font-semibold text-gray-900">Split {pr.split_sequence}:</span>
-                                          <span className="text-gray-700 ml-1">{pr.qty_in} in</span>
-                                          {pr.qty_contaminated > 0 && (
-                                            <span className="text-gray-700 ml-1">({pr.qty_contaminated} lost)</span>
+                                          <span className="font-semibold text-gray-900">Split {pr.splitSequence}:</span>
+                                          <span className="text-gray-700 ml-1">{pr.qtyIn} in</span>
+                                          {pr.qtyContaminated > 0 && (
+                                            <span className="text-gray-700 ml-1">({pr.qtyContaminated} lost)</span>
                                           )}
                                         </div>
                                       ))}
@@ -197,7 +197,7 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                               </div>
                               <div className="text-center">
                                 <div className="text-base text-gray-400 mb-1">Available</div>
-                                <div className="font-semibold text-gray-900 text-base">{event.available_plants?.toLocaleString() || 0}</div>
+                                <div className="font-semibold text-gray-900 text-base">{event.availablePlants?.toLocaleString() || 0}</div>
                               </div>
                             </div>
                           </div>
@@ -208,7 +208,7 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                           <div className="bg-gray-50 rounded p-3 space-y-2.5 text-base">
                             <div>
                               <span className="text-gray-600">Contaminated Count: </span>
-                              <span className="font-semibold text-gray-900">{event.mortality_count || 0}</span>
+                              <span className="font-semibold text-gray-900">{event.mortalityCount || 0}</span>
                             </div>
                           </div>
                         )}
@@ -234,19 +234,19 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
 
                         {/* Age Metrics */}
                         <div className="flex flex-wrap items-center gap-3 text-base mt-3">
-                          {event.age_at_arrival !== null && event.age_at_arrival !== undefined && (
+                          {event.ageAtArrival !== null && event.ageAtArrival !== undefined && (
                             <div className="flex items-center gap-2">
                               <span className="text-gray-500">Age at Arrival:</span>
                               <span className="font-semibold text-gray-900">
-                                {event.age_at_arrival} days
+                                {event.ageAtArrival} days
                               </span>
                             </div>
                           )}
-                          {event.age_at_departure !== null && event.age_at_departure !== undefined && (
+                          {event.ageAtDeparture !== null && event.ageAtDeparture !== undefined && (
                             <div className="flex items-center gap-2">
                               <span className="text-gray-500">Age at Departure:</span>
                               <span className="font-semibold text-gray-900">
-                                {event.age_at_departure} days
+                                {event.ageAtDeparture} days
                               </span>
                             </div>
                           )}

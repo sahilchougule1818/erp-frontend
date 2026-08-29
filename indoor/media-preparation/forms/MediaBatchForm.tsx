@@ -7,7 +7,7 @@ import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Save, Users, FlaskConical, ChevronDown, ChevronUp, Trash2 } from 'lucide-react';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { useAuth } from '../../../auth/AuthContext';
 import { syncOperatorAssignments, toggleStagedOperator } from '../../operators/utils/syncOperatorAssignments';
@@ -43,7 +43,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const [labs, setLabs] = useState<any[]>([]);
   const freedAssignmentIds = useRef<number[]>([]);
 
-  const getDisplayName = (op: any) => `${op.first_name || ''} ${op.last_name || ''}`.trim() || op.short_name;
+  const getDisplayName = (op: any) => `${op.firstName || ''} ${op.lastName || ''}`.trim() || op.shortName;
 
   useEffect(() => {
     if (!open) return;
@@ -51,16 +51,16 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       setActiveTab('details');
       setForm({
         id: initialData.id,
-        media_code: initialData.media_code || '',
-        media_type: initialData.media_type || '',
-        lab_number: initialData.lab_number?.toString() || '',
-        started_at: initialData.started_at || '',
-        media_loaded_at: initialData.media_loaded_at || '',
-        pressure_reached_at: initialData.pressure_reached_at || '',
-        ended_at: initialData.ended_at || '',
-        opened_at: initialData.opened_at || '',
-        media_volume: initialData.media_volume || '',
-        bottles_count: initialData.bottles_count || '',
+        mediaCode: initialData.mediaCode || '',
+        mediaType: initialData.mediaType || '',
+        labNumber: initialData.labNumber?.toString() || '',
+        startedAt: initialData.startedAt || '',
+        mediaLoadedAt: initialData.mediaLoadedAt || '',
+        pressureReachedAt: initialData.pressureReachedAt || '',
+        endedAt: initialData.endedAt || '',
+        openedAt: initialData.openedAt || '',
+        mediaVolume: initialData.mediaVolume || '',
+        bottlesCount: initialData.bottlesCount || '',
         temperature: initialData.temperature || '',
         pressure: initialData.pressure || '',
         duration: initialData.duration || '',
@@ -70,7 +70,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       loadOperators();
     } else {
       const defaultLab = isLocked && user?.labNumber ? user.labNumber.toString() : '';
-      setForm({ media_code: '', media_type: '', lab_number: defaultLab });
+      setForm({ mediaCode: '', mediaType: '', labNumber: defaultLab });
       setStagedOperators([]);
       setInitialAssignments([]);
       setAllOperators([]);
@@ -89,10 +89,10 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const fetchLabs = async () => {
     try {
       const data = await indoorApi.labs.getLabs();
-      const activeLabs = data.filter((lab: any) => lab.is_active);
+      const activeLabs = data.filter((lab: any) => lab.isActive);
       setLabs(activeLabs);
-      if (activeLabs.length === 1 && !form.lab_number) {
-        setForm((prev: any) => ({ ...prev, lab_number: activeLabs[0].lab_number.toString() }));
+      if (activeLabs.length === 1 && !form.labNumber) {
+        setForm((prev: any) => ({ ...prev, labNumber: activeLabs[0].labNumber.toString() }));
       }
     } catch (error) {
       console.error('Failed to fetch labs:', error);
@@ -103,7 +103,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
     setLoadingOperators(true);
     try {
       const [assignmentsRes, operatorsRes] = await Promise.all([
-        indoorApi.operators.getAssignments({ activity_type: 'autoclave', media_code: initialData.media_code }),
+        indoorApi.operators.getAssignments({ activityType: 'autoclave', mediaCode: initialData.mediaCode }),
         indoorApi.operators.getActive()
       ]);
       const assignments = Array.isArray(assignmentsRes) ? assignmentsRes : [];
@@ -112,8 +112,8 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       setInitialAssignments(assignments);
       freedAssignmentIds.current = [];
       setStagedOperators(assignments.map((a: any) => ({
-        id: parseInt(a.operator_id), short_name: a.short_name,
-        first_name: a.first_name, last_name: a.last_name, assignmentId: a.id
+        id: parseInt(a.operatorId), shortName: a.shortName,
+        firstName: a.firstName, lastName: a.lastName, assignmentId: a.id
       })));
     } catch { notify.error('Failed to load operator data'); }
     finally { setLoadingOperators(false); }
@@ -125,9 +125,9 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       op.id,
       {
         id: op.id,
-        short_name: op.short_name,
-        first_name: op.first_name,
-        last_name: op.last_name,
+        shortName: op.shortName,
+        firstName: op.firstName,
+        lastName: op.lastName,
       },
       freedAssignmentIds.current
     );
@@ -138,16 +138,16 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const set = (key: string, value: any) => setForm((f: any) => ({ ...f, [key]: value }));
 
   const handleCreate = async () => {
-    if (!form.media_code?.trim()) { notify.error('Media code is required'); return; }
-    if (!form.lab_number) { notify.error('Lab is required'); return; }
-    const labNum = parseInt(form.lab_number);
+    if (!form.mediaCode?.trim()) { notify.error('Media code is required'); return; }
+    if (!form.labNumber) { notify.error('Lab is required'); return; }
+    const labNum = parseInt(form.labNumber);
     if (isNaN(labNum)) { notify.error('Invalid lab number'); return; }
     
     const payload = { 
-      media_code: form.media_code.trim(), 
-      media_type: form.media_type?.trim() || '', 
-      lab_number: labNum,
-      operator_ids: stagedOperators.map(o => o.id) 
+      mediaCode: form.mediaCode.trim(), 
+      mediaType: form.mediaType?.trim() || '', 
+      labNumber: labNum,
+      operatorIds: stagedOperators.map(o => o.id) 
     };
     
     setSaving(true);
@@ -161,12 +161,12 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
     try {
       const payload = { ...form };
       // Convert empty strings to null for time fields
-      const timeFields = ['started_at', 'media_loaded_at', 'pressure_reached_at', 'ended_at', 'opened_at'];
+      const timeFields = ['startedAt', 'mediaLoadedAt', 'pressureReachedAt', 'endedAt', 'openedAt'];
       timeFields.forEach(field => {
         if (payload[field] === '') payload[field] = null;
       });
       // Convert empty strings to null for numeric fields
-      const numericFields = ['media_volume', 'bottles_count', 'temperature', 'pressure', 'duration'];
+      const numericFields = ['mediaVolume', 'bottlesCount', 'temperature', 'pressure', 'duration'];
       numericFields.forEach(field => {
         if (payload[field] === '') payload[field] = null;
       });
@@ -179,16 +179,16 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
     try {
       await syncOperatorAssignments(initialAssignments, stagedOperators, {
         add: (operatorId) => indoorApi.operators.addAssignment({
-          operator_id: operatorId,
-          activity_type: 'autoclave',
-          media_code: initialData.media_code,
+          operatorId: operatorId,
+          activityType: 'autoclave',
+          mediaCode: initialData.mediaCode,
         }),
-        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operator_id: operatorId }),
+        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operatorId: operatorId }),
         remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
       });
       notify.success('Operators updated successfully');
       setInitialAssignments(prev => prev.filter((a: any) =>
-        stagedOperators.some(op => op.assignmentId === a.id || op.id === parseInt(a.operator_id))
+        stagedOperators.some(op => op.assignmentId === a.id || op.id === parseInt(a.operatorId))
       ));
     } catch (error: any) {
       notify.error(error.message || 'Failed to save operators');
@@ -202,7 +202,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
       isOpen={open}
       onClose={() => !saving && onClose()}
       title={isEdit ? 'Edit Media Batch' : 'Create Media Batch'}
-      subtitle={isEdit ? `Media Code: ${initialData.media_code}` : undefined}
+      subtitle={isEdit ? `Media Code: ${initialData.mediaCode}` : undefined}
       maxWidth="650px"
     >
       {isEdit ? (
@@ -225,11 +225,11 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Media Code</Label>
-                  <Input value={form.media_code} disabled className="bg-gray-100" />
+                  <Input value={form.mediaCode} disabled className="bg-gray-100" />
                 </div>
                 <div className="space-y-2">
                   <Label>Media Type</Label>
-                  <Input value={form.media_type} onChange={e => set('media_type', e.target.value)} placeholder="e.g. MS Medium" disabled={saving} />
+                  <Input value={form.mediaType} onChange={e => set('mediaType', e.target.value)} placeholder="e.g. MS Medium" disabled={saving} />
                 </div>
               </div>
 
@@ -237,31 +237,31 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Autoclave ON Time</Label>
-                  <Input type="time" value={form.started_at} onChange={e => set('started_at', e.target.value)} disabled={saving} />
+                  <Input type="time" value={form.startedAt} onChange={e => set('startedAt', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Media Loading Time</Label>
-                  <Input type="time" value={form.media_loaded_at} onChange={e => set('media_loaded_at', e.target.value)} disabled={saving} />
+                  <Input type="time" value={form.mediaLoadedAt} onChange={e => set('mediaLoadedAt', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Pressure Time</Label>
-                  <Input type="time" value={form.pressure_reached_at} onChange={e => set('pressure_reached_at', e.target.value)} disabled={saving} />
+                  <Input type="time" value={form.pressureReachedAt} onChange={e => set('pressureReachedAt', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Off Time</Label>
-                  <Input type="time" value={form.ended_at} onChange={e => set('ended_at', e.target.value)} disabled={saving} />
+                  <Input type="time" value={form.endedAt} onChange={e => set('endedAt', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Open Time</Label>
-                  <Input type="time" value={form.opened_at} onChange={e => set('opened_at', e.target.value)} disabled={saving} />
+                  <Input type="time" value={form.openedAt} onChange={e => set('openedAt', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Media Volume</Label>
-                  <Input type="number" value={form.media_volume} onChange={e => set('media_volume', e.target.value)} disabled={saving} />
+                  <Input type="number" value={form.mediaVolume} onChange={e => set('mediaVolume', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Bottles Count</Label>
-                  <Input type="number" value={form.bottles_count} onChange={e => set('bottles_count', e.target.value)} disabled={saving} />
+                  <Input type="number" value={form.bottlesCount} onChange={e => set('bottlesCount', e.target.value)} disabled={saving} />
                 </div>
                 <div className="space-y-2">
                   <Label>Temperature (°C)</Label>
@@ -366,26 +366,26 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Media Code *</Label>
-                <Input value={form.media_code} onChange={e => set('media_code', e.target.value)} placeholder="e.g. MS-001" disabled={saving} autoFocus />
+                <Input value={form.mediaCode} onChange={e => set('mediaCode', e.target.value)} placeholder="e.g. MS-001" disabled={saving} autoFocus />
               </div>
               <div className="space-y-2">
                 <Label>Media Type</Label>
-                <Input value={form.media_type} onChange={e => set('media_type', e.target.value)} placeholder="e.g. MS Medium" disabled={saving} />
+                <Input value={form.mediaType} onChange={e => set('mediaType', e.target.value)} placeholder="e.g. MS Medium" disabled={saving} />
               </div>
               <div className="space-y-2 col-span-2">
                 <Label>Lab *</Label>
                 {isLocked ? (
-                  <Input value={`Lab ${form.lab_number || ''}`} disabled className="bg-gray-100" />
+                  <Input value={`Lab ${form.labNumber || ''}`} disabled className="bg-gray-100" />
                 ) : (
-                  <Select value={form.lab_number || ''} onValueChange={v => set('lab_number', v)} disabled={saving}>
+                  <Select value={form.labNumber || ''} onValueChange={v => set('labNumber', v)} disabled={saving}>
                     <SelectTrigger><SelectValue placeholder="Select lab" /></SelectTrigger>
                     <SelectContent>
                       {labs.length === 0 ? (
                         <div className="px-2 py-1.5 text-sm text-gray-500">No labs available</div>
                       ) : (
                         labs.map((lab) => (
-                          <SelectItem key={lab.lab_number} value={lab.lab_number.toString()}>
-                            Lab {lab.lab_number} - {lab.lab_name}
+                          <SelectItem key={lab.labNumber} value={lab.labNumber.toString()}>
+                            Lab {lab.labNumber} - {lab.labName}
                           </SelectItem>
                         ))
                       )}

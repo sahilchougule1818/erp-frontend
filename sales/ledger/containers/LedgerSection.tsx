@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { Badge } from '../../../shared/ui/badge';
 import { ArrowUpRight, ArrowDownLeft, TrendingUp, TrendingDown, Clock } from 'lucide-react';
-import { useLedger, useBankSummary, useDashboardStats } from '../../hooks/useSalesApi';
+import { useLedger } from '../../hooks/useLedger';
+import { useBankSummary } from '../../hooks/useBankAccounts';
+import { useDashboardStats } from '../../hooks/useDashboard';
 import { format } from 'date-fns';
 import { DataTable } from '../../../shared/components/DataTable';
 import { LedgerFilterBar } from '../../components/LedgerFilterBar';
@@ -17,10 +19,10 @@ const ENTRY_TYPE_LABELS: Record<string, { label: string; color: string }> = {
 
 const LedgerSection: React.FC = () => {
   const [filters, setFilters] = useState({
-    bank_account_id: 'all',
+    bankAccountId: 'all',
     type: 'all',
-    from_date: '',
-    to_date: '',
+    fromDate: '',
+    toDate: '',
   });
 
   const { entries, loading, error, pagination, refetch } = useLedger(filters);
@@ -31,14 +33,14 @@ const LedgerSection: React.FC = () => {
     setFilters(f => ({ ...f, [key]: value }));
 
   const handleReset = () =>
-    setFilters({ bank_account_id: 'all', type: 'all', from_date: '', to_date: '' });
+    setFilters({ bankAccountId: 'all', type: 'all', fromDate: '', toDate: '' });
 
   const handlePageChange = (page: number) => {
     refetch(page);
   };
 
-  const netInflow  = Number(stats?.net_inflow)  || 0;
-  const netOutflow = Number(stats?.net_outflow) || 0;
+  const netInflow  = Number(stats?.netInflow)  || 0;
+  const netOutflow = Number(stats?.netOutflow) || 0;
 
   const fmt = (n: number) =>
     n >= 1_00_000 ? `₹${(n / 1_00_000).toFixed(1)}L`
@@ -47,7 +49,7 @@ const LedgerSection: React.FC = () => {
 
   const columns = [
     {
-      key: 'entry_date',
+      key: 'entryDate',
       label: 'Date',
       render: (val: string) => (
         <span className="text-base">
@@ -56,7 +58,7 @@ const LedgerSection: React.FC = () => {
       )
     },
     {
-      key: 'entry_type',
+      key: 'entryType',
       label: 'Particular',
       render: (val: string) => {
         const meta = ENTRY_TYPE_LABELS[val] ?? { label: val, color: 'bg-slate-50 text-slate-600 border-slate-200' };
@@ -64,52 +66,52 @@ const LedgerSection: React.FC = () => {
       }
     },
     {
-      key: 'customer_name',
+      key: 'customerName',
       label: 'Customer',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'order_id',
+      key: 'orderId',
       label: 'Booking ID',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'transaction_number',
+      key: 'transactionNumber',
       label: 'System TXN No.',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'payment_reference',
+      key: 'paymentReference',
       label: 'Payment Ref',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'payment_method',
+      key: 'paymentMethod',
       label: 'Method',
       render: (val: string) => <span className="text-base">{val || 'Cash'}</span>
     },
     {
-      key: 'bank_account_name',
+      key: 'bankAccountName',
       label: 'Account',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'refund_id',
+      key: 'refundId',
       label: 'Refund ID',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'stock_purchase_id',
+      key: 'stockPurchaseId',
       label: 'Purchase ID',
       render: (val: string) => <span className="text-base">{val || '—'}</span>
     },
     {
-      key: 'debit_amount',
+      key: 'debitAmount',
       label: 'Outflow (−)',
       render: (val: number) => <span className="text-base">{Number(val) > 0 ? `₹${Number(val).toLocaleString()}` : '—'}</span>
     },
     {
-      key: 'credit_amount',
+      key: 'creditAmount',
       label: 'Inflow (+)',
       render: (val: number) => <span className="text-base">{Number(val) > 0 ? `₹${Number(val).toLocaleString()}` : '—'}</span>
     },

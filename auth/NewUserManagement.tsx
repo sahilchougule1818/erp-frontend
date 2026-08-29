@@ -12,20 +12,20 @@ import { UserPlus, Trash2, AlertCircle, Mail, Shield, Settings } from 'lucide-re
 import { useAuth } from './AuthContext';
 import { useNotify } from '../shared/hooks/useNotify';
 import { fetchCsrfToken } from '../shared/helpers/csrf';
-import apiClient from '../shared/services/apiClient';
+import apiClient from '../shared/api/apiClient';
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
 interface Manager {
-  user_id: number;
+  userId: number;
   username: string;
   email: string;
-  first_name: string;
-  last_name: string;
-  role_name: string;
-  lab_number: number | null;
-  is_active: boolean;
-  created_at: string;
+  firstName: string;
+  lastName: string;
+  roleName: string;
+  labNumber: number | null;
+  isActive: boolean;
+  createdAt: string;
 }
 
 export function UserManagement() {
@@ -45,7 +45,7 @@ export function UserManagement() {
   const [username, setUsername] = useState('');
   const [role, setRole] = useState('');
   const [labNumber, setLabNumber] = useState('');
-  const [labs, setLabs] = useState<{ lab_number: number; lab_name: string }[]>([]);
+  const [labs, setLabs] = useState<{ labNumber: number; labName: string }[]>([]);
   const [emailOTP, setEmailOTP] = useState('');
   const [showEmailOTP, setShowEmailOTP] = useState(false);
   
@@ -75,8 +75,8 @@ export function UserManagement() {
 
   const fetchLabs = async () => {
     try {
-      const data = await apiClient.get<{ lab_number: number; lab_name: string; is_active: boolean }[]>('/indoor/labs');
-      setLabs(data.filter(l => l.is_active));
+      const data = await apiClient.get<{ labNumber: number; labName: string; isActive: boolean }[]>('/indoor/labs');
+      setLabs(data.filter(l => l.isActive));
     } catch {}
   };
 
@@ -210,7 +210,7 @@ export function UserManagement() {
     setError('');
     setLoading(true);
     try {
-      await apiClient.delete('/auth/delete-manager', { data: { userId: selectedManager?.user_id, masterOTP } });
+      await apiClient.delete('/auth/delete-manager', { data: { userId: selectedManager?.userId, masterOTP } });
       resetDeleteForm();
       setShowDeleteDialog(false);
       fetchManagers();
@@ -303,27 +303,27 @@ export function UserManagement() {
             </TableHeader>
             <TableBody>
               {managers.map((manager) => (
-                <TableRow key={manager.user_id}>
+                <TableRow key={manager.userId}>
                   <TableCell className="font-medium">
-                    {manager.first_name} {manager.last_name}
+                    {manager.firstName} {manager.lastName}
                   </TableCell>
                   <TableCell className="font-mono text-sm">{manager.username}</TableCell>
                   <TableCell>{manager.email}</TableCell>
                   <TableCell>
-                    <Badge className={getRoleBadgeColor(manager.role_name)}>
-                      {manager.role_name}
+                    <Badge className={getRoleBadgeColor(manager.roleName)}>
+                      {manager.roleName}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {manager.lab_number ? `Lab ${manager.lab_number}` : '—'}
+                    {manager.labNumber ? `Lab ${manager.labNumber}` : '—'}
                   </TableCell>
                   <TableCell>
-                    <Badge className={manager.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
-                      {manager.is_active ? 'Active' : 'Inactive'}
+                    <Badge className={manager.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                      {manager.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {new Date(manager.created_at).toLocaleDateString()}
+                    {new Date(manager.createdAt).toLocaleDateString()}
                   </TableCell>
                   <TableCell>
                     <Button
@@ -470,8 +470,8 @@ export function UserManagement() {
                   </SelectTrigger>
                   <SelectContent>
                     {labs.map(lab => (
-                      <SelectItem key={lab.lab_number} value={lab.lab_number.toString()}>
-                        Lab {lab.lab_number} — {lab.lab_name}
+                      <SelectItem key={lab.labNumber} value={lab.labNumber.toString()}>
+                        Lab {lab.labNumber} — {lab.labName}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -541,7 +541,7 @@ export function UserManagement() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Manager Account</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete the account for <strong>{selectedManager?.first_name} {selectedManager?.last_name}</strong>? This action cannot be undone.
+              Are you sure you want to delete the account for <strong>{selectedManager?.firstName} {selectedManager?.lastName}</strong>? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 import type { Worker } from '../../types/outdoor.types';
 

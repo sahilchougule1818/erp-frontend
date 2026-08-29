@@ -3,20 +3,20 @@ import { ShoppingBag } from 'lucide-react';
 import { Badge } from '../../../shared/ui/badge';
 import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { inventoryApi } from '../../services/inventoryApi';
+import { inventoryApi } from '../../api/inventoryApi';
 import { format } from 'date-fns';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 type Transaction = {
   id: number;
-  item_id: number;
-  item_name: string;
+  itemId: number;
+  itemName: string;
   type: 'purchase' | 'withdrawal';
   quantity: number;
   date: string;
-  supplier_name?: string;
+  supplierName?: string;
   price?: number;
-  current_stock: number;
+  currentStock: number;
   notes?: string;
 };
 
@@ -33,7 +33,7 @@ export function PurchaseLog() {
 
   const fetchData = async () => {
     try {
-      const res = await inventoryApi.stockUsage.getHistory(currentPage, limit);
+      const res = await inventoryApi.stockUsage.getHistory(currentPage, limit, 'purchase');
       const { data, pagination } = parseSpringPage<Transaction>(res);
       setTransactions(data);
       setCurrentPage(pagination.page);
@@ -50,18 +50,18 @@ export function PurchaseLog() {
 
   const columns = [
     {
-      key: 'purchase_date',
+      key: 'purchaseDate',
       label: 'Date',
       render: (val: string) => (val ? format(new Date(val), 'dd MMM yyyy') : '—')
     },
-    { key: 'item_name', label: 'Item' },
+    { key: 'itemName', label: 'Item' },
     { key: 'quantity', label: 'Qty' },
-    { key: 'supplier_name', label: 'Supplier' },
-    { key: 'purchase_id', label: 'Purchase ID' },
+    { key: 'supplierName', label: 'Supplier' },
+    { key: 'purchaseId', label: 'Purchase ID' },
     { key: 'notes', label: 'Notes' },
   ];
 
-  const purchases = transactions.filter(t => t.type === 'purchase');
+  const purchases = transactions;
 
   return (
     <div className="p-6">
@@ -76,9 +76,9 @@ export function PurchaseLog() {
             columns={columns}
             records={purchases}
             filterConfig={{
-              filter1Key: 'item_name',
+              filter1Key: 'itemName',
               filter1Label: 'Search item...',
-              filter2Key: 'supplier_name',
+              filter2Key: 'supplierName',
               filter2Label: 'Supplier',
             }}
             exportFileName="purchase_log"

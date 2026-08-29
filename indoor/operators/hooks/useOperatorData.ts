@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { indoorApi } from '../../services/indoorApi';
-import apiClient from '../../../shared/services/apiClient';
+import { indoorApi } from '../../api/indoorApi';
+import apiClient from '../../../shared/api/apiClient';
 import type { Operator } from '../../types';
 
 export function useOperatorData() {

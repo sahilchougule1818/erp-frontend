@@ -6,14 +6,13 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '../shared/ui/avatar';
 import { Badge } from '../shared/ui/badge';
 import { Button } from '../shared/ui/button';
-import { LabSelector } from '../shared/components/LabSelector';
-import { useLabContext } from '../indoor/contexts/LabContext';
+import { IndoorHeaderLabSelector } from '../indoor/components/IndoorHeaderLabSelector';
 import { useAuth, User } from '../auth/AuthContext';
 import { useState, useEffect } from 'react';
 import { TwoFactorSetup } from '../auth/TwoFactorSetup';
 import { useToast } from '../shared/ui/use-toast';
 import { NotificationPanel } from '../sales/components/NotificationPanel';
-import apiClient from '../shared/services/apiClient';
+import apiClient from '../shared/api/apiClient';
 
 import {
   DropdownMenu,
@@ -47,7 +46,6 @@ const getRoleLabel = (role: string) => {
 
 export function Header({ breadcrumbs, user, onNavigate }: HeaderProps) {
   const { logout } = useAuth();
-  const { labNumber, setLabNumber, isLocked } = useLabContext();
   const { toast } = useToast();
   const [show2FASetup, setShow2FASetup] = useState(false);
   const [has2FA, setHas2FA] = useState(false);
@@ -137,14 +135,7 @@ export function Header({ breadcrumbs, user, onNavigate }: HeaderProps) {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Lab Selector - Only show for Indoor module */}
-          {breadcrumbs[0] === 'Indoor' && (
-            <div className="pr-4 border-r border-gray-200">
-              {isLocked
-                ? <span className="text-sm font-medium text-slate-600">Lab {labNumber}</span>
-                : <LabSelector value={labNumber} onChange={setLabNumber} />
-              }
-            </div>
-          )}
+          {breadcrumbs[0] === 'Indoor' && <IndoorHeaderLabSelector />}
           
           {/* Notification Bell */}
           <div className="relative">

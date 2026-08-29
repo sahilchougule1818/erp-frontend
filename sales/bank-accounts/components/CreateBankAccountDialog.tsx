@@ -3,7 +3,7 @@ import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
 import { Button } from '../../../shared/ui/button';
-import { bankAccountsApi } from '../../services/salesApi';
+import { bankAccountsApi } from '../../api/salesApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface Props {
@@ -15,15 +15,15 @@ interface Props {
 const CreateBankAccountDialog: React.FC<Props> = ({ open, onOpenChange, onSuccess }) => {
   const notify = useNotify();
   const [formData, setFormData] = useState({
-    account_name: '',
-    account_number: '',
-    bank_name: '',
+    accountName: '',
+    accountNumber: '',
+    bankName: '',
     branch: '',
-    ifsc_code: ''
+    ifscCode: ''
   });
 
   const handleSubmit = async () => {
-    if (!formData.account_name || !formData.account_number || !formData.bank_name) {
+    if (!formData.accountName || !formData.accountNumber || !formData.bankName) {
       notify.error('Please fill all required fields');
       return;
     }
@@ -32,7 +32,7 @@ const CreateBankAccountDialog: React.FC<Props> = ({ open, onOpenChange, onSucces
       notify.success('Bank account registered');
       onOpenChange(false);
       onSuccess();
-      setFormData({ account_name: '', account_number: '', bank_name: '', branch: '', ifsc_code: '' });
+      setFormData({ accountName: '', accountNumber: '', bankName: '', branch: '', ifscCode: '' });
     } catch (err: any) {
       notify.error(err.message || 'Failed to create account');
     }
@@ -49,16 +49,16 @@ const CreateBankAccountDialog: React.FC<Props> = ({ open, onOpenChange, onSucces
             <div className="space-y-2">
               <Label>Display Name *</Label>
               <Input 
-                value={formData.account_name}
-                onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
+                value={formData.accountName}
+                onChange={(e) => setFormData({ ...formData, accountName: e.target.value })}
                 placeholder="e.g. Main Savings"
               />
             </div>
             <div className="space-y-2">
               <Label>Account Number *</Label>
               <Input 
-                value={formData.account_number}
-                onChange={(e) => setFormData({ ...formData, account_number: e.target.value })}
+                value={formData.accountNumber}
+                onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
                 placeholder="e.g. 00112233445566"
               />
             </div>
@@ -71,8 +71,8 @@ const CreateBankAccountDialog: React.FC<Props> = ({ open, onOpenChange, onSucces
             <div className="col-span-2 space-y-2">
               <Label>Bank Name *</Label>
               <Input 
-                value={formData.bank_name}
-                onChange={(e) => setFormData({ ...formData, bank_name: e.target.value })}
+                value={formData.bankName}
+                onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
                 placeholder="SBI / HDFC / ICICI"
               />
             </div>
@@ -87,8 +87,8 @@ const CreateBankAccountDialog: React.FC<Props> = ({ open, onOpenChange, onSucces
             <div className="space-y-2">
               <Label>IFSC Code</Label>
               <Input 
-                value={formData.ifsc_code}
-                onChange={(e) => setFormData({ ...formData, ifsc_code: e.target.value })}
+                value={formData.ifscCode}
+                onChange={(e) => setFormData({ ...formData, ifscCode: e.target.value })}
                 placeholder="SBIN0001234"
               />
             </div>

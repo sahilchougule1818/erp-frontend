@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { Badge } from '../ui/badge';
-import apiClient from '../services/apiClient';
+import apiClient from '../api/apiClient';
 
 interface Lab {
   labNumber: number;

@@ -1,4 +1,4 @@
-import apiClient from '../../shared/services/apiClient';
+import apiClient from '../../shared/api/apiClient';
 
 export const settingsApi = {
   // Company Settings

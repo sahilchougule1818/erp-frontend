@@ -26,10 +26,10 @@ export function WorkerForm({ initialData, onSubmit, onDelete, onCancel }: Worker
     if (initialData) {
       setForm({
         id: initialData.id,
-        firstName: initialData.first_name,
-        middleName: initialData.middle_name || '',
-        lastName: initialData.last_name,
-        isActive: initialData.is_active
+        firstName: initialData.firstName,
+        middleName: initialData.middleName || '',
+        lastName: initialData.lastName,
+        isActive: initialData.isActive
       });
     } else {
       setForm(INITIAL_FORM);

@@ -6,14 +6,14 @@ import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../shared/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { useCustomers } from '../../hooks/useSalesApi';
+import { useCustomers } from '../../hooks/useCustomers';
 import { useNotify } from '../../../shared/hooks/useNotify';
-import { customersApi, Customer } from '../../services/salesApi';
+import { customersApi, Customer } from '../../api/salesApi';
 import { Plus, Pencil } from 'lucide-react';
 
 type CustomerFormValues = {
   name: string;
-  phone_number: string;
+  phoneNumber: string;
   address: string;
 };
 
@@ -33,7 +33,7 @@ export function CustomersManagement() {
 
   const openCreate = () => {
     setEditing(null);
-    reset({ name: '', phone_number: '', address: '' });
+    reset({ name: '', phoneNumber: '', address: '' });
     setIsOpen(true);
   };
 
@@ -41,7 +41,7 @@ export function CustomersManagement() {
     setEditing(customer);
     reset({
       name: customer.name,
-      phone_number: customer.phone_number || '',
+      phoneNumber: customer.phoneNumber || '',
       address: customer.address || '',
     });
     setIsOpen(true);
@@ -52,11 +52,11 @@ export function CustomersManagement() {
     try {
       const payload = {
         name: data.name,
-        phone_number: data.phone_number || undefined,
+        phoneNumber: data.phoneNumber || undefined,
         address: data.address || undefined,
       };
       if (editing) {
-        await customersApi.update(editing.customer_id, payload);
+        await customersApi.update(editing.customerId, payload);
         notify.success('Customer updated');
       } else {
         await customersApi.create(payload);
@@ -72,10 +72,10 @@ export function CustomersManagement() {
   };
 
   const columns = [
-    { key: 'customer_id', label: 'Customer ID' },
+    { key: 'customerId', label: 'Customer ID' },
     { key: 'name', label: 'Name' },
     {
-      key: 'phone_number',
+      key: 'phoneNumber',
       label: 'Phone',
       render: (val: string) => val || '—'
     },
@@ -85,7 +85,7 @@ export function CustomersManagement() {
       render: (val: string) => val || '—'
     },
     {
-      key: 'created_at',
+      key: 'createdAt',
       label: 'Added On',
       render: (val: string) =>
         val
@@ -106,7 +106,7 @@ export function CustomersManagement() {
             title=""
 
             columns={columns}
-            records={customers.filter(b => !b.is_deleted)}
+            records={customers.filter(b => !b.isDeleted)}
             onEdit={openEdit}
             addButton={
               <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={openCreate}>
@@ -116,7 +116,7 @@ export function CustomersManagement() {
             filterConfig={{
               filter1Key: 'name',
               filter1Label: 'Search by name...',
-              filter2Key: 'phone_number',
+              filter2Key: 'phoneNumber',
               filter2Label: 'Phone',
             }}
             exportFileName="customers"
@@ -150,7 +150,7 @@ export function CustomersManagement() {
 
             <div className="space-y-2">
               <Label>Phone Number</Label>
-              <Input {...register('phone_number')} placeholder="9999999999" />
+              <Input {...register('phoneNumber')} placeholder="9999999999" />
             </div>
 
             <div className="space-y-2">

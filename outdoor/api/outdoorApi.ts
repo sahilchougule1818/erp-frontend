@@ -1,4 +1,4 @@
-import apiClient from '../../shared/services/apiClient';
+import apiClient from '../../shared/api/apiClient';
 import { toSpringPageParams } from '../../shared/utils/springPage';
 import type { ShiftPayload, TransitionPayload, UndoPayload } from '../types/outdoor.types';
 
@@ -49,23 +49,6 @@ export const outdoorApi = {
       apiClient.put(`/outdoor/settings/sh-units/${id}`, data),
     deletePhTunnel: (id: number) => apiClient.delete(`/outdoor/settings/ph-tunnels/${id}`),
     deleteShUnit: (id: number) => apiClient.delete(`/outdoor/settings/sh-units/${id}`),
-  },
-
-  // Backward-compatible aliases used by existing hooks
-  phUnits: {
-    getAll: () => apiClient.get('/outdoor/settings/ph-tunnels', { params: { active: true } }),
-    create: (data: { name: string; capacity?: number }) =>
-      apiClient.post('/outdoor/settings/ph-tunnels', data),
-    update: (id: number, data: { name: string; capacity?: number; active?: boolean }) =>
-      apiClient.put(`/outdoor/settings/ph-tunnels/${id}`, data),
-  },
-
-  shUnits: {
-    getAll: () => apiClient.get('/outdoor/settings/sh-units', { params: { active: true } }),
-    create: (data: { name: string; capacity?: number }) =>
-      apiClient.post('/outdoor/settings/sh-units', data),
-    update: (id: number, data: { name: string; capacity?: number; active?: boolean }) =>
-      apiClient.put(`/outdoor/settings/sh-units/${id}`, data),
   },
 
   workers: {

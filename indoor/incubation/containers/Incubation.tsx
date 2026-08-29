@@ -11,22 +11,22 @@ export function Incubation() {
   const [showAll, setShowAll] = useState(false);
 
   const columns = [
-    { key: 'incubation_date', label: 'Incubation Date', render: (val: string) => val?.split('T')[0] },
+    { key: 'incubationDate', label: 'Incubation Date', render: (val: string) => val?.split('T')[0] },
     { key: 'stage', label: 'Stage' },
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'media_code', label: 'Media Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'qty_in', label: 'Bottles Entered' },
-    { key: 'qty_contaminated', label: 'Contamination' },
-    { key: 'qty_sold', label: 'Sold' },
-    { key: 'qty_available', label: 'Available' },
-    { key: 'incubation_period', label: 'Period (Days)' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'mediaCode', label: 'Media Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'qtyIn', label: 'Bottles Entered' },
+    { key: 'qtyContaminated', label: 'Contamination' },
+    { key: 'qtySold', label: 'Sold' },
+    { key: 'qtyAvailable', label: 'Available' },
+    { key: 'incubationPeriod', label: 'Period (Days)' },
     { key: 'temperature', label: 'Temp' },
     { key: 'humidity', label: 'Humidity' },
-    { key: 'light_intensity', label: 'Light Intensity' },
+    { key: 'lightIntensity', label: 'Light Intensity' },
     {
-      key: 'is_rooted',
+      key: 'isRooted',
       label: 'Rooting',
       render: (v: boolean) => v ? 'YES' : 'NO'
     },
@@ -45,11 +45,11 @@ export function Incubation() {
             title=""
             columns={columns}
             records={showAll ? records : records.filter((r: any) => r.state === 'ACTIVE')}
-            onEdit={(record) => { if (record.state === 'ACTIVE' && !record.is_rooted) setEditingRecord(record); }}
+            onEdit={(record) => { if (record.state === 'ACTIVE' && !record.isRooted) setEditingRecord(record); }}
             filterConfig={{
-              filter1Key: 'plant_name',
+              filter1Key: 'plantName',
               filter1Label: 'Plant Name',
-              filter2Key: 'batch_code',
+              filter2Key: 'batchCode',
               filter2Label: 'Batch Name'
             }}
             exportFileName="incubation_records"

@@ -26,7 +26,7 @@ import { TransitionForm }         from '../../hardening/forms/TransitionForm';
 import { ImportForm }             from '../forms/ImportForm';
 import { QuickFertilizeForm }     from '../../fertilization/forms/QuickFertilizeForm';
 import { MortalityForm }          from '../../mortality/forms/MortalityForm';
-import { outdoorApi }             from '../../services/outdoorApi';
+import { outdoorApi }             from '../../api/outdoorApi';
 import { useNotify }              from '../../../shared/hooks/useNotify';
 import { cn }                     from '../../../shared/ui/utils';
 import { TimelineModal } from '../components/TimelineModal';
@@ -80,7 +80,7 @@ const BatchMaster: React.FC = () => {
         return null;
       
       case 'TRANSITION':
-        if (batch.current_phase === 'secondary_hardening') {
+        if (batch.currentPhase === 'secondary_hardening') {
           return 'Secondary hardening is the final phase - no further transitions allowed';
         }
         return null;
@@ -108,7 +108,7 @@ const BatchMaster: React.FC = () => {
   const handleUndoClick = async (batch: Batch) => {
     setSelected(batch);
     try {
-      const raw = await outdoorApi.batchOperations.getUndoPreview(batch.batch_code);
+      const raw = await outdoorApi.batchOperations.getUndoPreview(batch.batchCode);
       const preview = raw.data || raw;
       setUndoPreview(preview);
 
@@ -134,11 +134,11 @@ const BatchMaster: React.FC = () => {
   const handleDropdownOpen = async (open: boolean, batch: Batch) => {
     if (!open) return;
     try {
-      const raw = await outdoorApi.batchOperations.getUndoPreview(batch.batch_code);
+      const raw = await outdoorApi.batchOperations.getUndoPreview(batch.batchCode);
       const preview = raw.data || raw;
       setUndoLockReasons(prev => ({
         ...prev,
-        [batch.batch_code]: preview.lockReasons ?? [],
+        [batch.batchCode]: preview.lockReasons ?? [],
       }));
     } catch {
       // silently ignore — undo button stays in default state
@@ -148,8 +148,8 @@ const BatchMaster: React.FC = () => {
   const handleTimeline = async (batch: Batch) => {
     try {
       const [timeline, stats] = await Promise.all([
-        outdoorApi.batchTimeline.getTimeline(batch.batch_code),
-        outdoorApi.batchTimeline.getStats(batch.batch_code)
+        outdoorApi.batchTimeline.getTimeline(batch.batchCode),
+        outdoorApi.batchTimeline.getStats(batch.batchCode)
       ]);
       setTimelineData(timeline || []);
       setTimelineStats(stats || null);
@@ -162,20 +162,20 @@ const BatchMaster: React.FC = () => {
   };
 
   const columns = [
-    { key: 'batch_code',             label: 'Batch Code' },
-    { key: 'created_at',             label: 'Created Date',  render: (v: string) => v ? new Date(v).toLocaleDateString() : '—' },
-    { key: 'plant_name',             label: 'Plant Name' },
-    { key: 'current_age',            label: 'Age (Days)',     render: (v: number) => `${v ?? 0} days` },
-    { key: 'current_phase', label: 'Current Phase' },
-    { key: 'current_tunnel',         label: 'Tunnel' },
-    { key: 'initial_plants',         label: 'Initial Plants', render: (v: number) => Number(v || 0).toLocaleString() },
-    { key: 'total_mortality',        label: 'Mortality' },
-    { key: 'total_plants',           label: 'Alive Count',    render: (v: number) => Number(v || 0).toLocaleString() },
-    { key: 'current_phase_sold',     label: 'Phase Sold',     render: (v: number) => Number(v || 0).toLocaleString() },
-    { key: 'available_plants',       label: 'Available' },
-    { key: 'is_sampled',             label: 'Sampling',       render: (v: string) => v === 'c' ? 'Result Reported' : v === 's' ? 'Sample Sent' : 'Not Sampled' },
+    { key: 'batchCode',             label: 'Batch Code' },
+    { key: 'createdAt',             label: 'Created Date',  render: (v: string) => v ? new Date(v).toLocaleDateString() : '—' },
+    { key: 'plantName',             label: 'Plant Name' },
+    { key: 'currentAge',            label: 'Age (Days)',     render: (v: number) => `${v ?? 0} days` },
+    { key: 'currentPhase', label: 'Current Phase' },
+    { key: 'currentTunnel',         label: 'Tunnel' },
+    { key: 'initialPlants',         label: 'Initial Plants', render: (v: number) => Number(v || 0).toLocaleString() },
+    { key: 'totalMortality',        label: 'Mortality' },
+    { key: 'totalPlants',           label: 'Alive Count',    render: (v: number) => Number(v || 0).toLocaleString() },
+    { key: 'currentPhaseSold',     label: 'Phase Sold',     render: (v: number) => Number(v || 0).toLocaleString() },
+    { key: 'availablePlants',       label: 'Available' },
+    { key: 'isSampled',             label: 'Sampling',       render: (v: string) => v === 'c' ? 'Result Reported' : v === 's' ? 'Sample Sent' : 'Not Sampled' },
     { key: 'state',                  label: 'State' },
-    { key: 'sold_plants',            label: 'Total Sold',     render: (v: number) => Number(v || 0).toLocaleString() },
+    { key: 'soldPlants',            label: 'Total Sold',     render: (v: number) => Number(v || 0).toLocaleString() },
     {
       key: '_actions',
       label: 'Actions',
@@ -201,14 +201,14 @@ const BatchMaster: React.FC = () => {
                   <Tooltip side="left" content={lockReason}>
                     <span className="block w-full">
                       <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="h-4 w-4 mr-2" /> {batch.current_phase === 'secondary_hardening' ? 'Shift Unit' : 'Shift Tunnel'}
+                        <Lock className="h-4 w-4 mr-2" /> {batch.currentPhase === 'secondary_hardening' ? 'Shift Unit' : 'Shift Tunnel'}
                       </DropdownMenuItem>
                     </span>
                   </Tooltip>
                 </TooltipProvider>
               ) : (
                 <DropdownMenuItem onClick={() => openModal('SHIFT', batch)}>
-                  <ArrowRightLeft className="h-4 w-4 mr-2" /> {batch.current_phase === 'secondary_hardening' ? 'Shift Unit' : 'Shift Tunnel'}
+                  <ArrowRightLeft className="h-4 w-4 mr-2" /> {batch.currentPhase === 'secondary_hardening' ? 'Shift Unit' : 'Shift Tunnel'}
                 </DropdownMenuItem>
               );
             })()}
@@ -271,7 +271,7 @@ const BatchMaster: React.FC = () => {
             })()}
             
             {/* Alternating actions - only show one at a time */}
-            {batch.is_sampled === 'n' && (() => {
+            {batch.isSampled === 'n' && (() => {
               const lockReason = getActionLockReason('SAMPLE', batch);
               return lockReason ? (
                 <TooltipProvider>
@@ -290,7 +290,7 @@ const BatchMaster: React.FC = () => {
               );
             })()}
             
-            {batch.is_sampled === 's' && (() => {
+            {batch.isSampled === 's' && (() => {
               const lockReason = getActionLockReason('REPORT', batch);
               return lockReason ? (
                 <TooltipProvider>
@@ -311,13 +311,13 @@ const BatchMaster: React.FC = () => {
             
             <DropdownMenuSeparator />
             
-            {(undoLockReasons[batch.batch_code]?.length ?? 0) > 0 ? (
+            {(undoLockReasons[batch.batchCode]?.length ?? 0) > 0 ? (
               <TooltipProvider>
                 <Tooltip
                   side="left"
                   content={
                     <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                      {undoLockReasons[batch.batch_code].map((r, i) => (
+                      {undoLockReasons[batch.batchCode].map((r, i) => (
                         <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 6 }}>
                           <span style={{ color: '#f87171', marginTop: 1 }}>•</span>
                           <span style={{ color: '#f8fafc' }}>{r}</span>
@@ -362,7 +362,7 @@ const BatchMaster: React.FC = () => {
               title=""
               columns={columns}
               records={batches}
-              filterConfig={{ filter1Key: 'plant_name', filter1Label: 'Plant Name', filter2Key: 'batch_code', filter2Label: 'Batch Code' }}
+              filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}
               exportFileName="outdoor_batch_list"
               pagination={pagination}
               addButton={
@@ -386,7 +386,7 @@ const BatchMaster: React.FC = () => {
           tunnels={tunnels}
           shUnits={shUnits}
           workers={workers}
-          onSubmit={(data) => makeShift(selectedBatch.batch_code, data).then(ok => ok && closeModal())}
+          onSubmit={(data) => makeShift(selectedBatch.batchCode, data).then(ok => ok && closeModal())}
           onClose={closeModal}
         />
       )}
@@ -398,7 +398,7 @@ const BatchMaster: React.FC = () => {
           shUnits={shUnits}
           workers={workers}
           onSubmit={(data) =>
-            phaseTransition(selectedBatch.batch_code, selectedBatch.current_tunnel ?? '', data)
+            phaseTransition(selectedBatch.batchCode, selectedBatch.currentTunnel ?? '', data)
               .then(ok => ok && closeModal())
           }
           onClose={closeModal}
@@ -412,7 +412,7 @@ const BatchMaster: React.FC = () => {
               <AlertDialogTitle className="text-2xl font-black text-slate-900">Restore Previous State?</AlertDialogTitle>
               <AlertDialogDescription asChild>
                 <div className="space-y-4 pt-2">
-                  <p className="font-medium text-slate-600 leading-relaxed">{undoPreview.undo_description}</p>
+                  <p className="font-medium text-slate-600 leading-relaxed">{undoPreview.undoDescription}</p>
                   <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-4 space-y-2 text-base shadow-inner">
                     <p className="text-indigo-900 font-bold flex justify-between">
                       Target Tunnel: <span>{undoPreview.previousState?.tunnel ?? 'N/A'}</span>
@@ -443,7 +443,7 @@ const BatchMaster: React.FC = () => {
               <AlertDialogCancel className="rounded-xl font-black text-slate-400">Abort</AlertDialogCancel>
               <AlertDialogAction
                 className="!bg-indigo-600 !hover:bg-indigo-700 !text-white rounded-xl font-black shadow-lg shadow-indigo-100"
-                onClick={() => undoLastAction(selectedBatch.batch_code).then((ok: boolean) => ok && closeModal())}
+                onClick={() => undoLastAction(selectedBatch.batchCode).then((ok: boolean) => ok && closeModal())}
               >
                 Confirm Restoration
               </AlertDialogAction>
@@ -462,7 +462,7 @@ const BatchMaster: React.FC = () => {
                   <div className="bg-rose-50 border border-rose-200 rounded-2xl p-6 text-center shadow-inner">
                     <p className="text-base font-bold text-rose-800 leading-relaxed">
                       You are attempting to purge batch{' '}
-                      <span className="font-black underline decoration-2">{selectedBatch.batch_code}</span> from the master records. 
+                      <span className="font-black underline decoration-2">{selectedBatch.batchCode}</span> from the master records. 
                       This will erase all historical data associated with this entry.
                     </p>
                   </div>
@@ -473,7 +473,7 @@ const BatchMaster: React.FC = () => {
               <AlertDialogCancel className="rounded-xl font-black text-slate-400 border-none bg-slate-100">Cancel Request</AlertDialogCancel>
               <AlertDialogAction
                 className="!bg-rose-600 !hover:bg-rose-700 !text-white rounded-xl font-black shadow-xl shadow-rose-100 px-8 h-12"
-                onClick={() => undoLastAction(selectedBatch.batch_code).then(ok => ok && closeModal())}
+                onClick={() => undoLastAction(selectedBatch.batchCode).then(ok => ok && closeModal())}
               >
                 Execute Purge
               </AlertDialogAction>
@@ -484,9 +484,9 @@ const BatchMaster: React.FC = () => {
 
       {modal === 'SAMPLE' && selectedBatch && (
         <SampleForm
-          batch={{ ...selectedBatch, current_tunnel: selectedBatch.current_tunnel ?? '' }}
+          batch={{ ...selectedBatch, currentTunnel: selectedBatch.currentTunnel ?? '' }}
           onSubmit={(data) =>
-            submitSample(selectedBatch.batch_code, data).then(ok => ok && closeModal())
+            submitSample(selectedBatch.batchCode, data).then(ok => ok && closeModal())
           }
           onClose={closeModal}
         />
@@ -496,7 +496,7 @@ const BatchMaster: React.FC = () => {
         <ReportSampleForm
           batch={selectedBatch}
           onSubmit={(data) =>
-            reportSampleResult(selectedBatch.batch_code, data).then(ok => ok && closeModal())
+            reportSampleResult(selectedBatch.batchCode, data).then(ok => ok && closeModal())
           }
           onClose={closeModal}
         />
@@ -505,10 +505,10 @@ const BatchMaster: React.FC = () => {
       {modal === 'FERTILIZE' && selectedBatch && (
         <QuickFertilizeForm
           open={true}
-          batch={{ ...selectedBatch, current_tunnel: selectedBatch.current_tunnel ?? '' }}
+          batch={{ ...selectedBatch, currentTunnel: selectedBatch.currentTunnel ?? '' }}
           workers={workers}
           onSubmit={(data) =>
-            recordFertilization(selectedBatch.batch_code, data).then(ok => ok && closeModal())
+            recordFertilization(selectedBatch.batchCode, data).then(ok => ok && closeModal())
           }
           onClose={closeModal}
         />
@@ -517,10 +517,10 @@ const BatchMaster: React.FC = () => {
       {modal === 'MORTALITY' && selectedBatch && (
         <MortalityForm
           batch={{
-            batch_code: selectedBatch.batch_code,
-            current_phase: selectedBatch.current_phase,
-            current_tunnel: selectedBatch.current_tunnel ?? '',
-            available_plants: Number(selectedBatch.available_plants),
+            batchCode: selectedBatch.batchCode,
+            currentPhase: selectedBatch.currentPhase,
+            currentTunnel: selectedBatch.currentTunnel ?? '',
+            availablePlants: Number(selectedBatch.availablePlants),
           }}
           onClose={closeModal}
           onSuccess={loadData}
@@ -534,7 +534,7 @@ const BatchMaster: React.FC = () => {
             tunnels={tunnels}
             workers={workers}
             onSubmit={(data) =>
-              importFromIndoor(selectedIndoorBatch.id, data, selectedIndoorBatch.source_type).then(ok => ok && closeModal())
+              importFromIndoor(selectedIndoorBatch.id, data, selectedIndoorBatch.sourceType).then(ok => ok && closeModal())
             }
             onClose={closeModal}
           />
@@ -566,9 +566,9 @@ const BatchMaster: React.FC = () => {
                     >
                       <div className="space-y-1">
                         <div className="font-black text-base text-slate-900 group-hover:text-emerald-700 transition-colors tracking-tight">
-                          {b.batch_code}
+                          {b.batchCode}
                         </div>
-                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">{b.plant_name}</div>
+                        <div className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">{b.plantName}</div>
                       </div>
                       <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white font-semibold">
                         Initiate Transition <ArrowUpRight className="ml-2 h-4 w-4" />

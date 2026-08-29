@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { bankAccountsApi, ledgerApi } from '../services/salesApi';
+import { bankAccountsApi, ledgerApi } from '../api/salesApi';
 import { parseSpringPage } from '../../shared/utils/springPage';
-import { normalizeBankAccount } from '../utils/normalize';
 import type { BankAccount } from '../types';
 
 export const useBankAccounts = (all = false) => {
@@ -13,8 +12,8 @@ export const useBankAccounts = (all = false) => {
     try {
       setLoading(true);
       const response = await bankAccountsApi.getAll({ all });
-      const { data } = parseSpringPage<Record<string, unknown>>(response);
-      setAccounts(data.map(normalizeBankAccount));
+      const { data } = parseSpringPage<BankAccount>(response);
+      setAccounts(data);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -38,8 +37,8 @@ export const useBankSummary = () => {
       const data = await ledgerApi.getBankSummary();
       const rows = Array.isArray(data)
         ? data
-        : parseSpringPage<Record<string, unknown>>(data).data;
-      setSummary(rows.map(normalizeBankAccount));
+        : parseSpringPage<BankAccount>(data).data;
+      setSummary(rows);
     } catch (err: any) {
       setError(err.message);
       setSummary([]);

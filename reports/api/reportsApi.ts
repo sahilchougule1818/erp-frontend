@@ -1,4 +1,4 @@
-import apiClient from '../../shared/services/apiClient';
+import apiClient from '../../shared/api/apiClient';
 import { parseSpringPage } from '../../shared/utils/springPage';
 
 function asReportRows(response: unknown): Record<string, unknown>[] {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { DataTable } from '../../../shared/components/DataTable';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { Button } from '../../../shared/ui/button';
 import { Trash2 } from 'lucide-react';
@@ -9,7 +9,7 @@ import { parseSpringPage } from '../../../shared/utils/springPage';
 // Sampling uses two tables after refactor:
 //   sampling_submissions  (was: create_sampling)
 //   sampling_results      (was: report_sampling)
-// certificate_no renamed to certificate_number in sampling_results.
+// certificate_no renamed to certificateNumber in sampling_results.
 
 export function OutdoorSampling() {
   const [samples, setSamples] = useState<any[]>([]);
@@ -68,12 +68,12 @@ export function OutdoorSampling() {
 
   // Summary columns — combined view of submissions + results
   const summaryColumns = [
-    { key: 'batch_code',    label: 'Batch Code' },
-    { key: 'plant_name',    label: 'Plant Name' },
-    { key: 'current_phase', label: 'Phase' },
-    { key: 'current_tunnel',label: 'Tunnel' },
-    { key: 'sample_date',   label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
-    { key: 'plant_age_at_sampling', label: 'Age at Sampling',
+    { key: 'batchCode',    label: 'Batch Code' },
+    { key: 'plantName',    label: 'Plant Name' },
+    { key: 'currentPhase', label: 'Phase' },
+    { key: 'currentTunnel',label: 'Tunnel' },
+    { key: 'sampleDate',   label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
+    { key: 'plantAgeAtSampling', label: 'Age at Sampling',
       render: (val: number) => val != null ? `${val} days` : '—' },
     { key: 'status',        label: 'Result',
       render: (val: string) => {
@@ -82,17 +82,17 @@ export function OutdoorSampling() {
         return <span className="px-2 py-1 rounded border text-base bg-gray-50 text-gray-600 border-gray-200 shadow-none">Pending</span>;
       }
     },
-    { key: 'seed_certificate_number', label: 'Seed Cert. No' },
+    { key: 'seedCertificateNumber', label: 'Seed Cert. No' },
   ];
 
   // Submissions columns — sampling_submissions table
   const submissionColumns = [
-    { key: 'sample_date',   label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
-    { key: 'batch_code',    label: 'Batch Code' },
-    { key: 'plant_name',    label: 'Plant Name' },
-    { key: 'current_phase', label: 'Phase' },
-    { key: 'current_tunnel',label: 'Tunnel' },
-    { key: 'plant_age_at_sampling', label: 'Age at Sampling',
+    { key: 'sampleDate',   label: 'Sample Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
+    { key: 'batchCode',    label: 'Batch Code' },
+    { key: 'plantName',    label: 'Plant Name' },
+    { key: 'currentPhase', label: 'Phase' },
+    { key: 'currentTunnel',label: 'Tunnel' },
+    { key: 'plantAgeAtSampling', label: 'Age at Sampling',
       render: (val: number) => val != null ? `${val} days` : '—' },
     { key: 'notes',         label: 'Notes' },
     { key: 'actions',       label: 'Actions', render: (_: any, record: any) => (
@@ -106,8 +106,8 @@ export function OutdoorSampling() {
 
   // Results columns — sampling_results table
   const resultColumns = [
-    { key: 'batch_code',    label: 'Batch Code' },
-    { key: 'received_date', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
+    { key: 'batchCode',    label: 'Batch Code' },
+    { key: 'receivedDate', label: 'Received Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
     { key: 'status',        label: 'Result',
       render: (val: string) => {
         if (val === 'c') return <span className="px-2 py-1 rounded border text-base bg-emerald-50 text-emerald-700 border-emerald-200 shadow-none">Completed</span>;
@@ -115,7 +115,7 @@ export function OutdoorSampling() {
         return <span className="px-2 py-1 rounded border text-base bg-gray-50 text-gray-600 border-gray-200 shadow-none">Pending</span>;
       }
     },
-    { key: 'seed_certificate_number', label: 'Seed Cert. No' },
+    { key: 'seedCertificateNumber', label: 'Seed Cert. No' },
     { key: 'reason',        label: 'Notes' },
     { key: 'actions',       label: 'Actions', render: (_: any, record: any) => (
       <div className="flex gap-1 justify-end">
@@ -157,8 +157,8 @@ export function OutdoorSampling() {
             columns={getColumns()}
             records={samples}
             filterConfig={{
-              filter1Key: 'batch_code',  filter1Label: 'Batch Code',
-              filter2Key: 'plant_name',  filter2Label: 'Plant Name',
+              filter1Key: 'batchCode',  filter1Label: 'Batch Code',
+              filter2Key: 'plantName',  filter2Label: 'Plant Name',
             }}
             exportFileName={getExportName()}
             pagination={{

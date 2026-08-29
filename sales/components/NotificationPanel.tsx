@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { notificationsApi, UpcomingDelivery } from '../services/salesApi';
+import { notificationsApi, UpcomingDelivery } from '../api/salesApi';
 import { X, Calendar, Package, User } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 
@@ -30,7 +30,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
     setDismissedIds(newDismissed);
   };
 
-  const visibleDeliveries = deliveries.filter(d => !dismissedIds.has(d.order_id));
+  const visibleDeliveries = deliveries.filter(d => !dismissedIds.has(d.orderId));
 
   return (
     <div className="absolute top-12 w-96 bg-white rounded-lg shadow-2xl border border-gray-200 overflow-hidden z-50" style={{ right: '1rem', maxHeight: '500px' }}>
@@ -49,12 +49,12 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
         ) : (
           <div className="p-3 space-y-3">
             {visibleDeliveries.map((delivery) => {
-              const daysUntil = differenceInDays(new Date(delivery.expected_delivery_date), new Date());
+              const daysUntil = differenceInDays(new Date(delivery.expectedDeliveryDate), new Date());
               const isUrgent = daysUntil <= 3;
               
               return (
                 <div
-                  key={delivery.order_id}
+                  key={delivery.orderId}
                   className={`relative rounded-lg border-2 p-4 transition-all hover:shadow-md ${
                     isUrgent 
                       ? 'bg-red-50 border-red-300 hover:border-red-400' 
@@ -62,7 +62,7 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
                   }`}
                 >
                   <button
-                    onClick={() => handleDismiss(delivery.order_id)}
+                    onClick={() => handleDismiss(delivery.orderId)}
                     className="absolute top-2 right-2 text-gray-400 hover:text-gray-700 transition-colors"
                   >
                     <X className="h-4 w-4" />
@@ -82,26 +82,26 @@ export const NotificationPanel: React.FC<NotificationPanelProps> = ({ onClose })
                     <div className="space-y-2 text-base">
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-gray-500 flex-shrink-0" />
-                        <span className="font-semibold text-gray-900">{delivery.customer_name}</span>
-                        <span className="text-gray-500 text-base">({delivery.customer_id})</span>
+                        <span className="font-semibold text-gray-900">{delivery.customerName}</span>
+                        <span className="text-gray-500 text-base">({delivery.customerId})</span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <span className="text-gray-700">
-                          <span className="font-semibold">{delivery.quantity}</span> units - {delivery.plant_name}
+                          <span className="font-semibold">{delivery.quantity}</span> units - {delivery.plantName}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-500 flex-shrink-0" />
                         <span className="font-semibold text-gray-900">
-                          {format(new Date(delivery.expected_delivery_date), 'dd MMM yyyy')}
+                          {format(new Date(delivery.expectedDeliveryDate), 'dd MMM yyyy')}
                         </span>
                       </div>
 
                       <div className="text-base text-gray-600 mt-2 pt-2 border-t border-gray-300 font-mono">
-                        {delivery.order_id}
+                        {delivery.orderId}
                       </div>
                     </div>
                   </div>

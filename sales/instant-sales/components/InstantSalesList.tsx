@@ -11,9 +11,8 @@ import { CreateInstantSaleForm } from '../forms/CreateInstantSaleForm';
 import { ManageInstantSaleDialog } from '../forms/ManageInstantSaleDialog';
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { useIndoorStock, useOutdoorStock } from '../../hooks/useStock';
-import { customerBookingsApi, bookingPaymentsApi, salesApi } from '../../services/salesApi';
-import { extractApiErrorMessage } from '../../../shared/services/apiClient';
-import { normalizeInstantSaleStats } from '../../utils/normalize';
+import { customerBookingsApi, bookingPaymentsApi, salesApi } from '../../api/salesApi';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 
 export const InstantSalesList: React.FC = () => {
   const [sales, setSales] = useState<InstantSale[]>([]);
@@ -37,7 +36,7 @@ export const InstantSalesList: React.FC = () => {
         salesApi.dashboard.getInstantSaleStats()
       ]);
       setSales(data);
-      setStats(normalizeInstantSaleStats(statsData as Record<string, unknown>));
+      setStats(statsData);
     } catch (error: any) {
       notify.error(error.message || 'Failed to fetch instant sales');
     } finally {
@@ -55,9 +54,9 @@ export const InstantSalesList: React.FC = () => {
     : `₹${n.toLocaleString()}`;
 
   const columns = [
-    { key: 'order_id', label: 'Order ID' },
+    { key: 'orderId', label: 'Order ID' },
     {
-      key: 'sale_date',
+      key: 'saleDate',
       label: 'Sale Date',
       render: (val: string) => (
         <span className="text-base">
@@ -65,57 +64,57 @@ export const InstantSalesList: React.FC = () => {
         </span>
       )
     },
-    { key: 'customer_name', label: 'Customer Name' },
-    { key: 'phone_number', label: 'Phone' },
+    { key: 'customerName', label: 'Customer Name' },
+    { key: 'phoneNumber', label: 'Phone' },
     {
       key: 'items',
       label: 'Items',
       render: (_val: any, row: InstantSale) => {
         if (!row.items || row.items.length === 0) return <span className="text-base">—</span>;
         const summary = row.items.map((i) => {
-          const batchInfo = i.batch_code ? ` (${i.batch_code})` : '';
-          return `${i.plant_name}${batchInfo} × ${i.quantity}`;
+          const batchInfo = i.batchCode ? ` (${i.batchCode})` : '';
+          return `${i.plantName}${batchInfo} × ${i.quantity}`;
         }).join(', ');
         return <span className="text-base" title={summary}>{summary}</span>;
       }
     },
     {
-      key: 'base_amount',
+      key: 'baseAmount',
       label: 'Base Amount',
       render: (val: number) => <span className="text-base">{`₹${Number(val || 0).toLocaleString()}`}</span>
     },
     {
-      key: 'delivery_charges',
+      key: 'deliveryCharges',
       label: 'Delivery Charges',
       render: (val: number) => <span className="text-base">{`₹${Number(val || 0).toLocaleString()}`}</span>
     },
     {
-      key: 'cgst_percent',
+      key: 'cgstPercent',
       label: 'CGST',
       render: (val: number) => <span className="text-base">{`${Number(val || 0)}%`}</span>
     },
     {
-      key: 'sgst_percent',
+      key: 'sgstPercent',
       label: 'SGST',
       render: (val: number) => <span className="text-base">{`${Number(val || 0)}%`}</span>
     },
     {
-      key: 'total_amount',
+      key: 'totalAmount',
       label: 'Total Amount',
       render: (val: number) => <span className="text-base font-semibold">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'paid_amount',
+      key: 'paidAmount',
       label: 'Paid',
       render: (val: number) => <span className="text-base">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'remaining_amount',
+      key: 'remainingAmount',
       label: 'Remaining',
       render: (val: number) => <span className="text-base">{`₹${Number(val).toLocaleString()}`}</span>
     },
     {
-      key: 'payment_status',
+      key: 'paymentStatus',
       label: 'Payment',
       render: (val: string) => {
         const styles: any = {
@@ -127,7 +126,7 @@ export const InstantSalesList: React.FC = () => {
       }
     },
     {
-      key: 'delivery_status',
+      key: 'deliveryStatus',
       label: 'Status',
       render: (val: string) => {
         const styles: any = {
@@ -154,7 +153,7 @@ export const InstantSalesList: React.FC = () => {
   const handleEditSale = async (sale: InstantSale) => {
     try {
       setSelectedSale(sale);
-      const salePayments = await bookingPaymentsApi.getByBooking(sale.order_id);
+      const salePayments = await bookingPaymentsApi.getByBooking(sale.orderId);
       setPayments(salePayments);
       setShowManageDialog(true);
     } catch (error: any) {
@@ -164,8 +163,8 @@ export const InstantSalesList: React.FC = () => {
 
   const handleAddPayment = async (data: any) => {
     try {
-      const orderId = selectedSale.order_id;
-      await bookingPaymentsApi.create({ ...data, order_id: orderId });
+      const orderId = selectedSale.orderId;
+      await bookingPaymentsApi.create({ ...data, orderId: orderId });
       notify.success('Payment added successfully');
       await fetchSales();
       const updatedPayments = await bookingPaymentsApi.getByBooking(orderId);
@@ -184,7 +183,7 @@ export const InstantSalesList: React.FC = () => {
       await bookingPaymentsApi.delete(transactionNumber);
       notify.success('Payment deleted successfully');
       await fetchSales();
-      const orderId = selectedSale.order_id;
+      const orderId = selectedSale.orderId;
       const updatedPayments = await bookingPaymentsApi.getByBooking(orderId);
       setPayments(updatedPayments);
       // Update selected sale with fresh data
@@ -197,7 +196,7 @@ export const InstantSalesList: React.FC = () => {
   };
 
   const handleCancelSale = async (reason?: string) => {
-    await customerBookingsApi.cancel(selectedSale.order_id, { cancellation_reason: reason }, true);
+    await customerBookingsApi.cancel(selectedSale.orderId, { cancellationReason: reason }, true);
     notify.success('Sale cancelled successfully');
     await fetchSales();
     setShowManageDialog(false);
@@ -206,7 +205,7 @@ export const InstantSalesList: React.FC = () => {
   const handleUpdateSale = async () => {
     try {
       await fetchSales();
-      const orderId = selectedSale.order_id;
+      const orderId = selectedSale.orderId;
       const updatedSale = await instantSaleApi.getById(orderId);
       setSelectedSale(updatedSale);
       notify.success('Sale updated successfully');
@@ -232,7 +231,7 @@ export const InstantSalesList: React.FC = () => {
             <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#185FA5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Instant Sales</span>
             <ShoppingCart style={{ color: '#185FA5', width: '20px', height: '20px' }} />
           </div>
-          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#0C447C', marginTop: '8px' }}>{stats?.total_sales || 0}</div>
+          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#0C447C', marginTop: '8px' }}>{stats?.totalSales || 0}</div>
           <div style={{ fontSize: '0.7rem', color: '#185FA5', fontWeight: '600', textTransform: 'uppercase', marginTop: '4px' }}>
             Order count
           </div>
@@ -243,7 +242,7 @@ export const InstantSalesList: React.FC = () => {
             <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#854F0B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Outstanding Amount</span>
             <IndianRupee style={{ color: '#854F0B', width: '20px', height: '20px' }} />
           </div>
-          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#633806', marginTop: '8px' }}>{fmt(Number(stats?.outstanding_amount) || 0)}</div>
+          <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#633806', marginTop: '8px' }}>{fmt(Number(stats?.outstandingAmount) || 0)}</div>
           <div style={{ fontSize: '0.7rem', color: '#854F0B', fontWeight: '600', textTransform: 'uppercase', marginTop: '4px' }}>
             From customers
           </div>
@@ -264,9 +263,9 @@ export const InstantSalesList: React.FC = () => {
           </Button>
         }
         filterConfig={{
-          filter1Key: 'customer_name',
+          filter1Key: 'customerName',
           filter1Label: 'Search customer...',
-          filter2Key: 'order_id',
+          filter2Key: 'orderId',
           filter2Label: 'Order ID'
         }}
         exportFileName="instant_sales_export"

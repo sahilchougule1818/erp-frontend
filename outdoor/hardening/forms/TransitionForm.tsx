@@ -9,15 +9,15 @@ import { TrayInput } from '../../components/TrayInput';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 interface Batch {
-  batch_code: string;
-  available_plants: number;
-  total_plants: number;
-  current_phase: string;
-  current_tunnel?: string;
+  batchCode: string;
+  availablePlants: number;
+  totalPlants: number;
+  currentPhase: string;
+  currentTunnel?: string;
 }
 
 interface Tunnel {
-  tunnel_name?: string;
+  tunnelName?: string;
   name?: string;
   tunnel?: string;
 }
@@ -33,11 +33,11 @@ interface TransitionFormProps {
 
 export function TransitionForm({ batch, tunnels, shUnits, workers, onSubmit, onClose }: TransitionFormProps) {
   const [targetPhase, setTargetPhase] = useState(
-    batch.current_phase === 'primary_hardening' ? 'holding_area' : 'secondary_hardening'
+    batch.currentPhase === 'primary_hardening' ? 'holding_area' : 'secondary_hardening'
   );
   const [newTunnel, setNewTunnel] = useState('');
   const [unit, setUnit] = useState('');
-  const [plants, setPlants] = useState(batch.available_plants ?? batch.total_plants);
+  const [plants, setPlants] = useState(batch.availablePlants ?? batch.totalPlants);
   const [mortalityCount, setMortalityCount] = useState(0);
   const [reason, setReason] = useState('');
   const [selectedWorkers, setSelectedWorkers] = useState<number[]>([]);
@@ -67,13 +67,13 @@ export function TransitionForm({ batch, tunnels, shUnits, workers, onSubmit, onC
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Batch Information</p>
           <div className="bg-gray-50 p-3 rounded-md space-y-1">
             <p className="text-base text-gray-600">
-              Batch Code: <span className="font-semibold text-gray-900">{batch.batch_code}</span>
+              Batch Code: <span className="font-semibold text-gray-900">{batch.batchCode}</span>
             </p>
             <p className="text-base text-gray-600">
-              Current Tunnel: <span className="font-semibold text-gray-900">{batch.current_tunnel || '—'}</span>
+              Current Tunnel: <span className="font-semibold text-gray-900">{batch.currentTunnel || '—'}</span>
             </p>
             <p className="text-base text-gray-600">
-              Current Phase: <span className="font-semibold text-gray-900">{batch.current_phase?.replace(/_/g, ' ')}</span>
+              Current Phase: <span className="font-semibold text-gray-900">{batch.currentPhase?.replace(/_/g, ' ')}</span>
             </p>
           </div>
         </div>
@@ -86,13 +86,13 @@ export function TransitionForm({ batch, tunnels, shUnits, workers, onSubmit, onC
               <Select value={targetPhase} onValueChange={setTargetPhase}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {batch.current_phase === 'primary_hardening' && (
+                  {batch.currentPhase === 'primary_hardening' && (
                     <>
                       <SelectItem value="holding_area">Holding Area</SelectItem>
                       <SelectItem value="secondary_hardening">Secondary Hardening</SelectItem>
                     </>
                   )}
-                  {batch.current_phase === 'holding_area' && (
+                  {batch.currentPhase === 'holding_area' && (
                     <SelectItem value="secondary_hardening">Secondary Hardening</SelectItem>
                   )}
                 </SelectContent>

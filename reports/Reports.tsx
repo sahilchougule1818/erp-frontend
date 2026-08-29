@@ -5,7 +5,7 @@ import { Input } from '../shared/ui/input';
 import { Download, Filter } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import * as XLSX from 'xlsx';
-import { reportsApi } from './services/reportsApi';
+import { reportsApi } from './api/reportsApi';
 import { useState, useEffect } from 'react';
 
 export function Reports() {
@@ -132,10 +132,10 @@ export function Reports() {
                   <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="total_bookings" fill="#3b82f6" name="Total Bookings" />
-                  <Bar dataKey="delivered_bookings" fill="#22c55e" name="Delivered" />
-                  <Bar dataKey="pending_bookings" fill="#eab308" name="Pending" />
-                  <Bar dataKey="cancelled_bookings" fill="#ef4444" name="Cancelled" />
+                  <Bar dataKey="totalBookings" fill="#3b82f6" name="Total Bookings" />
+                  <Bar dataKey="deliveredBookings" fill="#22c55e" name="Delivered" />
+                  <Bar dataKey="pendingBookings" fill="#eab308" name="Pending" />
+                  <Bar dataKey="cancelledBookings" fill="#ef4444" name="Cancelled" />
                 </BarChart>
               </ResponsiveContainer>
               )}
@@ -152,10 +152,10 @@ export function Reports() {
                   <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="total_bookings" fill="#6366f1" name="Total Bookings" />
-                  <Bar dataKey="delivered_bookings" fill="#4ade80" name="Delivered" />
-                  <Bar dataKey="pending_bookings" fill="#f59e0b" name="Pending" />
-                  <Bar dataKey="cancelled_bookings" fill="#ef4444" name="Cancelled" />
+                  <Bar dataKey="totalBookings" fill="#6366f1" name="Total Bookings" />
+                  <Bar dataKey="deliveredBookings" fill="#4ade80" name="Delivered" />
+                  <Bar dataKey="pendingBookings" fill="#f59e0b" name="Pending" />
+                  <Bar dataKey="cancelledBookings" fill="#ef4444" name="Cancelled" />
                 </BarChart>
               </ResponsiveContainer>
               )}
@@ -172,9 +172,9 @@ export function Reports() {
                   <YAxis stroke="#6b7280" />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="total_credits" fill="#22c55e" name="Total Credits (₹)" />
-                  <Bar dataKey="total_debits" fill="#ef4444" name="Total Debits (₹)" />
-                  <Bar dataKey="total_refunds" fill="#f97316" name="Total Refunds (₹)" />
+                  <Bar dataKey="totalCredits" fill="#22c55e" name="Total Credits (₹)" />
+                  <Bar dataKey="totalDebits" fill="#ef4444" name="Total Debits (₹)" />
+                  <Bar dataKey="totalRefunds" fill="#f97316" name="Total Refunds (₹)" />
                 </BarChart>
               </ResponsiveContainer>
               )}

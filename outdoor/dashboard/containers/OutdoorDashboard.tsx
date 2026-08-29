@@ -1,7 +1,7 @@
 import { useState, useEffect, memo, useCallback } from 'react';
 import { Leaf, TreePine, Warehouse, Skull } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { outdoorApi } from '../../services/outdoorApi';
+import { outdoorApi } from '../../api/outdoorApi';
 
 const UNITS = [
   { name: 'Unit A', prefix: 'A', tunnels: 10 },
@@ -57,7 +57,7 @@ export const OutdoorDashboard = memo(() => {
   const renderOccupancyBar = (tunnelName: string) => {
     const data = getTunnelData(tunnelName);
     const batches = data?.batches || [];
-    const totalPlants = batches.reduce((sum: number, b: any) => sum + (b.available_plants || 0), 0);
+    const totalPlants = batches.reduce((sum: number, b: any) => sum + (b.availablePlants || 0), 0);
     const capacity = data?.capacity || 0;
     const isOverCapacity = capacity > 0 && totalPlants > capacity;
     const isExpanded = expandedTunnel === tunnelName;
@@ -99,13 +99,13 @@ export const OutdoorDashboard = memo(() => {
               {batches.length > 0 ? (
                 batches.map((batch: any, idx: number) => {
                   const base = capacity > 0 ? capacity : totalPlants;
-                  const pct = base > 0 ? Math.min((batch.available_plants / base) * 100, 100) : 0;
+                  const pct = base > 0 ? Math.min((batch.availablePlants / base) * 100, 100) : 0;
                   const color = COLORS_HEX[idx % COLORS_HEX.length];
                   return (
                     <div
                       key={idx}
                       style={{ width: `${pct}%`, height: '100%', backgroundColor: color, transition: 'width 0.3s ease' }}
-                      title={`${batch.batch_code}: ${batch.available_plants} plants`}
+                      title={`${batch.batchCode}: ${batch.availablePlants} plants`}
                     />
                   );
                 })
@@ -148,19 +148,19 @@ export const OutdoorDashboard = memo(() => {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 100px', gap: '12px', padding: '8px' }}>
                     <div>
                       <div style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#1e293b' }}>
-                        {batch.batch_code}
+                        {batch.batchCode}
                       </div>
                       <div style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                        {batch.plant_name}
+                        {batch.plantName}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right', fontSize: '0.8rem' }}>
                       <div style={{ fontWeight: 'bold', color: '#0f172a' }}>
-                        {batch.available_plants}
+                        {batch.availablePlants}
                       </div>
-                      {batch.total_mortality > 0 && (
+                      {batch.totalMortality > 0 && (
                         <div style={{ color: '#ef4444', fontWeight: '600', fontSize: '0.7rem' }}>
-                          ⚠ {batch.total_mortality}
+                          ⚠ {batch.totalMortality}
                         </div>
                       )}
                     </div>
@@ -208,15 +208,15 @@ export const OutdoorDashboard = memo(() => {
                 <div
                   key={idx}
                   style={{ padding: '12px', backgroundColor: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '12px', cursor: 'pointer' }}
-                  onClick={() => navigate(`/batch-timeline?batch=${batch.batch_code}`)}
+                  onClick={() => navigate(`/batch-timeline?batch=${batch.batchCode}`)}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <div>
-                      <div style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{batch.batch_code}</div>
-                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{batch.plant_name}</div>
+                      <div style={{ fontWeight: 'bold', fontSize: '0.875rem' }}>{batch.batchCode}</div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{batch.plantName}</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#ea580c' }}>{batch.available_plants}</div>
+                      <div style={{ fontSize: '0.875rem', fontWeight: 'bold', color: '#ea580c' }}>{batch.availablePlants}</div>
                       <div style={{ fontSize: '10px', color: '#fb923c', fontWeight: 'bold', textTransform: 'uppercase' }}>Plants</div>
                     </div>
                   </div>
@@ -254,7 +254,7 @@ export const OutdoorDashboard = memo(() => {
               </div>
               <Leaf style={{ color: '#3B6D11', width: '20px', height: '20px' }} />
             </div>
-            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#27500A', marginTop: '8px' }}>{stats?.primary_count || 0}</div>
+            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#27500A', marginTop: '8px' }}>{stats?.primaryCount || 0}</div>
           </div>
 
           <div style={{ padding: '20px', backgroundColor: '#E6F1FB', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
@@ -265,7 +265,7 @@ export const OutdoorDashboard = memo(() => {
               </div>
               <TreePine style={{ color: '#185FA5', width: '20px', height: '20px' }} />
             </div>
-            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#0C447C', marginTop: '8px' }}>{stats?.secondary_count || 0}</div>
+            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#0C447C', marginTop: '8px' }}>{stats?.secondaryCount || 0}</div>
           </div>
 
           <div style={{ padding: '20px', backgroundColor: '#FAEEDA', borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)' }}>
@@ -287,7 +287,7 @@ export const OutdoorDashboard = memo(() => {
               </div>
               <Skull style={{ color: '#A32D2D', width: '20px', height: '20px' }} />
             </div>
-            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#791F1F', marginTop: '8px' }}>{stats?.total_mortality || 0}</div>
+            <div style={{ fontSize: '1.875rem', fontWeight: '700', color: '#791F1F', marginTop: '8px' }}>{stats?.totalMortality || 0}</div>
           </div>
         </div>
       )}

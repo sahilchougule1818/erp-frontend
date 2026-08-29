@@ -3,7 +3,7 @@ import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
 import { Button } from '../../../shared/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 import { useAuth } from '../../../auth/AuthContext';
 import { usePlantMaster } from '../../settings/hooks/usePlantMaster';
 
@@ -40,10 +40,10 @@ export function CreateBatchForm({ mediaCodes = [], onSubmit, onCancel }: CreateB
   const fetchLabs = async () => {
     try {
       const data = await indoorApi.labs.getLabs();
-      const activeLabs = data.filter((lab: any) => lab.is_active);
+      const activeLabs = data.filter((lab: any) => lab.isActive);
       setLabs(activeLabs);
       if (activeLabs.length === 1) {
-        setForm(prev => ({ ...prev, labNumber: activeLabs[0].lab_number.toString() }));
+        setForm(prev => ({ ...prev, labNumber: activeLabs[0].labNumber.toString() }));
       }
     } catch (error) {
       console.error('Failed to fetch labs:', error);
@@ -80,9 +80,9 @@ export function CreateBatchForm({ mediaCodes = [], onSubmit, onCancel }: CreateB
               <SelectValue placeholder="Select plant" />
             </SelectTrigger>
             <SelectContent>
-              {plants.filter(p => p.is_active).map((plant) => (
+              {plants.filter(p => p.isActive).map((plant) => (
                 <SelectItem key={plant.id} value={plant.id.toString()}>
-                  {plant.plant_name}
+                  {plant.plantName}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -99,8 +99,8 @@ export function CreateBatchForm({ mediaCodes = [], onSubmit, onCancel }: CreateB
               </SelectTrigger>
               <SelectContent>
                 {labs.map((lab) => (
-                  <SelectItem key={lab.lab_number} value={lab.lab_number.toString()}>
-                    Lab {lab.lab_number} - {lab.lab_name}
+                  <SelectItem key={lab.labNumber} value={lab.labNumber.toString()}>
+                    Lab {lab.labNumber} - {lab.labName}
                   </SelectItem>
                 ))}
               </SelectContent>

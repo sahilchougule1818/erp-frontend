@@ -6,7 +6,7 @@ import { Button } from '../../../shared/ui/button';
 import { Trash2, Info } from 'lucide-react';
 import { OperatorSelector } from '../../operators/components/OperatorSelector';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
-import { indoorApi } from '../../services/indoorApi';
+import { indoorApi } from '../../api/indoorApi';
 
 interface IncubationFormProps {
   initialData: any;
@@ -50,7 +50,7 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
       ...initialData
     });
     if (initialData?.operators) {
-      const operatorIds = initialData.operators.map((op: any) => parseInt(op.operatorId ?? op.operator_id));
+      const operatorIds = initialData.operators.map((op: any) => parseInt(op.operatorId ?? op.operatorId));
       setForm((prev: any) => ({ ...prev, operatorIds }));
     }
     if (isTerminalIncubation) {
@@ -69,7 +69,7 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
     id: form.id,
     batchName: selectedBatch?.batchCode,
     plantName: selectedBatch?.plantName,
-    noOfBottles: selectedBatch?.qty_available || selectedBatch?.current_qty_in || form.noOfBottles,
+    noOfBottles: selectedBatch?.qtyAvailable || selectedBatch?.qtyIn || form.noOfBottles,
     mediaCode: form.mediaCode,
     contaminationCount: form.contamination,
     incubationPeriod: form.incubationPeriod,
@@ -124,7 +124,7 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
             </div>
             <div className="space-y-2">
               <Label>Current Bottles</Label>
-              <Input type="number" value={selectedBatch?.qty_available || selectedBatch?.current_qty_in || ''} readOnly className="bg-gray-100" />
+              <Input type="number" value={selectedBatch?.qtyAvailable || selectedBatch?.qtyIn || ''} readOnly className="bg-gray-100" />
             </div>
             <div className="col-span-2 space-y-2">
               <Label>Media Code</Label>

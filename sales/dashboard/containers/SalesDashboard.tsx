@@ -1,6 +1,7 @@
 import { Package, ArrowUp } from 'lucide-react';
 import { DataTable } from '../../../shared/components/DataTable';
-import { useIndoorStock, useOutdoorStock, useDashboardStats } from '../../hooks/useSalesApi';
+import { useIndoorStock, useOutdoorStock } from '../../hooks/useStock';
+import { useDashboardStats } from '../../hooks/useDashboard';
 
 // ─── Stat card ────────────────────────────────────────────────────────────────
 
@@ -47,26 +48,26 @@ export function SalesDashboard() {
   const { stock: outdoorStock } = useOutdoorStock();
   const { stats } = useDashboardStats();
 
-  const totalIndoorBottles = Number(stats?.total_indoor_bottles) || 0;
-  const totalOutdoorPlants = Number(stats?.total_outdoor_plants) || 0;
+  const totalIndoorBottles = Number(stats?.totalIndoorBottles) || 0;
+  const totalOutdoorPlants = Number(stats?.totalOutdoorPlants) || 0;
 
   // ── Columns ──────────────────────────────────────────────────────────────
 
   const indoorColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
     { key: 'stage', label: 'Stage' },
     { key: 'phase', label: 'Phase' },
-    { key: 'lab_number', label: 'Lab' },
-    { key: 'available_bottles', label: 'Available Plants', render: (val: number) => Number(val).toLocaleString() }
+    { key: 'labNumber', label: 'Lab' },
+    { key: 'availableBottles', label: 'Available Plants', render: (val: number) => Number(val).toLocaleString() }
   ];
 
   const outdoorColumns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant' },
     { key: 'phase', label: 'Phase' },
     { key: 'location', label: 'Location' },
-    { key: 'available_plants', label: 'Available Plants', render: (val: number) => Number(val).toLocaleString() }
+    { key: 'availablePlants', label: 'Available Plants', render: (val: number) => Number(val).toLocaleString() }
   ];
 
   return (

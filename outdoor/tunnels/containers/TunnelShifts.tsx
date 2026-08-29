@@ -30,34 +30,34 @@ export function TunnelShifts() {
 
   const columns = [
     {
-      key: 'moved_at',
+      key: 'movedAt',
       label: 'Date',
       render: (val: string) => val?.split('T')[0] ?? '',
     },
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
     {
-      key: 'movement_type',
+      key: 'movementType',
       label: 'Type',
       render: (val: string) => movementTypeBadge(val),
     },
     {
-      key: 'from_location',
+      key: 'fromLocation',
       label: 'From',
       render: (val: string | null) => val ?? '—',
     },
     {
-      key: 'to_location',
+      key: 'toLocation',
       label: 'To',
       render: (val: string | null) => val ?? '—',
     },
     {
-      key: 'plants_at_entry',
+      key: 'plantsAtEntry',
       label: 'Plants',
       render: (val: number) => Number(val || 0).toLocaleString(),
     },
     {
-      key: 'mortality_count',
+      key: 'mortalityCount',
       label: 'Mortality',
       render: (val: number) => {
         const n = Number(val ?? 0);
@@ -67,7 +67,7 @@ export function TunnelShifts() {
       },
     },
     {
-      key: 'sold_count',
+      key: 'soldCount',
       label: 'Sold',
       render: (val: number) => Number(val ?? 0).toLocaleString(),
     },
@@ -86,8 +86,8 @@ export function TunnelShifts() {
             columns={columns}
             records={records}
             filterConfig={{
-              filter1Key: 'batch_code', filter1Label: 'Batch Code',
-              filter2Key: 'movement_type', filter2Label: 'Type',
+              filter1Key: 'batchCode', filter1Label: 'Batch Code',
+              filter2Key: 'movementType', filter2Label: 'Type',
             }}
             exportFileName="movement-journal"
             pagination={pagination}

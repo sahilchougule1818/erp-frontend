@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../../../shared/ui/select';
-import { bankAccountsApi, BankAccount } from '../../services/salesApi';
+import { bankAccountsApi, BankAccount } from '../../api/salesApi';
 
 type BankAccountSelectorProps = {
   value?: string;
@@ -27,7 +27,7 @@ export const BankAccountSelector: React.FC<BankAccountSelectorProps> = ({
     const loadAccounts = async () => {
       try {
         const allAccounts = await bankAccountsApi.getAll();
-        setAccounts(allAccounts.filter(acc => acc.is_active));
+        setAccounts(allAccounts.filter(acc => acc.isActive));
       } catch (error) {
         console.error('Error loading bank accounts:', error);
         setAccounts([]);
@@ -45,7 +45,7 @@ export const BankAccountSelector: React.FC<BankAccountSelectorProps> = ({
       <SelectContent>
         {accounts.map((account) => (
           <SelectItem key={account.id} value={String(account.id)}>
-            {account.account_name} - {account.bank_name} (****{account.account_number.slice(-4)})
+            {account.accountName} - {account.bankName} (****{account.accountNumber.slice(-4)})
           </SelectItem>
         ))}
       </SelectContent>

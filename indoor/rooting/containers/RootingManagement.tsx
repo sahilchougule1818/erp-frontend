@@ -13,16 +13,16 @@ export function RootingManagement() {
   };
 
   const columns = [
-    { key: 'batch_code', label: 'Batch Code' },
-    { key: 'plant_name', label: 'Plant Name' },
-    { key: 'lab_number', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
-    { key: 'media_code', label: 'Media Code', render: (v: string) => v || '—' },
-    { key: 'qty_in', label: 'Bottles Entered' },
-    { key: 'qty_contaminated', label: 'Contamination' },
-    { key: 'qty_sold', label: 'Sold' },
-    { key: 'qty_available', label: 'Available' },
-    { key: 'source_batch_stage', label: 'Source Stage' },
-    { key: 'rooting_date', label: 'Rooting Date', render: (value: string | null) => formatDate(value) },
+    { key: 'batchCode', label: 'Batch Code' },
+    { key: 'plantName', label: 'Plant Name' },
+    { key: 'labNumber', label: 'Lab', render: (v: number) => v ? `Lab ${v}` : '-' },
+    { key: 'mediaCode', label: 'Media Code', render: (v: string) => v || '—' },
+    { key: 'qtyIn', label: 'Bottles Entered' },
+    { key: 'qtyContaminated', label: 'Contamination' },
+    { key: 'qtySold', label: 'Sold' },
+    { key: 'qtyAvailable', label: 'Available' },
+    { key: 'sourceBatchStage', label: 'Source Stage' },
+    { key: 'rootingDate', label: 'Rooting Date', render: (value: string | null) => formatDate(value) },
     { key: 'state', label: 'State' },
   ];
 

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import apiClient from '../../../shared/services/apiClient';
+import apiClient from '../../../shared/api/apiClient';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
 export interface Plant {

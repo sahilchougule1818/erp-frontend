@@ -9,13 +9,13 @@ export function HoldingArea() {
   const { records, refetch, pagination } = useHoldingAreaData();
   const { editingRecord, onEditRecord, closeEdit } = usePhaseEditing(refetch);
 
-  // Use shared config — includes source_phase, mortality, sold, and available columns
+  // Use shared config — includes sourcePhase, mortality, sold, and available columns
   const baseColumns = createPhaseColumns(phaseColumnConfigs.holdingArea);
 
-  // Replace 'current_tunnel' with 'source_tunnel' for holding area
+  // Replace 'currentTunnel' with 'sourceTunnel' for holding area
   const columns = baseColumns.map(col => {
-    if (col.key === 'current_tunnel') {
-      return { ...col, key: 'source_tunnel', label: 'Source Tunnel' };
+    if (col.key === 'currentTunnel') {
+      return { ...col, key: 'sourceTunnel', label: 'Source Tunnel' };
     }
     return col;
   });
@@ -32,7 +32,7 @@ export function HoldingArea() {
             title=""
             columns={columns}
             records={records}
-            filterConfig={{ filter1Key: 'batch_code', filter1Label: 'Batch Code', filter2Key: 'plant_name', filter2Label: 'Plant Name' }}
+            filterConfig={{ filter1Key: 'batchCode', filter1Label: 'Batch Code', filter2Key: 'plantName', filter2Label: 'Plant Name' }}
             exportFileName="holding-area"
             onEdit={onEditRecord}
             pagination={pagination}
@@ -42,10 +42,10 @@ export function HoldingArea() {
 
       {editingRecord && (
         <UnifiedEditModal
-          eventCode={editingRecord.event_code}
-          batchCode={editingRecord.batch_code}
-          tunnel={editingRecord.source_tunnel ?? ''}
-          phase={editingRecord.source_phase ?? 'holding_area'}
+          eventCode={editingRecord.eventCode}
+          batchCode={editingRecord.batchCode}
+          tunnel={editingRecord.sourceTunnel ?? ''}
+          phase={editingRecord.sourcePhase ?? 'holding_area'}
           onClose={closeEdit}
         />
       )}
