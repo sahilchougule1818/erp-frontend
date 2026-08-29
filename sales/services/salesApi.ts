@@ -96,7 +96,7 @@ export const customerBookingsApi = {
   cancel: (orderId: string, data: { cancellation_reason?: string }, isInstantSale: boolean) => {
     return isInstantSale
       ? apiClient.post<Booking>(`/sales/instant-sales/${orderId}/cancel`, data)
-      : apiClient.put<Booking>(`/sales/pre-bookings/${orderId}/cancel`, data);
+      : apiClient.post<Booking>(`/sales/pre-bookings/${orderId}/cancel`, data);
   },
   delete: (orderId: string, isInstantSale: boolean) => {
     return isInstantSale
@@ -202,7 +202,7 @@ export const billingApi = {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Invoice-${orderId}.pdf`;
+      a.download = `Invoice-${orderId}.html`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);

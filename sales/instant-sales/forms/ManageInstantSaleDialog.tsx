@@ -14,7 +14,8 @@ import {
 } from 'lucide-react';
 import { PAYMENT_METHODS } from '../../constants/EventTypes';
 import { cn } from '../../../shared/ui/utils';
-import { customerBookingsApi, billingApi } from '../../services/salesApi';
+import { instantSaleApi } from '../api/instantSaleApi';
+import { billingApi } from '../../services/salesApi';
 import { extractApiErrorMessage } from '../../../shared/services/apiClient';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
@@ -38,14 +39,6 @@ interface ManageInstantSaleDialogProps {
   outdoorBatches?: any[];
   onAddPayment: (data: any) => Promise<void>;
   onDeletePayment: (transactionNumber: string) => Promise<void>;
-  onStatusChange: (
-    booking: any,
-    newStatus: string,
-    fulfillment?: {
-      fulfillment_type: string;
-      allocations: { item_number: number; batch_code: string; quantity: number }[];
-    },
-  ) => Promise<void>;
   onCancelBooking: (reason?: string) => Promise<void>;
   onUpdate?: () => Promise<void>;
 }
@@ -55,7 +48,7 @@ const EMPTY_ALLOCATION: AllocationDraft = { batch_code: '', quantity: '' };
 export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = ({
   open, onOpenChange, selectedBooking, payments, accounts,
   indoorBatches = [], outdoorBatches = [],
-  onAddPayment, onDeletePayment, onStatusChange, onCancelBooking, onUpdate,
+  onAddPayment, onDeletePayment, onCancelBooking, onUpdate,
 }) => {
   const [formData, setFormData] = useState({
     amount: '', payment_type: 'REGULAR', payment_method: 'Cash',
@@ -166,7 +159,7 @@ export const ManageInstantSaleDialog: React.FC<ManageInstantSaleDialogProps> = (
             payload.sgst_percent = Number(editedFinancials.sgst_percent);
           }
 
-          await customerBookingsApi.updateInstantSale(selectedBooking.order_id, payload);
+          await instantSaleApi.update(selectedBooking.order_id, payload);
           if (onUpdate) await onUpdate();
         }
       }

@@ -11,7 +11,7 @@ const toList = (response: unknown) => {
 };
 
 export const preBookingApi = {
-  getAll: async (limit = 50, offset = 0): Promise<PreBooking[]> => {
+  getAll: async (limit = 200, offset = 0): Promise<PreBooking[]> => {
     const res = await apiClient.get(`${BASE_URL}?limit=${limit}&offset=${offset}`);
     return toList(res).map((item) => normalizePreBooking(item));
   },

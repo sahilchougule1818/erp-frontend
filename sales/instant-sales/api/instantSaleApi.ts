@@ -11,7 +11,7 @@ const toList = (response: unknown) => {
 };
 
 export const instantSaleApi = {
-  getAll: async (limit = 50, offset = 0): Promise<InstantSale[]> => {
+  getAll: async (limit = 200, offset = 0): Promise<InstantSale[]> => {
     const res = await apiClient.get(`${BASE_URL}?limit=${limit}&offset=${offset}`);
     return toList(res).map((item) => normalizeInstantSale(item));
   },

@@ -196,18 +196,6 @@ export const InstantSalesList: React.FC = () => {
     }
   };
 
-  const handleStatusChange = async (booking: any, newStatus: string, fulfillment?: any) => {
-    try {
-      await customerBookingsApi.updateInstantSaleStatus(booking.order_id, { delivery_status: newStatus });
-      notify.success('Status updated successfully');
-      await fetchSales();
-      setShowManageDialog(false);
-    } catch (error: any) {
-      notify.error('Failed to update status');
-      throw error;
-    }
-  };
-
   const handleCancelSale = async (reason?: string) => {
     await customerBookingsApi.cancel(selectedSale.order_id, { cancellation_reason: reason }, true);
     notify.success('Sale cancelled successfully');
@@ -300,7 +288,6 @@ export const InstantSalesList: React.FC = () => {
         outdoorBatches={outdoorStock || []}
         onAddPayment={handleAddPayment}
         onDeletePayment={handleDeletePayment}
-        onStatusChange={handleStatusChange}
         onCancelBooking={handleCancelSale}
         onUpdate={handleUpdateSale}
       />
