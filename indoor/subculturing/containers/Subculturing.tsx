@@ -67,6 +67,7 @@ export function Subculturing() {
           batchCode={editingRecord.batchCode}
           stage={editingRecord.toStage}
           activityType="event"
+          operatorDesignation="SUBCULTURING"
           onClose={() => setEditingRecord(null)}
           onSuccess={refetch}
         />

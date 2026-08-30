@@ -18,6 +18,7 @@ interface OperatorEditModalProps {
   cleaningRecordKind?: 'standard' | 'deep';
   targetLabel?: string;
   activityType?: string;
+  operatorDesignation?: string;
   stage?: string;
   onClose: () => void;
   onSuccess?: () => void;
@@ -31,6 +32,7 @@ export function UnifiedOperatorEditModal({
   cleaningRecordKind = 'standard',
   targetLabel,
   activityType = 'event',
+  operatorDesignation,
   stage,
   onClose,
   onSuccess
@@ -66,7 +68,9 @@ export function UnifiedOperatorEditModal({
             cleaningRecordKind,
             activityType: cleaningRecordId != null ? 'cleaning' : activityType
           }),
-          indoorApi.operators.getActive()
+          indoorApi.operators.getActive(
+            operatorDesignation ? { designation: operatorDesignation } : undefined
+          )
         ]);
         if (!active) return;
 
@@ -93,7 +97,7 @@ export function UnifiedOperatorEditModal({
     }
     loadData();
     return () => { active = false; };
-  }, [eventCode, mediaCode, cleaningRecordId, cleaningRecordKind, activityType, notify]);
+  }, [eventCode, mediaCode, cleaningRecordId, cleaningRecordKind, activityType, operatorDesignation, notify]);
 
   const toggleOperator = (operatorId: number) => {
     const operator = allOperators.find(op => op.id === operatorId);

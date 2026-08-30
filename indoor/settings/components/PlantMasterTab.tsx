@@ -15,11 +15,11 @@ export function PlantMasterTab() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedPlant, setSelectedPlant] = useState<Plant | null>(null);
   const [deletePlantId, setDeletePlantId] = useState<number | null>(null);
-  const [formData, setFormData] = useState({ plantName: '', active: true });
+  const [formData, setFormData] = useState({ plantName: '', plantSubtype: '', active: true });
 
   const handleEdit = (plant: Plant) => {
     setSelectedPlant(plant);
-    setFormData({ plantName: plant.plantName, active: plant.active });
+    setFormData({ plantName: plant.plantName, plantSubtype: '', active: plant.active });
     setShowModal(true);
   };
 
@@ -43,9 +43,12 @@ export function PlantMasterTab() {
 
     try {
       if (selectedPlant) {
-        await updatePlant(selectedPlant.id, formData);
+        await updatePlant(selectedPlant.id, { plantName: formData.plantName.trim(), active: formData.active });
       } else {
-        await createPlant({ plantName: formData.plantName.trim() });
+        await createPlant({
+          plantName: formData.plantName.trim(),
+          ...(formData.plantSubtype.trim() ? { plantSubtype: formData.plantSubtype.trim() } : {})
+        });
       }
       closeModal();
     } catch (error: any) {
@@ -56,7 +59,7 @@ export function PlantMasterTab() {
   const closeModal = () => {
     setShowModal(false);
     setSelectedPlant(null);
-    setFormData({ plantName: '', active: true });
+    setFormData({ plantName: '', plantSubtype: '', active: true });
   };
 
   return (
@@ -98,10 +101,21 @@ export function PlantMasterTab() {
                 <Input
                   value={formData.plantName}
                   onChange={(e) => setFormData({ ...formData, plantName: e.target.value })}
-                  placeholder="e.g., Banana, Teak, Mango"
+                  placeholder={selectedPlant ? 'e.g., Banana G9' : 'e.g., Banana, Teak, Mango'}
                   required
                 />
               </div>
+
+              {!selectedPlant && (
+                <div className="space-y-2">
+                  <Label>Subtype</Label>
+                  <Input
+                    value={formData.plantSubtype}
+                    onChange={(e) => setFormData({ ...formData, plantSubtype: e.target.value })}
+                    placeholder="e.g., G9, Grand Naine"
+                  />
+                </div>
+              )}
 
               {selectedPlant && (
                 <div className="space-y-2">

@@ -35,7 +35,7 @@ export function usePlantMaster() {
     fetchPlants();
   }, []);
 
-  const createPlant = async (plantData: { plantName: string }) => {
+  const createPlant = async (plantData: { plantName: string; plantSubtype?: string }) => {
     await apiClient.post('/indoor/settings/plants', plantData);
     await fetchPlants();
   };

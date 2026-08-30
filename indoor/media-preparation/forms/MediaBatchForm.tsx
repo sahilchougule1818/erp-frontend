@@ -11,6 +11,7 @@ import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { useAuth } from '../../../auth/AuthContext';
 import { syncOperatorAssignments, toggleStagedOperator } from '../../operators/utils/syncOperatorAssignments';
+import { isRecordActive } from '../../../shared/utils/recordActive';
 
 interface MediaBatchFormProps {
   open: boolean;
@@ -81,7 +82,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
 
   const loadAllOperators = async () => {
     try {
-      const res = await indoorApi.operators.getActive();
+      const res = await indoorApi.operators.getActive({ designation: 'MEDIA_PREPARATION' });
       setAllOperators(Array.isArray(res) ? res : []);
     } catch { setAllOperators([]); }
   };
@@ -89,7 +90,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const fetchLabs = async () => {
     try {
       const data = await indoorApi.labs.getLabs();
-      const activeLabs = data.filter((lab: any) => lab.isActive);
+      const activeLabs = data.filter((lab: any) => isRecordActive(lab));
       setLabs(activeLabs);
       if (activeLabs.length === 1 && !form.labNumber) {
         setForm((prev: any) => ({ ...prev, labNumber: activeLabs[0].labNumber.toString() }));
@@ -104,7 +105,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
     try {
       const [assignmentsRes, operatorsRes] = await Promise.all([
         indoorApi.operators.getAssignments({ activityType: 'autoclave', mediaCode: initialData.mediaCode }),
-        indoorApi.operators.getActive()
+        indoorApi.operators.getActive({ designation: 'MEDIA_PREPARATION' })
       ]);
       const assignments = Array.isArray(assignmentsRes) ? assignmentsRes : [];
       const ops = Array.isArray(operatorsRes) ? operatorsRes : [];

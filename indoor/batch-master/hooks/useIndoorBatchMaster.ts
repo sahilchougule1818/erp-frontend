@@ -44,9 +44,11 @@ export const useIndoorBatchMaster = () => {
     }
   }, [labNumber]);
 
-  const fetchOperators = useCallback(async () => {
+  const fetchOperators = useCallback(async (designation?: string) => {
     try {
-      const data = await indoorApi.operators.getActive();
+      const data = await indoorApi.operators.getActive(
+        designation ? { designation } : undefined
+      );
       setOperators(Array.isArray(data) ? data : []);
     } catch (err: any) {
       console.error('Failed to fetch operators', err);

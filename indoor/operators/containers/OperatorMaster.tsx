@@ -7,6 +7,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useOperatorMaster } from '../hooks/useOperatorMaster';
 import { OperatorForm } from '../forms/OperatorForm';
+import { formatOperatorDesignations } from '../constants/operatorDesignations';
 import { useLabContext } from '../../contexts/LabContext';
 
 export function OperatorMaster() {
@@ -94,7 +95,8 @@ export function OperatorMaster() {
               { key: 'id', label: 'ID' },
               { key: 'shortName', label: 'Short Name' },
               { key: 'fullName', label: 'Full Name', render: (_: any, op: any) => [op.firstName, op.middleName, op.lastName].filter(Boolean).join(' ') },
-              { key: 'isActive', label: 'State', render: (val: boolean) => val ? 'Active' : 'Inactive' }
+              { key: 'designations', label: 'Designations', render: (_: any, op: any) => formatOperatorDesignations(op.designations) },
+              { key: 'isActive', label: 'State', render: (val: boolean, op: any) => (val ?? op.active) ? 'Active' : 'Inactive' }
             ]}
             onEdit={handleEdit}
             onDelete={(op: any) => { setDeleteId(op.id); toggleModal('delete', true); }}

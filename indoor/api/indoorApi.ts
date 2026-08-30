@@ -96,7 +96,8 @@ export const indoorApi = {
       const { page = 1, limit = 10, size } = params || {};
       return apiClient.get('/indoor/operators', { params: pageQuery(page, size ?? limit) });
     },
-    getActive: () => apiClient.get('/indoor/operators/active'),
+    getActive: (params?: { designation?: string }) =>
+      apiClient.get('/indoor/operators/active', { params }),
     getLog:    () => apiClient.get('/indoor/operator-log'),
     create:    (data: any) => apiClient.post('/indoor/operators', data),
     update:    (id: number | string, data: any) => apiClient.put(`/indoor/operators/${id}`, data),
@@ -178,7 +179,7 @@ export const indoorApi = {
 
   plants: {
     getPlants:    () => apiClient.get('/indoor/settings/plants'),
-    createPlant:  (data: { plantName: string }) => apiClient.post('/indoor/settings/plants', data),
+    createPlant:  (data: { plantName: string; plantSubtype?: string }) => apiClient.post('/indoor/settings/plants', data),
     updatePlant:  (id: number, data: { plantName: string; active: boolean }) => apiClient.put(`/indoor/settings/plants/${id}`, data),
     deletePlant:  (id: number) => apiClient.delete(`/indoor/settings/plants/${id}`)
   },

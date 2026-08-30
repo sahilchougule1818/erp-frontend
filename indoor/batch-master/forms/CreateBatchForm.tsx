@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { indoorApi } from '../../api/indoorApi';
 import { useAuth } from '../../../auth/AuthContext';
 import { usePlantMaster } from '../../settings/hooks/usePlantMaster';
+import { isRecordActive } from '../../../shared/utils/recordActive';
 
 interface CreateBatchFormProps {
   mediaCodes?: string[];
@@ -40,7 +41,7 @@ export function CreateBatchForm({ mediaCodes = [], onSubmit, onCancel }: CreateB
   const fetchLabs = async () => {
     try {
       const data = await indoorApi.labs.getLabs();
-      const activeLabs = data.filter((lab: any) => lab.isActive);
+      const activeLabs = data.filter((lab: any) => isRecordActive(lab));
       setLabs(activeLabs);
       if (activeLabs.length === 1) {
         setForm(prev => ({ ...prev, labNumber: activeLabs[0].labNumber.toString() }));
@@ -80,7 +81,7 @@ export function CreateBatchForm({ mediaCodes = [], onSubmit, onCancel }: CreateB
               <SelectValue placeholder="Select plant" />
             </SelectTrigger>
             <SelectContent>
-              {plants.filter(p => p.isActive).map((plant) => (
+              {plants.filter((p) => isRecordActive(p)).map((plant) => (
                 <SelectItem key={plant.id} value={plant.id.toString()}>
                   {plant.plantName}
                 </SelectItem>

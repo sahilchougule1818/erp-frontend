@@ -277,7 +277,6 @@ const IndoorBatchMaster: React.FC = () => {
   // Fetch data when component mounts or lab changes
   React.useEffect(() => {
     fetchBatches(1);
-    fetchOperators();
     
     const fetchMediaCodes = async () => {
       try {
@@ -290,10 +289,15 @@ const IndoorBatchMaster: React.FC = () => {
     };
     
     fetchMediaCodes();
-  }, [labNumber, fetchBatches, fetchOperators]);
+  }, [labNumber, fetchBatches]);
 
   const openModal = (type: ModalType, batch?: Batch) => {
     if (batch) setSelectedBatch(batch);
+    if (type === 'SUBCULTURE') {
+      fetchOperators('SUBCULTURING');
+    } else if (type === 'INCUBATE') {
+      fetchOperators('INCUBATION');
+    }
     setActiveModal(type);
   };
 

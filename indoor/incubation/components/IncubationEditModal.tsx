@@ -50,7 +50,7 @@ export function IncubationEditModal({ record, onClose, onSuccess }: IncubationEd
             eventCode: record.eventCode,
             activityType: 'event'
           }),
-          indoorApi.operators.getActive()
+          indoorApi.operators.getActive({ designation: 'INCUBATION' })
         ]);
         if (!active) return;
         
