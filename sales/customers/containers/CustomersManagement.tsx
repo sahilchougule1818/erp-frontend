@@ -1,6 +1,6 @@
+import { CustomersTable } from '../components/CustomersTable';
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Button } from '../../../shared/ui/button';
 import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
@@ -102,14 +102,14 @@ export function CustomersManagement() {
         </TabsList>
         
         <TabsContent value="customers">
-          <DataTable
-            title=""
+          <CustomersTable
+            title="Customers"
 
             columns={columns}
             records={customers.filter(b => !b.isDeleted)}
             onEdit={openEdit}
             addButton={
-              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={openCreate}>
+              <Button onClick={openCreate}>
                 <Plus className="w-4 h-4 mr-2" /> Add Customer
               </Button>
             }
@@ -160,7 +160,7 @@ export function CustomersManagement() {
 
             <div className="flex justify-end gap-3 pt-2 border-t">
               <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={saving} className="bg-green-600 hover:bg-green-700 text-white">
+              <Button type="submit" disabled={saving}>
                 {saving ? 'Saving...' : editing ? 'Save Changes' : 'Add Customer'}
               </Button>
             </div>

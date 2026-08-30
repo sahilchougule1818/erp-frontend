@@ -1,3 +1,4 @@
+import { BatchMasterTable } from '../components/BatchMasterTable';
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Button } from '../../../shared/ui/button';
@@ -29,7 +30,6 @@ import { useIndoorBatchMaster } from '../hooks/useIndoorBatchMaster';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
 import { Tooltip, TooltipProvider } from '../../../shared/ui/tooltip';
-import { DataTable } from '../../../shared/components/DataTable';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { CreateBatchForm } from '../forms/CreateBatchForm';
 import { SubcultureForm } from '../../subculturing/forms/SubcultureForm';
@@ -874,7 +874,7 @@ const columns = [
         </TabsList>
         
         <TabsContent value="master">
-          <DataTable
+          <BatchMasterTable
         title="Indoor Batch Master"
         columns={columns}
         records={showAll ? batches.map(batch => ({ ...batch })) : batches.filter(b => b.state === 'ACTIVE').map(batch => ({ ...batch }))}
@@ -891,13 +891,13 @@ const columns = [
               type="button"
               onClick={() => setShowAll(v => !v)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                showAll ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
+                showAll ? 'erp-accent-bg erp-accent-text border-[#7db86a]' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
               }`}
             >
               <span className={`w-2 h-2 rounded-full ${showAll ? 'bg-white' : 'bg-gray-400'}`} />
               Show All
             </button>
-            <Button onClick={() => openModal('CREATE')} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={() => openModal('CREATE')}>
               <Plus className="w-4 h-4 mr-2" />Create New Batch
             </Button>
           </div>

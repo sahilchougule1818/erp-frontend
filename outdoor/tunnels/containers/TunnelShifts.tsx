@@ -1,7 +1,6 @@
+import { TunnelShiftsTable } from '../components/TunnelShiftsTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useTunnelShiftsData } from '../hooks';
-import { DataTable } from '../../../shared/components/DataTable';
-
 const movementTypeLabel = (val: string) => {
   const map: Record<string, string> = {
     IMPORT: 'Import',
@@ -81,8 +80,8 @@ export function TunnelShifts() {
         </TabsList>
         
         <TabsContent value="shifts">
-          <DataTable
-            title=""
+          <TunnelShiftsTable
+            title="Tunnel Shift Records"
             columns={columns}
             records={records}
             filterConfig={{

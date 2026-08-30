@@ -1,5 +1,5 @@
+import { ContaminationTable } from '../components/ContaminationTable';
 import { useIndoorContaminationData } from '../hooks/useIndoorContaminationData';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useEffect } from 'react';
 
@@ -38,8 +38,8 @@ export function IndoorContamination() {
         </TabsList>
 
         <TabsContent value="summary">
-          <DataTable
-            title=""
+          <ContaminationTable
+            title="Contamination Summary"
             columns={summaryColumns}
             records={summary}
             exportFileName="contamination_summary"
@@ -47,8 +47,8 @@ export function IndoorContamination() {
         </TabsContent>
 
         <TabsContent value="records">
-          <DataTable
-            title=""
+          <ContaminationTable
+            title="Detailed Records"
             columns={recordsColumns}
             records={records}
             filterConfig={{

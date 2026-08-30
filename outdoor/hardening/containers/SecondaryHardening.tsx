@@ -1,6 +1,6 @@
+import { SecondaryHardeningTable } from '../components/SecondaryHardeningTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useSecondaryHardeningData } from '../hooks';
-import { DataTable } from '../../../shared/components/DataTable';
 import { createPhaseColumns, phaseColumnConfigs } from '../../components/phaseColumns';
 import { UnifiedEditModal } from '../../workers/components/UnifiedEditModal';
 import { usePhaseEditing } from '../hooks/usePhaseEditing';
@@ -19,8 +19,8 @@ export function SecondaryHardening() {
         </TabsList>
         
         <TabsContent value="secondary">
-          <DataTable
-            title=""
+          <SecondaryHardeningTable
+            title="Secondary Hardening Records"
             columns={columns}
             records={records}
             filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}

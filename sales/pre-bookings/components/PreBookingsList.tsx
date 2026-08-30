@@ -1,7 +1,7 @@
+import { PreBookingsTable } from './PreBookingsTable';
 import React, { useState, useEffect } from 'react';
 import { preBookingApi } from '../api/preBookingApi';
 import { PreBooking } from '../types/preBooking.types';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { Plus as PlusIcon, Clock, IndianRupee } from 'lucide-react';
@@ -260,7 +260,7 @@ export const PreBookingsList: React.FC = () => {
         </div>
       </div>
 
-      <DataTable
+      <PreBookingsTable
         title="Pre-Bookings"
         columns={columns}
         records={bookings}

@@ -1,3 +1,4 @@
+import { OutdoorWorkerTable } from '../components/OutdoorWorkerTable';
 import { useState } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Plus } from 'lucide-react';
@@ -8,7 +9,6 @@ import { Badge } from '../../../shared/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { useWorkerMaster } from '../hooks/useWorkerMaster';
 import { WorkerForm } from '../forms/WorkerForm';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { Units } from '../../units/containers/Units';
 
@@ -123,7 +123,7 @@ export function OutdoorWorkerMaster() {
         </TabsList>
 
         <TabsContent value="operators">
-          <DataTable
+          <OutdoorWorkerTable
             title="Worker Master"
             columns={columns}
             records={workers}
@@ -139,7 +139,7 @@ export function OutdoorWorkerMaster() {
         </TabsContent>
 
         <TabsContent value="operator-log">
-          <DataTable
+          <OutdoorWorkerTable
             title="Worker Log Register"
             columns={logColumns}
             records={workerLogs.filter((log: any) => selectedWorker === 'all' || log.workerId.toString() === selectedWorker)}

@@ -1,6 +1,6 @@
+import { PrimaryHardeningTable } from '../components/PrimaryHardeningTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { usePrimaryHardeningData } from '../hooks';
-import { DataTable } from '../../../shared/components/DataTable';
 import { createPhaseColumns, phaseColumnConfigs } from '../../components/phaseColumns';
 import { UnifiedEditModal } from '../../workers/components/UnifiedEditModal';
 import { usePhaseEditing } from '../hooks/usePhaseEditing';
@@ -19,8 +19,8 @@ export function PrimaryHardening() {
         </TabsList>
         
         <TabsContent value="primary">
-          <DataTable
-            title=""
+          <PrimaryHardeningTable
+            title="Primary Hardening Records"
             columns={columns}
             records={records}
             filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}

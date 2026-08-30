@@ -1,7 +1,7 @@
+import { LabMasterTable } from './LabMasterTable';
 import { useState } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Edit2, Trash2, FlaskConical } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../shared/ui/alert-dialog';
 import { Label } from '../../../shared/ui/label';
@@ -62,8 +62,8 @@ export function LabMasterTab() {
 
   return (
     <>
-      <DataTable
-        title=""
+      <LabMasterTable
+        title="Lab Master"
         records={labs}
         columns={[
           { key: 'id', label: 'ID' },
@@ -78,8 +78,7 @@ export function LabMasterTab() {
         addButton={
           <Button 
             onClick={() => setShowModal(true)} 
-            style={{ backgroundColor: '#4f46e5', color: '#fff' }} 
-            className="font-bold shadow-md shadow-indigo-100 rounded-xl px-4 py-2 flex items-center gap-2 transition-all hover:opacity-90 active:scale-95"
+            className="font-bold rounded-xl px-4 py-2 flex items-center gap-2"
           >
             <Plus className="w-4 h-4" />
             Add Lab

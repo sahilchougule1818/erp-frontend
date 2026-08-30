@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { LabProvider } from '../indoor/contexts/LabContext';
 import { Sidebar } from './Sidebar';
-import { Header } from './Header';
+import { ContentTopBar } from './ContentTopBar';
 import { getRouteMeta, isIndoorRoute } from '../routes/navigation';
 
 interface AppLayoutProps {
@@ -24,7 +24,7 @@ export function AppLayout({ children }: AppLayoutProps) {
   };
 
   const shell = (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-white overflow-hidden">
       <Sidebar
         currentPage={routeMeta.page}
         onNavigate={(page) => handleNavigate(page)}
@@ -32,12 +32,12 @@ export function AppLayout({ children }: AppLayoutProps) {
         isCollapsed={sidebarCollapsed}
         onToggle={() => setSidebarCollapsed((prev) => !prev)}
       />
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        <Header breadcrumbs={routeMeta.breadcrumbs} user={user} onNavigate={(page) => handleNavigate(page)} />
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden min-w-0 pr-3 py-3 bg-white">
+        <ContentTopBar showIndoorLab={showIndoorLab} />
+        <div className="flex-1 overflow-y-auto overflow-x-hidden">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   );
 

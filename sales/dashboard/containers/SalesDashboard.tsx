@@ -1,5 +1,5 @@
+import { SalesDashboardTable } from '../components/SalesDashboardTable';
 import { Package, ArrowUp } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useIndoorStock, useOutdoorStock } from '../../hooks/useStock';
 import { useDashboardStats } from '../../hooks/useDashboard';
 
@@ -99,7 +99,7 @@ export function SalesDashboard() {
         />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', minWidth: 0 }}>
           <div style={{ minWidth: 0, overflow: 'hidden' }}>
-            <DataTable
+            <SalesDashboardTable
               title="Indoor Stock (Incubation)"
               columns={indoorColumns}
               records={indoorStock}
@@ -107,7 +107,7 @@ export function SalesDashboard() {
             />
           </div>
           <div style={{ minWidth: 0, overflow: 'hidden' }}>
-            <DataTable
+            <SalesDashboardTable
               title="Outdoor Stock (Holding)"
               columns={outdoorColumns}
               records={outdoorStock}

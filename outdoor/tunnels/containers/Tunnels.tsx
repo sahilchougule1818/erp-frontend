@@ -1,3 +1,4 @@
+import { TunnelsTable } from '../components/TunnelsTable';
 import { useState, useEffect } from 'react';
 import { Button }   from '../../../shared/ui/button';
 import { Input }    from '../../../shared/ui/input';
@@ -5,7 +6,6 @@ import { Label }    from '../../../shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../../../shared/ui/dialog';
 import { Plus, Pencil } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { outdoorApi } from '../../api/outdoorApi';
 import type { Tunnel } from '../../types/outdoor.types';
 
@@ -122,7 +122,7 @@ export function Tunnels() {
         </DialogContent>
       </Dialog>
 
-      <DataTable
+      <TunnelsTable
         title="Tunnel Master"
         columns={columns}
         records={tunnels}

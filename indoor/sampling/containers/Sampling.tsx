@@ -1,7 +1,7 @@
+import { SamplingTable } from '../components/SamplingTable';
 import { useState, useEffect } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { DataTable } from '../../../shared/components/DataTable';
 import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { useNotify } from '../../../shared/hooks/useNotify';
@@ -120,8 +120,8 @@ export function Sampling() {
         </TabsList>
 
         <TabsContent value="summary">
-          <DataTable
-            title=""
+          <SamplingTable
+            title="Sampling Register"
             columns={summaryColumns}
             records={samples || []}
             filterConfig={{
@@ -139,8 +139,8 @@ export function Sampling() {
         </TabsContent>
 
         <TabsContent value="create">
-          <DataTable
-            title=""
+          <SamplingTable
+            title="Report Samples"
             columns={createColumns}
             records={samples || []}
             filterConfig={{
@@ -158,8 +158,8 @@ export function Sampling() {
         </TabsContent>
 
         <TabsContent value="report">
-          <DataTable
-            title=""
+          <SamplingTable
+            title="Sample Results"
             columns={reportColumns}
             records={samples || []}
             filterConfig={{

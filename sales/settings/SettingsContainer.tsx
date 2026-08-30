@@ -1,7 +1,7 @@
+import { SalesSettingsTable } from './components/SalesSettingsTable';
 import React, { useState } from 'react';
 import { Button } from '../../shared/ui/button';
 import { Plus } from 'lucide-react';
-import { DataTable } from '../../shared/components/DataTable';
 import { SharedForm } from '../components/SharedForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../shared/ui/tabs';
 import { useCompanySettings, usePlantTerms } from '../hooks/useSettings';
@@ -75,8 +75,8 @@ const SettingsContainer: React.FC = () => {
         </TabsList>
 
         <TabsContent value="company">
-          <DataTable
-            title=""
+          <SalesSettingsTable
+            title="Company Settings"
             columns={[
               { key: 'companyName', label: 'Company Name' },
               { key: 'gstNumber', label: 'GST Number' },
@@ -90,7 +90,7 @@ const SettingsContainer: React.FC = () => {
             addButton={
               !settings ? (
                 <Button
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                 
                   onClick={() => setIsCompanyFormOpen(true)}
                 >
                   <Plus className="w-4 h-4 mr-2" /> Add Company Details
@@ -102,8 +102,8 @@ const SettingsContainer: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="plant-terms">
-          <DataTable
-            title=""
+          <SalesSettingsTable
+            title="Plant Terms"
             columns={plantColumns}
             records={plantTerms}
             onEdit={(record) => {
@@ -113,7 +113,7 @@ const SettingsContainer: React.FC = () => {
             }}
             addButton={
               <Button
-                className="bg-green-600 hover:bg-green-700 text-white"
+               
                 onClick={() => {
                   setSelectedPlant(null);
                   setIsPlantFormOpen(true);

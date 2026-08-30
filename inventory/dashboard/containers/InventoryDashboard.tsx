@@ -1,6 +1,6 @@
+import { InventoryDashboardTable } from '../components/InventoryDashboardTable';
 import { useState, useEffect } from 'react';
 import { Box, AlertTriangle } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { inventoryApi } from '../../api/inventoryApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
 
@@ -69,7 +69,7 @@ export function InventoryDashboard() {
         </div>
       </div>
 
-      <DataTable
+      <InventoryDashboardTable
         title="Live Stock Inventory"
         columns={stockColumns}
         records={stockLevels}

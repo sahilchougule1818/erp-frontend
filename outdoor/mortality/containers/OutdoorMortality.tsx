@@ -1,5 +1,5 @@
+import { OutdoorMortalityTable } from '../components/OutdoorMortalityTable';
 import { useMortalityData } from '../hooks';
-import { DataTable }        from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 
 export function OutdoorMortality() {
@@ -43,8 +43,8 @@ export function OutdoorMortality() {
         </TabsList>
 
         <TabsContent value="summary">
-          <DataTable
-            title=""
+          <OutdoorMortalityTable
+            title="Mortality Summary"
             columns={summaryColumns}
             records={summary}
             exportFileName="mortality-summary"
@@ -54,8 +54,8 @@ export function OutdoorMortality() {
         </TabsContent>
 
         <TabsContent value="history">
-          <DataTable
-            title=""
+          <OutdoorMortalityTable
+            title="Mortality Records"
             columns={logColumns}
             records={log}
             filterConfig={{

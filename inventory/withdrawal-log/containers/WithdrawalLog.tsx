@@ -1,7 +1,7 @@
+import { WithdrawalLogTable } from '../components/WithdrawalLogTable';
 import { useState, useEffect } from 'react';
 import { LayoutList } from 'lucide-react';
 import { Badge } from '../../../shared/ui/badge';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { inventoryApi } from '../../api/inventoryApi';
 import { format } from 'date-fns';
@@ -69,8 +69,8 @@ export function WithdrawalLog() {
         </TabsList>
         
         <TabsContent value="withdrawal">
-          <DataTable
-            title=""
+          <WithdrawalLogTable
+            title="Withdrawal Log"
             columns={columns}
             records={usageRecords}
             filterConfig={{

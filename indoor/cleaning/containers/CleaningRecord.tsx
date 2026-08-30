@@ -1,3 +1,4 @@
+import { CleaningTable } from '../components/CleaningTable';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Button } from '../../../shared/ui/button';
@@ -6,7 +7,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Plus } from 'lucide-react';
 import { useCleaningData } from '../hooks/useCleaningData';
 import { CleaningRecordForm } from '../forms/CleaningRecordForm';
-import { DataTable } from '../../../shared/components/DataTable';
 import { UnifiedOperatorEditModal } from '../../operators/components/UnifiedOperatorEditModal';
 
 export function CleaningRecord() {
@@ -58,8 +58,8 @@ export function CleaningRecord() {
         </TabsList>
         
         <TabsContent value="cleaning">
-          <DataTable
-            title=""
+          <CleaningTable
+            title="Cleaning Record"
             columns={cleaningColumns}
             records={cleaningRecords}
             exportFileName="cleaning_records"
@@ -73,7 +73,7 @@ export function CleaningRecord() {
             }}
             pagination={cleaningPagination}
             addButton={
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => setModal({ open: true, editData: null, type: 'cleaning' })}>
+              <Button onClick={() => setModal({ open: true, editData: null, type: 'cleaning' })}>
                 <Plus className="w-4 h-4 mr-2" />Add New
               </Button>
             }
@@ -81,8 +81,8 @@ export function CleaningRecord() {
         </TabsContent>
         
         <TabsContent value="deep">
-          <DataTable
-            title=""
+          <CleaningTable
+            title="Deep Cleaning Record"
             columns={deepCleaningColumns}
             records={deepCleaningRecords}
             exportFileName="deep_cleaning_records"
@@ -96,7 +96,7 @@ export function CleaningRecord() {
             }}
             pagination={deepCleaningPagination}
             addButton={
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => setModal({ open: true, editData: null, type: 'deep' })}>
+              <Button onClick={() => setModal({ open: true, editData: null, type: 'deep' })}>
                 <Plus className="w-4 h-4 mr-2" />Add New
               </Button>
             }

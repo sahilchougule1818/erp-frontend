@@ -5,9 +5,11 @@ export function IndoorHeaderLabSelector() {
   const { labNumber, setLabNumber, isLocked } = useLabContext();
 
   return (
-    <div className="pr-4 border-r border-gray-200">
+    <div className="flex items-center justify-end shrink-0">
       {isLocked ? (
-        <span className="text-sm font-medium text-slate-600">Lab {labNumber}</span>
+        <span className="text-sm font-medium text-slate-600">
+          Lab {labNumber}
+        </span>
       ) : (
         <LabSelector value={labNumber} onChange={setLabNumber} />
       )}

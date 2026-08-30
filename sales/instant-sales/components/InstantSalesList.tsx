@@ -1,7 +1,7 @@
+import { InstantSalesTable } from './InstantSalesTable';
 import React, { useState, useEffect } from 'react';
 import { instantSaleApi } from '../api/instantSaleApi';
 import { InstantSale } from '../types/instantSale.types';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { Plus as PlusIcon, ShoppingCart, IndianRupee } from 'lucide-react';
@@ -249,7 +249,7 @@ export const InstantSalesList: React.FC = () => {
         </div>
       </div>
 
-      <DataTable
+      <InstantSalesTable
         title="Instant Sales"
         columns={columns}
         records={sales}

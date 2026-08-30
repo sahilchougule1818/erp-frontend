@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../../../shared/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Package, FlaskConical, Boxes } from 'lucide-react';
 import { useIndoorDashboard } from '../hooks/useIndoorDashboard';
 
@@ -23,11 +24,12 @@ export function IndoorDashboard() {
 
   return (
     <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Indoor Dashboard</h1>
-        <p className="text-base text-gray-500 mt-1">Real-time production metrics and operator performance</p>
-      </div>
+      <Tabs defaultValue="dashboard" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="dashboard">Indoor Dashboard</TabsTrigger>
+        </TabsList>
 
+        <TabsContent value="dashboard" className="space-y-6">
       <div className="grid grid-cols-3 gap-6">
         <div className="p-5 bg-green-50 rounded-xl border border-gray-200 shadow-sm">
           <div className="flex justify-between items-center">
@@ -37,12 +39,12 @@ export function IndoorDashboard() {
           <div className="text-3xl font-bold text-green-900 mt-2">{totalMediaBatches}</div>
         </div>
 
-        <div className="p-5 bg-teal-50 rounded-xl border border-gray-200 shadow-sm">
+        <div className="p-5 bg-[#7db86a]/20 rounded-xl border border-gray-200 shadow-sm">
           <div className="flex justify-between items-center">
-            <span className="text-base font-semibold text-teal-800 uppercase tracking-wider">Total Batches</span>
-            <Package className="text-teal-600 w-5 h-5" />
+            <span className="text-base font-semibold text-gray-700 uppercase tracking-wider">Total Batches</span>
+            <Package className="text-gray-600 w-5 h-5" />
           </div>
-          <div className="text-3xl font-bold text-teal-900 mt-2">{totalBatches}</div>
+          <div className="text-3xl font-bold text-gray-800 mt-2">{totalBatches}</div>
         </div>
 
         <div className="p-5 bg-blue-50 rounded-xl border border-gray-200 shadow-sm">
@@ -139,6 +141,8 @@ export function IndoorDashboard() {
           </CardContent>
         </Card>
       </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

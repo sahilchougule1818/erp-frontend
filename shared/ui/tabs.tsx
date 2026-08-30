@@ -25,10 +25,7 @@ function TabsList({
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
-      className={cn(
-        "inline-flex h-10 w-full items-center justify-start bg-transparent px-0 flex",
-        className,
-      )}
+      className={cn("erp-table-tab-list", className)}
       {...props}
     />
   );
@@ -42,7 +39,7 @@ function TabsTrigger({
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
       className={cn(
-        "data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-green-600 data-[state=active]:bg-transparent text-gray-500 hover:text-gray-700 inline-flex h-full items-center justify-center gap-1.5 rounded-t-lg border-b border-gray-200 px-4 py-2 text-base font-medium whitespace-nowrap transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+        "erp-table-tab-trigger focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         className,
       )}
       {...props}

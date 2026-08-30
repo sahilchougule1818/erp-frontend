@@ -1,10 +1,10 @@
+import { BankAccountTable } from '../components/BankAccountTable';
 import React, { useState } from 'react';
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { BankAccount, bankAccountsApi } from '../../api/salesApi';
 import { Plus, Pencil, Trash2, Lock } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
@@ -107,8 +107,8 @@ const BankAccountSection: React.FC = () => {
         </TabsList>
         
         <TabsContent value="bank-accounts">
-          <DataTable
-            title=""
+          <BankAccountTable
+            title="Bank Accounts"
             columns={columns}
             records={accounts}
             filterConfig={{
@@ -120,7 +120,7 @@ const BankAccountSection: React.FC = () => {
             addButton={
               <Button
                 size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white h-9"
+               
                 onClick={() => setIsCreateOpen(true)}
               >
                 <Plus className="w-4 h-4 mr-1.5" /> Register Account

@@ -1,7 +1,7 @@
+import { SHUnitsTable } from './SHUnitsTable';
 import { useState } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Edit2, Trash2, Building2 } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../shared/ui/alert-dialog';
 import { Label } from '../../../shared/ui/label';
@@ -61,8 +61,8 @@ export function SHUnitsTab() {
 
   return (
     <>
-      <DataTable
-        title=""
+      <SHUnitsTable
+        title="SH Units"
         records={units}
         columns={[
           { key: 'id', label: 'ID' },
@@ -149,7 +149,7 @@ export function SHUnitsTab() {
                 <Button type="button" variant="outline" onClick={closeModal}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit">
                   {selectedUnit ? 'Update Unit' : 'Create Unit'}
                 </Button>
               </div>

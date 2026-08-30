@@ -1,11 +1,11 @@
+import { MediaPreparationTable } from '../components/MediaPreparationTable';
 import { useState } from 'react';
 import { Button } from '../../../shared/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../shared/ui/alert-dialog';
 import { Plus } from 'lucide-react';
 import { useMediaData } from '../hooks/useMediaData';
 import { MediaBatchForm } from '../forms/MediaBatchForm';
-import { DataTable } from '../../../shared/components/DataTable';
-
 const STATUS_COLORS: Record<string, string> = {};
 
 export function MediaPreparation() {
@@ -43,8 +43,14 @@ export function MediaPreparation() {
 
   return (
     <div className="p-6">
-      <DataTable
-        title=""
+      <Tabs defaultValue="register" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="register">Media Preparation Register</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="register">
+      <MediaPreparationTable
+        title="Media Preparation Register"
         columns={columns}
         records={mediaBatches}
         onEdit={(record) => setModal({ open: true, data: record })}
@@ -56,12 +62,15 @@ export function MediaPreparation() {
         }}
         exportFileName="media_preparation"
         pagination={pagination}
+        hideBorder={true}
         addButton={
-          <Button className="bg-green-600 hover:bg-green-700" onClick={() => setModal({ open: true, data: null })}>
+          <Button onClick={() => setModal({ open: true, data: null })}>
             <Plus className="w-4 h-4 mr-2" />Add New
           </Button>
         }
       />
+        </TabsContent>
+      </Tabs>
 
       <MediaBatchForm
         open={modal.open}

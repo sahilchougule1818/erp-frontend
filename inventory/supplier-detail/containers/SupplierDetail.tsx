@@ -1,3 +1,4 @@
+import { SupplierDetailTable } from '../components/SupplierDetailTable';
 import { useState, useEffect } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Edit, Trash2, Truck } from 'lucide-react';
@@ -6,7 +7,6 @@ import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
 import { Badge } from '../../../shared/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { inventoryApi } from '../../api/inventoryApi';
 import { parseSpringPage } from '../../../shared/utils/springPage';
@@ -137,8 +137,8 @@ export function SupplierDetail() {
         </TabsList>
         
         <TabsContent value="supplier">
-          <DataTable 
-            title="" 
+          <SupplierDetailTable 
+            title="Supplier Details" 
             columns={supplierColumns} 
             records={suppliers}
             pagination={{
@@ -149,7 +149,7 @@ export function SupplierDetail() {
               onPageChange: handlePageChange
             }}
             addButton={
-              <Button className="bg-green-600 hover:bg-green-700" onClick={() => {
+              <Button onClick={() => {
                 setEditingSupplier(null);
                 setSupplierForm({ name: '', contact: '', location: '', itemsSupplied: [] });
                 setIsSupplierModalOpen(true);

@@ -1,3 +1,4 @@
+import { BatchMasterTable } from '../components/BatchMasterTable';
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { Tooltip, TooltipProvider } from '../../../shared/ui/tooltip';
@@ -16,7 +17,6 @@ import {
   Upload, MoreHorizontal,
   ArrowRightLeft, ArrowUpRight, RotateCcw, TestTube, Droplet, Download, Lock, Skull, Clock
 } from 'lucide-react';
-import { DataTable }              from '../../../shared/components/DataTable';
 import { useBatchMaster }         from '../hooks/useBatchMaster';
 import { ModalLayout }              from '../../../shared/components/ModalLayout';
 import { SampleForm }             from '../../sampling/forms/SampleForm';
@@ -358,8 +358,8 @@ const BatchMaster: React.FC = () => {
               <p className="text-base text-slate-500 font-medium tracking-tight">Loading batch data...</p>
             </div>
           ) : (
-            <DataTable
-              title=""
+            <BatchMasterTable
+              title="Outdoor Batch Master"
               columns={columns}
               records={batches}
               filterConfig={{ filter1Key: 'plantName', filter1Label: 'Plant Name', filter2Key: 'batchCode', filter2Label: 'Batch Code' }}
@@ -368,7 +368,7 @@ const BatchMaster: React.FC = () => {
               addButton={
                 <Button
                   size="sm"
-                  className="bg-green-600 hover:bg-green-700 text-white font-semibold"
+                  className="font-semibold"
                   onClick={async () => { await loadIndoorBatches(); setModal('INDOOR_LIST'); }}
                 >
                   <Upload className="h-4 w-4 mr-2" /> Import from Indoor
@@ -570,7 +570,7 @@ const BatchMaster: React.FC = () => {
                         </div>
                         <div className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">{b.plantName}</div>
                       </div>
-                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white font-semibold">
+                      <Button size="sm" className="font-semibold">
                         Initiate Transition <ArrowUpRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>

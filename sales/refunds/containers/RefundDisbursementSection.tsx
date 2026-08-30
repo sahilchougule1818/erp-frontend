@@ -1,3 +1,4 @@
+import { RefundDisbursementTable } from '../components/RefundDisbursementTable';
 import React, { useState } from 'react';
 import { Badge } from '../../../shared/ui/badge';
 import { Button } from '../../../shared/ui/button';
@@ -5,7 +6,6 @@ import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../../../shared/ui/dialog';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useRefunds, useRefundDetail } from '../../hooks/useRefunds';
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { PAYMENT_METHODS } from '../../constants/EventTypes';
@@ -148,8 +148,8 @@ const RefundDisbursementSection: React.FC = () => {
         </TabsList>
         
         <TabsContent value="refunds">
-          <DataTable
-            title=""
+          <RefundDisbursementTable
+            title="Refund Disbursements"
 
             columns={columns}
             records={refunds}

@@ -1,7 +1,7 @@
+import { RootingTable } from '../components/RootingTable';
 import { useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useRootingData } from '../hooks/useRootingData';
-import { DataTable } from '../../../shared/components/DataTable';
-
 export function RootingManagement() {
   const { rootedBatches, loading, error, pagination } = useRootingData();
   const [showAll, setShowAll] = useState(false);
@@ -34,18 +34,25 @@ export function RootingManagement() {
 
   return (
     <div className="p-6">
-      <DataTable
+      <Tabs defaultValue="register" className="w-full">
+        <TabsList className="w-full">
+          <TabsTrigger value="register">Rooting Register</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="register">
+      <RootingTable
         title="Rooting Register"
         description={`Total: ${pagination.total} | Active: ${activeCount} | Completed: ${completedCount}`}
         columns={columns}
         records={showAll ? rootedBatches : rootedBatches.filter((b: any) => b.state === 'ACTIVE' || b.state === 'OUTDOOR_READY')}
         exportFileName="rooted_batches"
+        hideBorder={true}
         addButton={
           <button
             type="button"
             onClick={() => setShowAll(v => !v)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-              showAll ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
+              showAll ? 'erp-accent-bg erp-accent-text border-[#7db86a]' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
             }`}
           >
             <span className={`w-2 h-2 rounded-full ${showAll ? 'bg-white' : 'bg-gray-400'}`} />
@@ -54,6 +61,8 @@ export function RootingManagement() {
         }
         pagination={pagination}
       />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

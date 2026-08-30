@@ -1,3 +1,4 @@
+import { LedgerTable } from '../components/LedgerTable';
 import React, { useState } from 'react';
 import { Badge } from '../../../shared/ui/badge';
 import { ArrowUpRight, ArrowDownLeft, TrendingUp, TrendingDown, Clock } from 'lucide-react';
@@ -5,7 +6,6 @@ import { useLedger } from '../../hooks/useLedger';
 import { useBankSummary } from '../../hooks/useBankAccounts';
 import { useDashboardStats } from '../../hooks/useDashboard';
 import { format } from 'date-fns';
-import { DataTable } from '../../../shared/components/DataTable';
 import { LedgerFilterBar } from '../../components/LedgerFilterBar';
 import { cn } from '../../../shared/ui/utils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
@@ -162,8 +162,8 @@ const LedgerSection: React.FC = () => {
         </TabsList>
         
         <TabsContent value="ledger">
-          <DataTable
-            title=""
+          <LedgerTable
+            title="Financial Ledger"
             columns={columns}
             records={entries}
             filterConfig={null}

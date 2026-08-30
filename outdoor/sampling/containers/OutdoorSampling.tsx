@@ -1,6 +1,6 @@
+import { OutdoorSamplingTable } from '../components/OutdoorSamplingTable';
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { DataTable } from '../../../shared/components/DataTable';
 import { outdoorApi } from '../../api/outdoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { Button } from '../../../shared/ui/button';
@@ -152,8 +152,8 @@ export function OutdoorSampling() {
         </TabsList>
 
         <TabsContent value={activeTab}>
-          <DataTable
-            title=""
+          <OutdoorSamplingTable
+            title="Outdoor Sampling Register"
             columns={getColumns()}
             records={samples}
             filterConfig={{

@@ -1,3 +1,4 @@
+import { InventoryPurchasesTable } from '../components/InventoryPurchasesTable';
 import React, { useState } from 'react';
 import { Badge } from '../../../shared/ui/badge';
 import { Button } from '../../../shared/ui/button';
@@ -6,7 +7,6 @@ import { useInventoryPayments, useInventoryItems, useWithdrawSuppliers } from '.
 import { useBankAccounts } from '../../hooks/useBankAccounts';
 import { CreateWithdrawDialog } from '../components/CreateWithdrawDialog';
 import { inventoryPaymentsApi, inventoryPurchasesApi } from '../../api/salesApi';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
 import { format } from 'date-fns';
@@ -120,8 +120,8 @@ const InventoryPurchasesSection: React.FC = () => {
         </TabsList>
         
         <TabsContent value="purchases">
-          <DataTable
-            title=""
+          <InventoryPurchasesTable
+            title="Inventory Purchases"
 
             columns={columns}
             records={payments}

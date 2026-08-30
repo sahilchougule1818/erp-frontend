@@ -34,7 +34,6 @@ export const LabSelector: React.FC<LabSelectorProps> = ({ value, onChange, class
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <label className="text-sm font-medium">Lab:</label>
       <Select
         value={value.toString()}
         onValueChange={(val) => onChange(parseInt(val))}

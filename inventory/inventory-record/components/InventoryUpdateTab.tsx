@@ -1,3 +1,4 @@
+import { InventoryUpdateTable } from './InventoryUpdateTable';
 import { useState } from 'react';
 import { MoreVertical, PackageMinus, Plus, RotateCcw } from 'lucide-react';
 import { Badge } from '../../../shared/ui/badge';
@@ -9,7 +10,6 @@ import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Input } from '../../../shared/ui/input';
 import { Label } from '../../../shared/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { inventoryApi } from '../../api/inventoryApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
@@ -105,7 +105,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
     }
   };
 
-  // Build records with computed fields for DataTable
+  // Build records with computed fields for InventoryUpdateTable
   const records = items.map(item => {
     const currentStock = item.currentStock || 0;
     const isLow = currentStock <= item.minStock;
@@ -173,8 +173,8 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
         </TabsList>
         
         <TabsContent value="inventory">
-          <DataTable
-            title=""
+          <InventoryUpdateTable
+            title="Inventory Update"
             columns={columns}
             records={records}
             exportFileName="inventory_update"
@@ -182,7 +182,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
             addButton={
               <Button
                 size="sm"
-                className="bg-green-600 hover:bg-green-700 text-white text-base"
+               
                 onClick={() => { setItemForm({ name: '', unit: '', minStock: '' }); setAddItemOpen(true); }}
               >
                 <Plus className="h-3.5 w-3.5 mr-1.5" />Add Item
@@ -271,7 +271,7 @@ export function InventoryUpdateTab({ items, onStockAdded, onItemAdded, paginatio
             </div>
             <div className="flex justify-end gap-3 pt-1">
               <Button variant="outline" onClick={() => setAddItemOpen(false)}>Cancel</Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white" onClick={handleSaveItem} disabled={saving}>
+              <Button onClick={handleSaveItem} disabled={saving}>
                 {saving ? 'Saving...' : 'Add Item'}
               </Button>
             </div>

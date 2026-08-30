@@ -1,6 +1,6 @@
+import { HoldingAreaTable } from '../components/HoldingAreaTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useHoldingAreaData } from '../hooks';
-import { DataTable } from '../../../shared/components/DataTable';
 import { createPhaseColumns, phaseColumnConfigs } from '../../components/phaseColumns';
 import { UnifiedEditModal } from '../../workers/components/UnifiedEditModal';
 import { usePhaseEditing } from '../../hardening/hooks/usePhaseEditing';
@@ -28,8 +28,8 @@ export function HoldingArea() {
         </TabsList>
         
         <TabsContent value="holding">
-          <DataTable
-            title=""
+          <HoldingAreaTable
+            title="Holding Area Records"
             columns={columns}
             records={records}
             filterConfig={{ filter1Key: 'batchCode', filter1Label: 'Batch Code', filter2Key: 'plantName', filter2Label: 'Plant Name' }}

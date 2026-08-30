@@ -34,11 +34,22 @@ export const indoorApi = {
   dashboard: {
     getDashboardStats:    (params?: string, labNumber?: number) => {
       const queryParams = params || '';
-      const labParam = labNumber !== undefined ? `${queryParams ? '&' : '?'}labNumber=${labNumber}` : '';
+      const resolved = resolveLabNumber(labNumber);
+      const labParam = resolved !== undefined ? `${queryParams ? '&' : '?'}labNumber=${resolved}` : '';
       return apiClient.get(`/indoor/dashboard/indoor-stats${queryParams}${labParam}`);
     },
-    getStageDistribution: (labNumber?: number) => apiClient.get('/indoor/dashboard/stage-distribution', { params: { labNumber } }),
-    getReadyForExport:    (labNumber?: number) => apiClient.get('/indoor/dashboard/ready-for-export', { params: { labNumber } })
+    getStageDistribution: (labNumber?: number) => {
+      const resolved = resolveLabNumber(labNumber);
+      return apiClient.get('/indoor/dashboard/stage-distribution', {
+        params: resolved !== undefined ? { labNumber: resolved } : {},
+      });
+    },
+    getReadyForExport:    (labNumber?: number) => {
+      const resolved = resolveLabNumber(labNumber);
+      return apiClient.get('/indoor/dashboard/ready-for-export', {
+        params: resolved !== undefined ? { labNumber: resolved } : {},
+      });
+    },
   },
 
   phaseViews: {

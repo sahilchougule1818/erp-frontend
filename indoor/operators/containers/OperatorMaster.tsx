@@ -1,3 +1,4 @@
+import { OperatorMasterTable } from '../components/OperatorMasterTable';
 import { useState, useEffect } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { UserPlus, Trash2, Edit2, Plus } from 'lucide-react';
@@ -6,7 +7,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useOperatorMaster } from '../hooks/useOperatorMaster';
 import { OperatorForm } from '../forms/OperatorForm';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useLabContext } from '../../contexts/LabContext';
 
 export function OperatorMaster() {
@@ -87,8 +87,8 @@ export function OperatorMaster() {
         </TabsList>
 
         <TabsContent value="master">
-          <DataTable
-            title=""
+          <OperatorMasterTable
+            title="Operator Master"
             records={operators}
             columns={[
               { key: 'id', label: 'ID' },
@@ -101,7 +101,7 @@ export function OperatorMaster() {
             exportFileName="operator_directory"
             pagination={operatorPagination}
             addButton={
-              <Button onClick={() => toggleModal('operator', true)} style={{ backgroundColor: '#4f46e5', color: '#fff' }} className="font-bold shadow-md shadow-indigo-100 rounded-xl px-4 py-2 flex items-center gap-2 transition-all hover:opacity-90 active:scale-95">
+              <Button onClick={() => toggleModal('operator', true)} className="font-bold rounded-xl px-4 py-2 flex items-center gap-2">
                 <Plus className="w-4 h-4" />
                 Register Operator
               </Button>
@@ -110,8 +110,8 @@ export function OperatorMaster() {
         </TabsContent>
 
         <TabsContent value="logs">
-          <DataTable
-            title=""
+          <OperatorMasterTable
+            title="Activity Monitoring"
             records={activityLogs}
             columns={[
               { key: 'activityDate', label: 'Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },

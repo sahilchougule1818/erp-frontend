@@ -1,7 +1,7 @@
+import { PurchaseLogTable } from '../components/PurchaseLogTable';
 import { useState, useEffect } from 'react';
 import { ShoppingBag } from 'lucide-react';
 import { Badge } from '../../../shared/ui/badge';
-import { DataTable } from '../../../shared/components/DataTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { inventoryApi } from '../../api/inventoryApi';
 import { format } from 'date-fns';
@@ -71,8 +71,8 @@ export function PurchaseLog() {
         </TabsList>
         
         <TabsContent value="purchase">
-          <DataTable
-            title=""
+          <PurchaseLogTable
+            title="Purchase Log"
             columns={columns}
             records={purchases}
             filterConfig={{

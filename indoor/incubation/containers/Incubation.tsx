@@ -1,7 +1,7 @@
+import { IncubationTable } from '../components/IncubationTable';
 import { useState } from 'react';
 import { useIncubationData } from '../hooks/useIncubationData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { DataTable } from '../../../shared/components/DataTable';
 import { IncubationEditModal } from '../components/IncubationEditModal';
 import { Badge } from '../../../shared/ui/badge';
 
@@ -41,8 +41,8 @@ export function Incubation() {
         </TabsList>
         
         <TabsContent value="register">
-          <DataTable
-            title=""
+          <IncubationTable
+            title="Incubation Register"
             columns={columns}
             records={showAll ? records : records.filter((r: any) => r.state === 'ACTIVE')}
             onEdit={(record) => { if (record.state === 'ACTIVE' && !record.isRooted) setEditingRecord(record); }}
@@ -58,7 +58,7 @@ export function Incubation() {
                 type="button"
                 onClick={() => setShowAll(v => !v)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md border text-sm font-medium transition-colors ${
-                  showAll ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
+                  showAll ? 'erp-accent-bg erp-accent-text border-[#7db86a]' : 'bg-white text-gray-600 border-gray-300 hover:border-green-500'
                 }`}
               >
                 <span className={`w-2 h-2 rounded-full ${showAll ? 'bg-white' : 'bg-gray-400'}`} />

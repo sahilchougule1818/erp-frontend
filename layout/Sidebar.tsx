@@ -30,6 +30,7 @@ import {
   Settings
 } from 'lucide-react';
 import { User } from '../auth/AuthContext';
+import { SidebarFooter } from './SidebarFooter';
 
 interface SidebarProps {
   currentPage: string;
@@ -186,13 +187,16 @@ export function Sidebar({ currentPage, onNavigate, user, isCollapsed, onToggle }
   }, [user]);
 
   return (
-    <div className="bg-green-50 border-r border-gray-200 flex flex-col flex-shrink-0" style={{ width: isCollapsed ? '64px' : '288px' }}>
+    <div
+      className="flex flex-col flex-shrink-0 py-3 pl-3 pr-1"
+      style={{ width: isCollapsed ? '76px' : '300px' }}
+    >
+      <div className="erp-sidebar-shell flex flex-col flex-1 min-h-0 rounded-[20px] border shadow-[0_8px_24px_rgba(61,90,50,0.22)] overflow-hidden">
       {/* Toggle Button - Fixed */}
-      <div className="h-16 flex items-center px-3 bg-green-50">
+      <div className="h-16 flex items-center px-3 border-b erp-sidebar-divider">
         <button
           onClick={onToggle}
-          className="w-10 h-10 flex items-center justify-center hover:bg-green-100 rounded-full transition-colors flex-shrink-0"
-          style={{ backgroundColor: '#166534', borderRadius: '10px' }}
+          className="w-10 h-10 flex items-center justify-center erp-sidebar-hover rounded-xl transition-colors flex-shrink-0"
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,72 +206,94 @@ export function Sidebar({ currentPage, onNavigate, user, isCollapsed, onToggle }
       </div>
 
       {/* Menu - Collapsible */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 transition-all duration-300 space-y-3">
+      <nav className="flex-1 overflow-y-auto py-3 px-2 transition-all duration-300 space-y-1">
         {menuItems.map(item => (
-          <div key={item.id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+          <div key={item.id}>
             {item.children ? (
-              <>
-                <button
-                  onClick={() => toggleGroup(item.id)}
-                  className={`w-full flex items-center px-3 py-2.5 text-gray-700 hover:bg-green-50 transition-colors ${isCollapsed ? 'justify-center' : 'justify-between'}`}
-                  title={isCollapsed ? item.label : ''}
-                >
-                  <div className="flex items-center">
-                    <item.icon className={`w-5 h-5 text-green-600 ${isCollapsed ? '' : 'mr-3'}`} />
-                    {!isCollapsed && <span className="text-base font-medium">{item.label}</span>}
-                  </div>
-                  {!isCollapsed && (
-                    expandedGroups.includes(item.id) ? (
-                      <ChevronDown className="w-4 h-4 text-green-600" />
-                    ) : (
-                      <ChevronRight className="w-4 h-4 text-green-600" />
-                    )
-                  )}
-                </button>
-                {!isCollapsed && expandedGroups.includes(item.id) && (
-                  <div className="bg-green-50/30 border-t border-gray-200">
-                    {item.children.map(child => (
-                      <button
-                        key={child.id}
-                        onClick={() => {
-                          if (isCollapsed) onToggle();
-                          onNavigate(child.page, child.breadcrumbs);
-                        }}
-                        className={`w-full flex items-center px-3 pl-12 py-2.5 text-base transition-colors ${
-                          currentPage === child.page
-                            ? 'bg-green-50 text-green-700 border-r-4 border-green-600 font-medium'
-                            : 'text-gray-600 hover:bg-green-50 border-l-4 border-transparent'
-                        }`}
-                      >
-                        <child.icon className="w-4 h-4 mr-3" />
-                        {child.label}
-                      </button>
-                    ))}
+              <div className="px-1">
+                {isCollapsed ? (
+                  <button
+                    onClick={() => toggleGroup(item.id)}
+                    className="w-full flex items-center justify-center px-3 py-2.5 rounded-xl text-white erp-sidebar-hover transition-colors"
+                    title={item.label}
+                  >
+                    <item.icon className="w-5 h-5 text-white shrink-0" />
+                  </button>
+                ) : (
+                  <div className="erp-sidebar-module rounded-xl border overflow-hidden">
+                    <button
+                      onClick={() => toggleGroup(item.id)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 text-white transition-colors erp-sidebar-hover ${
+                        expandedGroups.includes(item.id)
+                          ? 'erp-sidebar-module-header border-b'
+                          : ''
+                      }`}
+                    >
+                      <div className="flex items-center min-w-0">
+                        <item.icon className="w-5 h-5 text-white shrink-0 mr-3" />
+                        <span className="text-[15px] font-medium truncate text-white">{item.label}</span>
+                      </div>
+                      {expandedGroups.includes(item.id) ? (
+                        <ChevronDown className="w-4 h-4 text-white shrink-0" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-white shrink-0" />
+                      )}
+                    </button>
+
+                    {expandedGroups.includes(item.id) && (
+                      <div className="py-1.5 px-1.5 space-y-0.5">
+                        {item.children.map(child => (
+                          <button
+                            key={child.id}
+                            onClick={() => {
+                              onNavigate(child.page, child.breadcrumbs);
+                            }}
+                            className={`flex items-center w-full px-3 py-2 text-[14px] transition-all rounded-xl ${
+                              currentPage === child.page
+                                ? 'erp-sidebar-active'
+                                : 'text-white erp-sidebar-hover'
+                            }`}
+                          >
+                            <child.icon className="w-4 h-4 mr-3 shrink-0 text-white" />
+                            <span className="truncate">{child.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
-              </>
+              </div>
             ) : (
+              <div className="px-1">
               <button
                 onClick={() => {
                   if (isCollapsed) onToggle();
                   onNavigate(item.page!, item.breadcrumbs!);
                 }}
-                className={`w-full flex items-center px-3 py-2.5 text-base transition-colors ${
+                className={`w-full flex items-center px-3 py-2.5 text-[15px] transition-all rounded-xl ${
                   isCollapsed ? 'justify-center' : ''
                 } ${
                   currentPage === item.page
-                    ? 'bg-green-50 text-green-700 border-r-4 border-green-600 font-medium'
-                    : 'text-gray-700 hover:bg-green-50 border-l-4 border-transparent'
+                    ? 'erp-sidebar-active'
+                    : 'text-white erp-sidebar-hover'
                 }`}
                 title={isCollapsed ? item.label : ''}
               >
-                <item.icon className={`w-5 h-5 text-green-600 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'}`} />
+                <item.icon className={`w-5 h-5 shrink-0 text-white ${isCollapsed ? '' : 'mr-3'}`} />
                 {!isCollapsed && item.label}
               </button>
+              </div>
             )}
           </div>
         ))}
       </nav>
+
+      <SidebarFooter
+        user={user}
+        isCollapsed={isCollapsed}
+        onNavigate={(page) => onNavigate(page, [])}
+      />
+      </div>
     </div>
   );
 }

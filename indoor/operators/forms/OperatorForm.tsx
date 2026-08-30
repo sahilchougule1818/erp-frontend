@@ -70,7 +70,7 @@ export function OperatorForm({ initialData, onSubmit, onDelete, onCancel, isSubm
             <Trash2 className="w-4 h-4 mr-2" />Delete
           </Button>
         )}
-        <Button style={{ backgroundColor: '#4f46e5', color: '#fff' }} className="hover:opacity-90" onClick={handleSubmit} disabled={isSubmitting}>
+        <Button onClick={handleSubmit} disabled={isSubmitting}>
           {isSubmitting ? 'Saving...' : form.id ? 'Update' : 'Register'}
         </Button>
       </div>

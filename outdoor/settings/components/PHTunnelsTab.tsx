@@ -1,7 +1,7 @@
+import { PHTunnelsTable } from './PHTunnelsTable';
 import { useState } from 'react';
 import { Button } from '../../../shared/ui/button';
 import { Plus, Edit2, Home } from 'lucide-react';
-import { DataTable } from '../../../shared/components/DataTable';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { Label } from '../../../shared/ui/label';
 import { Input } from '../../../shared/ui/input';
@@ -46,8 +46,8 @@ export function PHTunnelsTab() {
 
   return (
     <>
-      <DataTable
-        title=""
+      <PHTunnelsTable
+        title="PH Tunnels"
         records={tunnels.filter(t => /^[A-E]\d+$/.test(t.name))}
         columns={[
           { key: 'id', label: 'ID' },
@@ -106,7 +106,7 @@ export function PHTunnelsTab() {
                 <Button type="button" variant="outline" onClick={closeModal}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">
+                <Button type="submit">
                   {selectedTunnel ? 'Update Tunnel' : 'Create Tunnel'}
                 </Button>
               </div>

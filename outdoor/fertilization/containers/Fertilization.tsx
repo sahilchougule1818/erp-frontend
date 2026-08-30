@@ -1,9 +1,9 @@
+import { FertilizationTable } from '../components/FertilizationTable';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../shared/ui/alert-dialog';
 import { useFertilizationData } from '../hooks';
 import { FertilizationEditModal } from '../components/FertilizationEditModal';
-import { DataTable } from '../../../shared/components/DataTable';
 import { useNotify } from '../../../shared/hooks/useNotify';
 
 export function Fertilization() {
@@ -49,8 +49,8 @@ export function Fertilization() {
         </TabsList>
         
         <TabsContent value="fertilization">
-          <DataTable
-            title=""
+          <FertilizationTable
+            title="Fertilization Records"
             columns={columns}
             records={records}
             onEdit={handleEdit}

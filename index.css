@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary:            #16a34a;
+  --color-primary:            #7db86a;
   --color-background:         #ffffff;
   --color-destructive:        #d4183d;
   --radius:                   0.625rem;
@@ -20,6 +20,7 @@
   --color-border:             #e5e7eb;
   --color-input:              #ffffff;
   --color-ring:               #94a3b8;
+  --color-table-heading:      #7db86a;
   --font-weight-medium:       500;
   --font-weight-normal:       400;
 }
@@ -99,4 +100,176 @@ body {
       grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
+
+  .erp-table-tab-list {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.5rem;
+    width: 100%;
+    height: auto;
+    padding: 0;
+    background: transparent;
+  }
+
+  .erp-table-tab-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    border-radius: 0.75rem;
+    padding: 0.5rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    white-space: nowrap;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
+  }
+}
+
+/*
+ * ERP accent colors — intentionally OUTSIDE @layer so Tailwind v4 cannot
+ * reorder these rules after state selectors (which was muting tab badges/buttons).
+ */
+:root {
+  --erp-sidebar-bg: #7db86a;
+  --erp-accent: var(--erp-sidebar-bg);
+  --erp-accent-foreground: #ffffff;
+  --erp-sidebar-module: rgba(0, 0, 0, 0.08);
+  --erp-sidebar-border: rgba(255, 255, 255, 0.16);
+  --erp-sidebar-hover: rgba(139, 94, 60, 0.45);
+  --erp-sidebar-active: #8b5e3c;
+}
+
+.erp-selection-pill,
+.erp-accent-bg,
+.erp-btn-primary {
+  background-color: var(--erp-accent) !important;
+  color: var(--erp-accent-foreground) !important;
+  border-color: transparent !important;
+  font-weight: 500;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.erp-selection-pill:hover,
+.erp-accent-bg:hover,
+.erp-btn-primary:hover,
+button.erp-selection-pill:hover,
+button.erp-btn-primary:hover {
+  background-color: var(--erp-sidebar-active) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.erp-table-tab-trigger[data-state="active"] {
+  background-color: var(--erp-sidebar-bg) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  font-weight: 500;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.erp-table-tab-trigger[data-state="active"]:hover {
+  background-color: var(--erp-sidebar-active) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.erp-accent-text {
+  color: var(--erp-accent-foreground);
+}
+
+.erp-table-tab-trigger:not([data-state="active"]) {
+  background-color: #ffffff !important;
+  border: 1px solid #d1d5db !important;
+  color: #4b5563 !important;
+  box-shadow: none;
+}
+
+.erp-table-tab-trigger:not([data-state="active"]):hover {
+  background-color: var(--erp-sidebar-hover) !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+}
+
+.erp-table-card {
+  gap: 0 !important;
+  overflow: hidden;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  box-shadow:
+    0 1px 3px 0 rgb(15 23 42 / 0.08),
+    0 1px 2px -1px rgb(15 23 42 / 0.06);
+}
+
+.erp-table-scroll {
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  background-color: #ffffff;
+  box-shadow: 0 1px 2px 0 rgb(15 23 42 / 0.05);
+}
+
+.erp-table-card > [data-slot="card-header"] {
+  padding: 1rem 1.5rem !important;
+  background-color: #ffffff;
+}
+
+.erp-table-card > [data-slot="card-content"] {
+  padding: 0 !important;
+}
+
+.erp-table-card > [data-slot="card-content"] > :not(.erp-table-scroll):not(:last-child) {
+  padding: 1rem 1.5rem 0;
+}
+
+.erp-table-card > [data-slot="card-content"] > .erp-table-scroll {
+  margin: 1rem 1.5rem 0;
+}
+
+.erp-table-card > [data-slot="card-content"] > :not(.erp-table-scroll) + .erp-table-scroll {
+  margin-top: 0.75rem;
+}
+
+.erp-table-card > [data-slot="card-content"] > .erp-table-scroll:last-child {
+  margin-bottom: 1rem;
+}
+
+.erp-table-card > [data-slot="card-content"] > :last-child.erp-table-pagination {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #ffffff;
+}
+
+.erp-sidebar-shell {
+  background-color: var(--erp-sidebar-bg);
+  border-color: var(--erp-sidebar-border);
+}
+
+.erp-sidebar-divider {
+  border-color: var(--erp-sidebar-border);
+}
+
+.erp-sidebar-module {
+  background-color: var(--erp-sidebar-module);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.erp-sidebar-module-header {
+  background-color: rgba(0, 0, 0, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.erp-sidebar-footer-box {
+  background-color: var(--erp-sidebar-module);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.erp-sidebar-hover:hover {
+  background-color: var(--erp-sidebar-hover) !important;
+}
+
+.erp-sidebar-active {
+  background-color: var(--erp-sidebar-active) !important;
+  color: #ffffff !important;
 }
