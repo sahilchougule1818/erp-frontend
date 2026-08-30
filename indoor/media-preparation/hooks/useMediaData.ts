@@ -65,19 +65,7 @@ export function useMediaData() {
       if (formData.id) {
         await indoorApi.autoclave.update(formData.id, rest);
       } else {
-        const created = await indoorApi.autoclave.create(rest) as { mediaCode?: string; mediaCode?: string };
-        const mediaCode = created?.mediaCode || created?.mediaCode || rest.mediaCode;
-        if (operatorIds?.length && mediaCode) {
-          await Promise.all(
-            operatorIds.map((operatorId: number) =>
-              indoorApi.operators.addAssignment({
-                operatorId,
-                activityType: 'autoclave',
-                mediaCode,
-              })
-            )
-          );
-        }
+        await indoorApi.autoclave.create({ ...rest, operatorIds });
       }
       await fetchMediaBatches();
       await fetchPendingMediaBatches();

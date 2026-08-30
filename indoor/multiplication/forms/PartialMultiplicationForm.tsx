@@ -10,17 +10,11 @@ import { ModalLayout } from '../../../shared/components/ModalLayout';
 import {
   SplitOperatorAssignment,
   validateSplitOperators,
-  validateRootingOperators,
   mapSplitOperatorsToPayload,
 } from '../../incubation/operators';
 import type { OperatorWorkEntry } from '../../operators/components/OperatorWorkAssignment';
 
-function nextStageLabel(currentStage?: string) {
-  const n = parseInt(String(currentStage || '').split('-')[1] || '0', 10);
-  return `Stage-${n + 1}`;
-}
-
-interface PartialRootingFormProps {
+interface PartialMultiplicationFormProps {
   record: any;
   mediaCodes: string[];
   operators: any[];
@@ -28,28 +22,40 @@ interface PartialRootingFormProps {
   onCancel: () => void;
 }
 
-export function PartialRootingForm({
+function nextStageLabel(currentStage?: string) {
+  const n = parseInt(String(currentStage || '').split('-')[1] || '0', 10);
+  return `Stage-${n + 1}`;
+}
+
+export function PartialMultiplicationForm({
   record,
   mediaCodes,
   operators,
   onSubmit,
   onCancel,
-}: PartialRootingFormProps) {
-  const [bottlesToRoot, setBottlesToRoot] = useState('');
+}: PartialMultiplicationFormProps) {
+  const [bottlesInherited, setBottlesInherited] = useState('');
+  const [newBottlesCount, setNewBottlesCount] = useState('');
   const [mediaCode, setMediaCode] = useState('');
   const [notes, setNotes] = useState('');
   const [operatorEntries, setOperatorEntries] = useState<OperatorWorkEntry[]>([]);
 
-  const availableBottles = record.qtyAvailable ?? record.qtyIn ?? record.remainingBottles ?? 0;
-  const bottles = parseInt(bottlesToRoot, 10) || 0;
+  const availableBottles = record.qtyAvailable ?? record.qtyIn ?? 0;
+  const targetStage = nextStageLabel(record.stage);
+  const inherited = parseInt(bottlesInherited, 10) || 0;
+  const output = parseInt(newBottlesCount, 10) || 0;
 
   const handleSubmit = () => {
-    if (!bottles || bottles <= 0) {
-      alert('Please enter a valid number of bottles');
+    if (!inherited || inherited <= 0) {
+      alert('Please enter a valid inherited bottle count');
       return;
     }
-    if (bottles > availableBottles) {
-      alert(`Cannot root more than ${availableBottles} bottles`);
+    if (inherited > availableBottles) {
+      alert(`Cannot take more than ${availableBottles} bottles`);
+      return;
+    }
+    if (!output || output <= 0) {
+      alert('Please enter a valid output bottle count');
       return;
     }
     if (!mediaCode) {
@@ -57,7 +63,7 @@ export function PartialRootingForm({
       return;
     }
 
-    const operatorError = validateRootingOperators(operatorEntries, bottles);
+    const operatorError = validateSplitOperators(operatorEntries, inherited, output);
     if (operatorError) {
       alert(operatorError);
       return;
@@ -66,7 +72,8 @@ export function PartialRootingForm({
     onSubmit({
       batchCode: record.batchCode,
       sourceRecordId: record.id,
-      bottlesCount: bottles,
+      bottlesInherited: inherited,
+      newBottlesCount: output,
       mediaCode,
       notes,
       operators: mapSplitOperatorsToPayload(operatorEntries),
@@ -74,35 +81,30 @@ export function PartialRootingForm({
   };
 
   return (
-    <ModalLayout title="Make Partial Rooting">
+    <ModalLayout title="Make Partial Multiplication">
       <div className="px-6 py-4 space-y-4" style={{ flex: 1, overflowY: 'auto' }}>
         <Alert className="bg-blue-50 border-blue-200">
           <Info className="h-4 w-4 text-blue-600" />
           <AlertDescription>
-            A new batch will be created with code: <strong>{record.batchCode}-R(n)</strong>
+            A new batch will be created with code: <strong>{record.batchCode}-M(n)</strong>
             <br />
-            The new batch enters <strong>{nextStageLabel(record.stage)}</strong> rooting
-            (same numeric stage as multiplication from {record.stage || record.toStage}).
+            The child batch moves to <strong>{targetStage}</strong> (same stage as a full multiplication from {record.stage}).
           </AlertDescription>
         </Alert>
 
         <div className="bg-gray-50 border rounded-lg p-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-sm text-gray-600">Original Batch</div>
+              <div className="text-sm text-gray-600">Parent Batch</div>
               <div className="font-semibold text-lg">{record.batchCode}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-600">Plant Name</div>
-              <div className="font-semibold text-lg">{record.plantName}</div>
-            </div>
-            <div>
               <div className="text-sm text-gray-600">Incubation Stage</div>
-              <div className="font-semibold">{record.stage || record.toStage}</div>
+              <div className="font-semibold text-lg">{record.stage}</div>
             </div>
             <div>
-              <div className="text-sm text-gray-600">Rooting Stage</div>
-              <div className="font-semibold text-orange-700">{nextStageLabel(record.stage || record.toStage)}</div>
+              <div className="text-sm text-gray-600">Target Stage</div>
+              <div className="font-semibold text-green-700">{targetStage}</div>
             </div>
             <div>
               <div className="text-sm text-gray-600">Available Bottles</div>
@@ -113,11 +115,30 @@ export function PartialRootingForm({
 
         <div className="space-y-3">
           <div className="space-y-2">
+            <Label>Bottles Taken From Parent (Input) *</Label>
+            <Input
+              type="number"
+              min="1"
+              max={availableBottles}
+              value={bottlesInherited}
+              onChange={(e) => setBottlesInherited(e.target.value)}
+              placeholder={`Max ${availableBottles}`}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label>Output Bottles After Multiplication *</Label>
+            <Input
+              type="number"
+              min="1"
+              value={newBottlesCount}
+              onChange={(e) => setNewBottlesCount(e.target.value)}
+              placeholder="Bottles produced"
+            />
+          </div>
+          <div className="space-y-2">
             <Label>Media Code *</Label>
             <Select value={mediaCode} onValueChange={setMediaCode}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select media code" />
-              </SelectTrigger>
+              <SelectTrigger><SelectValue placeholder="Select media code" /></SelectTrigger>
               <SelectContent>
                 {mediaCodes.map((code) => (
                   <SelectItem key={code} value={code}>{code}</SelectItem>
@@ -125,51 +146,25 @@ export function PartialRootingForm({
               </SelectContent>
             </Select>
           </div>
-
-          <div className="space-y-2">
-            <Label>Bottles to Root *</Label>
-            <Input
-              type="number"
-              min="1"
-              max={availableBottles}
-              value={bottlesToRoot}
-              onChange={(e) => setBottlesToRoot(e.target.value)}
-              placeholder={`Max: ${availableBottles}`}
-            />
-            <p className="text-xs text-gray-500">
-              Remaining in original batch: {availableBottles - bottles}
-            </p>
-          </div>
-
           <div className="space-y-2">
             <Label>Notes</Label>
-            <Textarea
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optional notes about this rooting operation"
-              rows={3}
-            />
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes..." rows={3} />
           </div>
         </div>
 
-        {bottles > 0 && (
+        {inherited > 0 && output > 0 && (
           <SplitOperatorAssignment
             operators={operators}
             entries={operatorEntries}
             onChange={setOperatorEntries}
-            bottlesIn={bottles}
-            bottlesOut={bottles}
+            bottlesIn={inherited}
+            bottlesOut={output}
           />
         )}
       </div>
-
-      <div className="border-t px-6 py-4 bg-gray-50" style={{ flexShrink: 0 }}>
-        <div className="flex justify-end gap-3">
-          <Button variant="outline" onClick={onCancel}>Cancel</Button>
-          <Button className="bg-orange-600 hover:bg-orange-700" onClick={handleSubmit}>
-            Create Partial Rooting
-          </Button>
-        </div>
+      <div className="flex justify-end gap-3 px-6 py-4 border-t">
+        <Button variant="outline" onClick={onCancel}>Cancel</Button>
+        <Button onClick={handleSubmit}>Create Partial Multiplication</Button>
       </div>
     </ModalLayout>
   );

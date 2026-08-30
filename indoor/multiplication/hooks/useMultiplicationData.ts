@@ -2,10 +2,10 @@ import { useState, useEffect } from 'react';
 import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { parseSpringPage } from '../../../shared/utils/springPage';
-import type { SubcultureRecord } from '../../types';
+import type { MultiplicationRecord } from '../../types';
 
-export function useSubcultureData() {
-  const [records, setRecords] = useState<SubcultureRecord[]>([]);
+export function useMultiplicationData() {
+  const [records, setRecords] = useState<MultiplicationRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -20,8 +20,8 @@ export function useSubcultureData() {
   const fetchRecords = async (page: number) => {
     setLoading(true);
     try {
-      const res = await indoorApi.phaseViews.getSubculturing(page, limit, labNumber);
-      const { data, pagination } = parseSpringPage<SubcultureRecord>(res);
+      const res = await indoorApi.phaseViews.getMultiplication(page, limit, labNumber);
+      const { data, pagination } = parseSpringPage<MultiplicationRecord>(res);
       setRecords(data);
       setTotalPages(pagination.totalPages);
       setTotal(pagination.total);

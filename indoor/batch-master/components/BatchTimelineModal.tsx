@@ -13,7 +13,7 @@ interface BatchTimelineModalProps {
 const formatPhaseDisplay = (phase: string): string => {
   switch (phase) {
     case 'initialisation': return 'Initialisation';
-    case 'subculturing': return 'Subculturing';
+    case 'multiplication': return 'Multiplication';
     case 'incubation': return 'Incubation';
     case 'rooting': return 'Rooting';
     case 'partial_rooting': return 'Partial Rooting';
@@ -26,7 +26,7 @@ const formatPhaseDisplay = (phase: string): string => {
 
 const getEventIcon = (eventType: string) => {
   switch (eventType) {
-    case 'SUBCULTURE': return FlaskConical;
+    case 'MULTIPLICATION': return FlaskConical;
     case 'INCUBATE': return Microscope;
     case 'ROOTING_PARTIAL': return Sprout;
     case 'ROOTING_FULL': return Sprout;
@@ -42,7 +42,7 @@ const getEventIcon = (eventType: string) => {
 
 const getEventColor = (eventType: string) => {
   switch (eventType) {
-    case 'SUBCULTURE': return 'bg-blue-100 text-blue-600';
+    case 'MULTIPLICATION': return 'bg-blue-100 text-blue-600';
     case 'INCUBATE': return 'bg-orange-100 text-orange-600';
     case 'ROOTING_PARTIAL': return 'bg-lime-100 text-lime-600';
     case 'ROOTING_FULL': return 'bg-green-100 text-green-600';
@@ -58,7 +58,7 @@ const getEventColor = (eventType: string) => {
 
 const getEventLabel = (event: any): string => {
   const phaseLabels: { [key: string]: string } = {
-    subculturing: 'Subculturing',
+    multiplication: 'Multiplication',
     incubation: 'Incubation',
     rooting: 'Rooting',
     contamination: 'Contamination',
@@ -124,7 +124,7 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                 const isExport = event.eventType === 'EXPORT';
                 const isContamination = event.eventType === 'CONTAMINATION';
                 const isSample = event.eventType === 'SAMPLE';
-                const isMainEvent = ['SUBCULTURE', 'INCUBATE', 'ROOTING_PARTIAL', 'ROOTING_FULL'].includes(event.eventType);
+                const isMainEvent = ['MULTIPLICATION', 'INCUBATE', 'ROOTING_PARTIAL', 'ROOTING_FULL'].includes(event.eventType);
                 const timeInStage = event.ageAtArrival !== null && event.ageAtDeparture !== null
                   ? event.ageAtDeparture - event.ageAtArrival
                   : null;
@@ -164,7 +164,7 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                                 <div className="font-semibold text-gray-900 text-base">{event.plantsEntered?.toLocaleString() || 0}</div>
                               </div>
                               <div className="text-center">
-                                <div className="text-base text-gray-400 mb-1">{event.eventType === 'SUBCULTURE' ? 'Loss' : 'Contaminated'}</div>
+                                <div className="text-base text-gray-400 mb-1">{event.eventType === 'MULTIPLICATION' ? 'Loss' : 'Contaminated'}</div>
                                 <div className="font-semibold text-gray-900 text-base">{event.mortalityCount?.toLocaleString() || 0}</div>
                               </div>
                               <div className="text-center">
@@ -174,7 +174,7 @@ export const BatchTimelineModal: React.FC<BatchTimelineModalProps> = ({
                               <div className="text-center">
                                 <div className="text-base text-gray-400 mb-1">Partially Rooted</div>
                                 <div>
-                                  {event.phase === 'subculturing' && event.partiallyRootedCount > 0 ? (
+                                  {event.phase === 'multiplication' && event.partiallyRootedCount > 0 ? (
                                     <span className="font-semibold text-gray-900 text-base">
                                       {event.partiallyRootedCount?.toLocaleString()}
                                     </span>

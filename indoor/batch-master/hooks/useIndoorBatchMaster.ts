@@ -58,16 +58,21 @@ export const useIndoorBatchMaster = () => {
   const createBatch = async (data: any) => {
     try {
       const res = await indoorApi.batchOperations.createBatch(data);
-      await fetchBatches();
       return { success: true, data: res };
     } catch (err: any) {
       return { success: false, error: err.response?.data?.message || err.message };
+    } finally {
+      await fetchBatches();
     }
   };
 
-  const recordSubculture = async (batchCode: string, data: any) => {
+  const recordMultiplication = async (batchCode: string, phase: string, data: any) => {
     try {
-      const res = await indoorApi.batchOperations.subculture({ batchCode, ...data });
+      const payload = { batchCode, ...data };
+      const res =
+        phase === 'incubation'
+          ? await indoorApi.batchOperations.fullMultiplication(payload)
+          : await indoorApi.batchOperations.firstMultiplication(payload);
       await fetchBatches();
       return { success: true, data: res };
     } catch (err: any) {
@@ -77,7 +82,7 @@ export const useIndoorBatchMaster = () => {
 
   const recordIncubation = async (batchCode: string, data: any) => {
     try {
-      const res = await indoorApi.batchOperations.incubate({ batchCode, ...data });
+      const res = await indoorApi.phaseViews.incubate({ batchCode, ...data });
       await fetchBatches();
       return { success: true, data: res };
     } catch (err: any) {
@@ -171,7 +176,7 @@ export const useIndoorBatchMaster = () => {
     fetchBatches,
     fetchOperators,
     createBatch,
-    recordSubculture,
+    recordMultiplication,
     recordIncubation,
     exportToOutdoor,
     unexportFromOutdoor,

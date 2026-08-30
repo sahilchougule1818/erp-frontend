@@ -4,7 +4,9 @@ import { Input } from '../../../shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Button } from '../../../shared/ui/button';
 import { Trash2, Info } from 'lucide-react';
-import { OperatorSelector } from '../../operators/components/OperatorSelector';
+import { IncubationOperatorAssignment as MultiplicationIncubationOperatorAssignment } from '../../multiplication/operators';
+import { IncubationOperatorAssignment as RootingIncubationOperatorAssignment, mapIncubationOperatorIdsToPayload, validateIncubationOperatorAssignment } from '../../rooting/operators';
+import { IncubationRecordOperatorAssignment } from '../operators';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { indoorApi } from '../../api/indoorApi';
 
@@ -65,7 +67,14 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
     setForm({ ...form, contamination: value, remainingBottles: (parseInt(form.noOfBottles) || 0) - contamination });
   };
 
-  const handleSubmit = () => onSubmit({
+  const handleSubmit = () => {
+    const operatorError = validateIncubationOperatorAssignment(form.operatorIds);
+    if (operatorError) {
+      alert(operatorError);
+      return;
+    }
+
+    onSubmit({
     id: form.id,
     batchName: selectedBatch?.batchCode,
     plantName: selectedBatch?.plantName,
@@ -76,8 +85,10 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
     temperature: form.temperature,
     humidity: form.humidity,
     lightIntensity: form.lightIntensity,
-    operatorIds: form.operatorIds
+    operatorIds: form.operatorIds,
+    operators: mapIncubationOperatorIdsToPayload(form.operatorIds)
   });
+  };
 
   const terminalBanner = isTerminalIncubation && (
     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -178,10 +189,25 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
           </div>
         </div>
 
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Operator Assignment</p>
-          <OperatorSelector operators={operators} selectedIds={form.operatorIds} onChange={(ids) => updateForm('operatorIds', ids)} />
-        </div>
+        {isTerminalIncubation ? (
+          <RootingIncubationOperatorAssignment
+            operators={operators}
+            selectedIds={form.operatorIds}
+            onChange={(ids) => updateForm('operatorIds', ids)}
+          />
+        ) : initialData ? (
+          <IncubationRecordOperatorAssignment
+            operators={operators}
+            selectedIds={form.operatorIds}
+            onChange={(ids) => updateForm('operatorIds', ids)}
+          />
+        ) : (
+          <MultiplicationIncubationOperatorAssignment
+            operators={operators}
+            selectedIds={form.operatorIds}
+            onChange={(ids) => updateForm('operatorIds', ids)}
+          />
+        )}
       </div>
       
       <div className="border-t px-6 py-4 bg-gray-50" style={{ flexShrink: 0 }}>

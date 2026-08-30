@@ -22,6 +22,9 @@ const STATUS_BADGE: Record<string, string> = {
   pending: 'bg-yellow-50 text-yellow-700 border-yellow-200',
   completed: 'bg-green-50 text-green-700 border-green-200',
   stock_unavailable: 'bg-red-50 text-red-700 border-red-200',
+  IMPORTED: 'bg-yellow-50 text-yellow-700 border-yellow-200',
+  READY: 'bg-green-50 text-green-700 border-green-200',
+  DEPLETED: 'bg-gray-50 text-gray-700 border-gray-200',
 };
 
 const PHASE_BADGE: Record<string, string> = {

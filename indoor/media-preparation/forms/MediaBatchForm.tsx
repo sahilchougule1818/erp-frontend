@@ -10,7 +10,7 @@ import { Save, Users, FlaskConical, ChevronDown, ChevronUp, Trash2 } from 'lucid
 import { indoorApi } from '../../api/indoorApi';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { useAuth } from '../../../auth/AuthContext';
-import { syncOperatorAssignments, toggleStagedOperator } from '../../operators/utils/syncOperatorAssignments';
+import { toggleStagedOperator } from '../../operators/utils/syncOperatorAssignments';
 import { isRecordActive } from '../../../shared/utils/recordActive';
 
 interface MediaBatchFormProps {
@@ -104,7 +104,7 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
     setLoadingOperators(true);
     try {
       const [assignmentsRes, operatorsRes] = await Promise.all([
-        indoorApi.operators.getAssignments({ activityType: 'autoclave', mediaCode: initialData.mediaCode }),
+        indoorApi.autoclave.getOperators(initialData.id),
         indoorApi.operators.getActive({ designation: 'MEDIA_PREPARATION' })
       ]);
       const assignments = Array.isArray(assignmentsRes) ? assignmentsRes : [];
@@ -178,15 +178,10 @@ export function MediaBatchForm({ open, initialData, operators, onSubmit, onDelet
   const handleSaveOperators = async () => {
     setSaving(true);
     try {
-      await syncOperatorAssignments(initialAssignments, stagedOperators, {
-        add: (operatorId) => indoorApi.operators.addAssignment({
-          operatorId: operatorId,
-          activityType: 'autoclave',
-          mediaCode: initialData.mediaCode,
-        }),
-        update: (assignmentId, operatorId) => indoorApi.operators.updateAssignment(assignmentId, { operatorId: operatorId }),
-        remove: (assignmentId) => indoorApi.operators.removeAssignment(assignmentId),
-      });
+      await indoorApi.autoclave.replaceOperators(
+        initialData.id,
+        stagedOperators.map((operator) => operator.id)
+      );
       notify.success('Operators updated successfully');
       setInitialAssignments(prev => prev.filter((a: any) =>
         stagedOperators.some(op => op.assignmentId === a.id || op.id === parseInt(a.operatorId))

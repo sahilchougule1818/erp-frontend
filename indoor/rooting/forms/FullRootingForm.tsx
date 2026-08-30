@@ -6,25 +6,52 @@ import { Alert, AlertDescription } from '../../../shared/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { AlertTriangle } from 'lucide-react';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
+import {
+  SplitOperatorAssignment,
+  validateRootingOperators,
+  mapSplitOperatorsToPayload,
+} from '../../incubation/operators';
+import type { OperatorWorkEntry } from '../../operators/components/OperatorWorkAssignment';
 
 interface FullRootingFormProps {
   record: any;
   mediaCodes: string[];
+  operators: any[];
   onSubmit: (data: any) => void;
   onCancel: () => void;
 }
 
-export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: FullRootingFormProps) {
+export function FullRootingForm({
+  record,
+  mediaCodes,
+  operators,
+  onSubmit,
+  onCancel,
+}: FullRootingFormProps) {
   const [mediaCode, setMediaCode] = useState('');
   const [notes, setNotes] = useState('');
+  const [operatorEntries, setOperatorEntries] = useState<OperatorWorkEntry[]>([]);
+
+  const availableBottles = record.qtyAvailable ?? record.qtyIn ?? 0;
 
   const handleSubmit = () => {
-    if (!mediaCode) { alert('Please select a media code'); return; }
+    if (!mediaCode) {
+      alert('Please select a media code');
+      return;
+    }
+
+    const operatorError = validateRootingOperators(operatorEntries, availableBottles);
+    if (operatorError) {
+      alert(operatorError);
+      return;
+    }
+
     onSubmit({
       batchCode: record.batchCode,
       sourceRecordId: record.id,
       mediaCode,
-      notes
+      notes,
+      operators: mapSplitOperatorsToPayload(operatorEntries),
     });
   };
 
@@ -56,7 +83,7 @@ export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: Full
             </div>
             <div>
               <div className="text-sm text-gray-600">Available Bottles</div>
-              <div className="font-semibold text-green-600">{record.qtyAvailable}</div>
+              <div className="font-semibold text-green-600">{availableBottles}</div>
             </div>
           </div>
         </div>
@@ -69,7 +96,7 @@ export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: Full
                 <SelectValue placeholder="Select media code" />
               </SelectTrigger>
               <SelectContent>
-                {mediaCodes.map(code => (
+                {mediaCodes.map((code) => (
                   <SelectItem key={code} value={code}>{code}</SelectItem>
                 ))}
               </SelectContent>
@@ -86,6 +113,16 @@ export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: Full
             />
           </div>
         </div>
+
+        {availableBottles > 0 && (
+          <SplitOperatorAssignment
+            operators={operators}
+            entries={operatorEntries}
+            onChange={setOperatorEntries}
+            bottlesIn={availableBottles}
+            bottlesOut={availableBottles}
+          />
+        )}
       </div>
 
       <div className="border-t px-6 py-4 bg-gray-50" style={{ flexShrink: 0 }}>
@@ -94,7 +131,7 @@ export function FullRootingForm({ record, mediaCodes, onSubmit, onCancel }: Full
           <Button
             className="bg-orange-600 hover:bg-orange-700"
             onClick={handleSubmit}
-            disabled={!mediaCode}
+            disabled={!mediaCode || availableBottles <= 0}
           >
             Move to Rooting
           </Button>

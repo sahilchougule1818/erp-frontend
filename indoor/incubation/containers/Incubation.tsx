@@ -2,12 +2,9 @@ import { IncubationTable } from '../components/IncubationTable';
 import { useState } from 'react';
 import { useIncubationData } from '../hooks/useIncubationData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
-import { IncubationEditModal } from '../components/IncubationEditModal';
-import { Badge } from '../../../shared/ui/badge';
 
 export function Incubation() {
-  const { records, refetch, pagination } = useIncubationData();
-  const [editingRecord, setEditingRecord] = useState<any>(null);
+  const { records, pagination } = useIncubationData();
   const [showAll, setShowAll] = useState(false);
 
   const columns = [
@@ -45,7 +42,6 @@ export function Incubation() {
             title="Incubation Register"
             columns={columns}
             records={showAll ? records : records.filter((r: any) => r.state === 'ACTIVE')}
-            onEdit={(record) => { if (record.state === 'ACTIVE' && !record.isRooted) setEditingRecord(record); }}
             filterConfig={{
               filter1Key: 'plantName',
               filter1Label: 'Plant Name',
@@ -70,14 +66,6 @@ export function Incubation() {
           />
         </TabsContent>
       </Tabs>
-
-      {editingRecord && (
-        <IncubationEditModal 
-          record={editingRecord}
-          onClose={() => setEditingRecord(null)}
-          onSuccess={refetch}
-        />
-      )}
     </div>
   );
 }

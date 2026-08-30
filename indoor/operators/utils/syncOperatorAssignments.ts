@@ -5,49 +5,8 @@ export interface StagedOperator {
   lastName?: string;
   role?: string;
   assignmentId?: number;
-}
-
-export interface InitialAssignment {
-  id: number;
-  operatorId?: number;
-  operatorId?: number;
-}
-
-function initialOperatorId(a: InitialAssignment): number {
-  return a.operatorId ?? a.operatorId ?? 0;
-}
-
-export async function syncOperatorAssignments(
-  initialAssignments: InitialAssignment[],
-  stagedOperators: StagedOperator[],
-  handlers: {
-    add: (operatorId: number) => Promise<unknown>;
-    update: (assignmentId: number, operatorId: number) => Promise<unknown>;
-    remove: (assignmentId: number) => Promise<unknown>;
-  }
-): Promise<void> {
-  const usedAssignmentIds = new Set<number>();
-  const ops: Promise<unknown>[] = [];
-
-  for (const op of stagedOperators) {
-    if (op.assignmentId != null) {
-      usedAssignmentIds.add(op.assignmentId);
-      const initial = initialAssignments.find(a => a.id === op.assignmentId);
-      if (initial && initialOperatorId(initial) !== op.id) {
-        ops.push(handlers.update(op.assignmentId, op.id));
-      }
-    } else {
-      ops.push(handlers.add(op.id));
-    }
-  }
-
-  for (const a of initialAssignments) {
-    if (!usedAssignmentIds.has(a.id)) {
-      ops.push(handlers.remove(a.id));
-    }
-  }
-
-  await Promise.all(ops);
+  qtyIn?: number;
+  qtyOut?: number;
 }
 
 export function toggleStagedOperator(
@@ -73,7 +32,7 @@ export function toggleStagedOperator(
   const freed = assignmentId != null ? freedAssignmentIds.slice(0, -1) : freedAssignmentIds;
 
   return {
-    staged: [...stagedOperators, { ...operator, assignmentId }],
+    staged: [...stagedOperators, { ...operator, assignmentId, qtyIn: 0, qtyOut: 0 }],
     freed,
   };
 }

@@ -34,7 +34,7 @@ export const MakeAvailableConfirm: React.FC<MakeAvailableConfirmProps> = ({
         Make batch <span className="font-semibold">{batchCode}</span> available for outdoor module?
       </p>
       <p className="text-base text-gray-500 mb-6">
-        This will lock subculture and incubation operations for this batch.
+        This will lock multiplication and incubation operations for this batch.
       </p>
       
       {error && (

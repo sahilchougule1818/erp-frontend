@@ -7,12 +7,11 @@ const OutdoorWorkerMaster = lazy(() => import('../outdoor/workers/containers/Out
 const Tunnels = lazy(() => import('../outdoor/tunnels/containers/Tunnels').then((m) => ({ default: m.Tunnels })));
 const IndoorDashboard = lazy(() => import('../indoor/dashboard/containers/IndoorDashboard').then((m) => ({ default: m.IndoorDashboard })));
 const MediaPreparation = lazy(() => import('../indoor/media-preparation/containers/MediaPreparation').then((m) => ({ default: m.MediaPreparation })));
-const Subculturing = lazy(() => import('../indoor/subculturing/containers/Subculturing').then((m) => ({ default: m.Subculturing })));
+const Multiplication = lazy(() => import('../indoor/multiplication/containers/Multiplication').then((m) => ({ default: m.Multiplication })));
 const Incubation = lazy(() => import('../indoor/incubation/containers/Incubation').then((m) => ({ default: m.Incubation })));
 const RootingManagement = lazy(() => import('../indoor/rooting/containers/RootingManagement').then((m) => ({ default: m.RootingManagement })));
 const CleaningRecord = lazy(() => import('../indoor/cleaning/containers/CleaningRecord').then((m) => ({ default: m.CleaningRecord })));
 const Sampling = lazy(() => import('../indoor/sampling/containers/Sampling').then((m) => ({ default: m.Sampling })));
-const IndoorContamination = lazy(() => import('../indoor/contamination/containers/IndoorContamination').then((m) => ({ default: m.IndoorContamination })));
 const IndoorBatchMaster = lazy(() => import('../indoor/batch-master/containers/IndoorBatchMaster'));
 const IndoorSettings = lazy(() => import('../indoor/settings/containers/IndoorSettings'));
 const OutdoorDashboard = lazy(() => import('../outdoor/dashboard/containers/OutdoorDashboard').then((m) => ({ default: m.OutdoorDashboard })));
@@ -52,10 +51,9 @@ export function AppRoutes() {
         <Route path="/indoor-batch-master" element={<IndoorBatchMaster />} />
         <Route path="/operator-master" element={<OperatorMaster />} />
         <Route path="/media-preparation" element={<MediaPreparation />} />
-        <Route path="/subculturing" element={<Subculturing />} />
+        <Route path="/multiplication" element={<Multiplication />} />
         <Route path="/incubation" element={<Incubation />} />
         <Route path="/rooting" element={<RootingManagement />} />
-        <Route path="/indoor-contamination" element={<IndoorContamination />} />
         <Route path="/cleaning-record" element={<CleaningRecord />} />
         <Route path="/sampling" element={<Sampling />} />
         <Route path="/indoor-settings" element={<IndoorSettings />} />

@@ -14,7 +14,6 @@ import {
   RotateCcw,
   Clock,
   Lock,
-  Skull,
   GitMerge,
   GitBranch
 } from 'lucide-react';
@@ -27,18 +26,19 @@ import {
   DropdownMenuTrigger
 } from '../../../shared/ui/dropdown-menu';
 import { useIndoorBatchMaster } from '../hooks/useIndoorBatchMaster';
+import { BatchOperatorWorkRegister } from '../../batch-operator-lines/components/BatchOperatorWorkRegister';
 import { useNotify } from '../../../shared/hooks/useNotify';
 import { cn } from '../../../shared/ui/utils';
 import { Tooltip, TooltipProvider } from '../../../shared/ui/tooltip';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { CreateBatchForm } from '../forms/CreateBatchForm';
-import { SubcultureForm } from '../../subculturing/forms/SubcultureForm';
+import { MultiplicationForm } from '../../multiplication/forms/MultiplicationForm';
 import { IncubationForm } from '../../incubation/forms/IncubationForm';
 import { SampleForm } from '../../sampling/forms/SampleForm';
 import { ReportSampleForm } from '../../sampling/forms/ReportSampleForm';
 import { MakeAvailableConfirm } from '../forms/MakeAvailableConfirm';
-import { RecordContaminationModal } from '../../contamination/components/RecordContaminationModal';
 import { PartialRootingForm } from '../../rooting/forms/PartialRootingForm';
+import { PartialMultiplicationForm } from '../../multiplication/forms/PartialMultiplicationForm';
 import { FullRootingForm } from '../../rooting/forms/FullRootingForm';
 import { indoorApi } from '../../api/indoorApi';
 import { extractApiErrorMessage } from '../../../shared/api/apiClient';
@@ -47,7 +47,7 @@ import { useAuth } from '../../../auth/AuthContext';
 import { Batch } from '../../types';
 import { BatchTimelineModal } from '../components/BatchTimelineModal';
 
-type ModalType = 'CREATE' | 'SUBCULTURE' | 'INCUBATE' | 'SAMPLE' | 'REPORT' | 'EXPORT' | 'TIMELINE' | 'CONTAMINATION' | 'PARTIAL_ROOTING' | 'FULL_ROOTING' | 'TERMINAL_INCUBATION' | null;
+type ModalType = 'CREATE' | 'MULTIPLICATION' | 'PARTIAL_MULTIPLICATION' | 'INCUBATE' | 'SAMPLE' | 'REPORT' | 'EXPORT' | 'TIMELINE' | 'PARTIAL_ROOTING' | 'FULL_ROOTING' | 'TERMINAL_INCUBATION' | null;
 
 const IndoorBatchMaster: React.FC = () => {
   const {
@@ -58,7 +58,7 @@ const IndoorBatchMaster: React.FC = () => {
     fetchBatches,
     fetchOperators,
     createBatch,
-    recordSubculture,
+    recordMultiplication,
     recordIncubation,
     submitSample,
     reportSampleResult,
@@ -98,21 +98,21 @@ const IndoorBatchMaster: React.FC = () => {
     const isTerminalBatch = isTerminal(batch);
 
     switch (action) {
-      case 'SUBCULTURE':
+      case 'MULTIPLICATION':
         if (isTerminalBatch) {
-          return 'Terminal incubation batches cannot be subcultured';
+          return 'Terminal incubation batches cannot be multiplied';
         }
         if (batch.stage === 'Stage-8' && batch.phase === 'incubation') {
-          return 'Cannot subculture from Stage-8 incubation - this is the final stage';
+          return 'Cannot multiply from Stage-8 incubation - this is the final stage';
         }
-        if (batch.phase !== 'initialisation' && batch.phase !== 'subculturing' && batch.phase !== 'incubation') {
-          return 'Subculture only available in initialisation, subculturing or incubation phase';
+        if (batch.phase !== 'initialisation' && batch.phase !== 'multiplication' && batch.phase !== 'incubation') {
+          return 'Multiplication only available in initialisation, multiplication or incubation phase';
         }
         if (batch.phase === 'initialisation') {
           return null;
         }
-        if (stageNum >= 0 && stageNum <= 8 && batch.phase !== 'incubation' && batch.phase !== 'subculturing') {
-          return 'Stage 0-8 can only subculture when in incubation or subculturing phase';
+        if (stageNum >= 0 && stageNum <= 8 && batch.phase !== 'incubation' && batch.phase !== 'multiplication') {
+          return 'Stage 0-8 can only be multiplied when in incubation or multiplication phase';
         }
         return null;
       
@@ -123,8 +123,8 @@ const IndoorBatchMaster: React.FC = () => {
         if (stageNum < 0 || stageNum > 8) {
           return 'Incubation only available for Stage 0-8';
         }
-        if (batch.phase !== 'subculturing') {
-          return 'Can only incubate when in subculturing phase';
+        if (batch.phase !== 'multiplication') {
+          return 'Can only incubate when in multiplication phase';
         }
         return null;
       
@@ -164,12 +164,6 @@ const IndoorBatchMaster: React.FC = () => {
         }
         return null;
       
-      case 'CONTAMINATION':
-        if (batch.phase !== 'incubation' && batch.phase !== 'rooting') {
-          return 'Contamination can only be recorded in incubation or rooting phase';
-        }
-        return null;
-      
       case 'EXPORT':
         if (batch.state === 'OUTDOOR_READY' || batch.state === 'AT_OUTDOOR') {
           return 'Batch already exported to outdoor';
@@ -200,7 +194,7 @@ const IndoorBatchMaster: React.FC = () => {
   const formatPhaseDisplay = (phase: string): string => {
     switch (phase) {
       case 'initialisation': return 'Initialisation';
-      case 'subculturing': return 'Subculturing';
+      case 'multiplication': return 'Multiplication';
       case 'incubation': return 'Incubation';
       case 'rooting': return 'Rooting';
       case 'partial_rooting': return 'Partial Rooting';
@@ -210,11 +204,11 @@ const IndoorBatchMaster: React.FC = () => {
 
   const formatStageDisplay = (stage: string | null, phase: string): string => {
     if (!stage || phase === 'initialisation') return 'Initialisation';
-    if (stage === 'Rooting') return 'Rooting';
     if (stage === 'Terminal-Incubation') return 'Terminal Incubation';
     const n = stage.replace('Stage-', '');
-    if (phase === 'subculturing') return `Stage ${n} - Subculture`;
+    if (phase === 'multiplication') return `Stage ${n} - Multiplication`;
     if (phase === 'incubation') return `Stage ${n} - Incubation`;
+    if (phase === 'rooting') return `Stage ${n} - Rooting`;
     return stage;
   };
 
@@ -293,9 +287,16 @@ const IndoorBatchMaster: React.FC = () => {
 
   const openModal = (type: ModalType, batch?: Batch) => {
     if (batch) setSelectedBatch(batch);
-    if (type === 'SUBCULTURE') {
-      fetchOperators('SUBCULTURING');
+    if (type === 'MULTIPLICATION') {
+      fetchOperators('MULTIPLICATION');
+      indoorApi.autoclave.getMediaCodes()
+        .then((codes) => setMediaCodes(Array.isArray(codes) ? codes : []))
+        .catch((error) => console.error('Failed to refresh media codes:', error));
     } else if (type === 'INCUBATE') {
+      fetchOperators('INCUBATION');
+    } else if (type === 'PARTIAL_MULTIPLICATION' || type === 'PARTIAL_ROOTING' || type === 'FULL_ROOTING') {
+      fetchOperators('INCUBATION');
+    } else if (type === 'TERMINAL_INCUBATION') {
       fetchOperators('INCUBATION');
     }
     setActiveModal(type);
@@ -317,7 +318,7 @@ const IndoorBatchMaster: React.FC = () => {
     }
   };
 
-  const handleSubculture = async (data: any) => {
+  const handleMultiplication = async (data: any) => {
     if (!selectedBatch) return;
     
     const apiData = {
@@ -325,21 +326,21 @@ const IndoorBatchMaster: React.FC = () => {
       currentBottles: data.currentBottles,
       newBottlesCount: parseInt(data.noOfBottles) || 0,
       notes: data.notes || '',
-      operators: data.operatorIds.map((id: any) => ({ id: parseInt(id) }))
+      operators: data.operators
     };
     
-    const result = await recordSubculture(selectedBatch.batchCode, apiData);
+    const result = await recordMultiplication(selectedBatch.batchCode, selectedBatch.phase, apiData);
     if (result.success) {
-      notify.success('Subculture recorded successfully');
+      notify.success('Multiplication recorded successfully');
       closeModal();
     } else {
-      notify.error(result.error || 'Failed to record subculture');
+      notify.error(result.error || 'Failed to record multiplication');
     }
   };
 
   const handleIncubation = async (data: any) => {
     if (!selectedBatch) return;
-    
+
     const apiData = {
       mediaCode: data.mediaCode || undefined,
       incubationPeriod: data.incubationPeriod ? parseInt(data.incubationPeriod) : 7,
@@ -349,7 +350,7 @@ const IndoorBatchMaster: React.FC = () => {
       contaminationCount: data.contaminationCount ? parseInt(data.contaminationCount) : 0,
       operators: data.operatorIds ? data.operatorIds.map((id: any) => ({ id: parseInt(id) })) : []
     };
-    
+
     const result = await recordIncubation(selectedBatch.batchCode, apiData);
     if (result.success) {
       notify.success('Incubation recorded successfully');
@@ -393,7 +394,7 @@ const IndoorBatchMaster: React.FC = () => {
   };
 
   const handleUnexportBatch = async (batch: Batch) => {
-    if (!confirm(`Remove "${batch.batchCode}" from outdoor availability? This will unlock subculture and incubation.`)) return;
+    if (!confirm(`Remove "${batch.batchCode}" from outdoor availability? This will unlock multiplication and incubation.`)) return;
     const result = await unexportFromOutdoor(batch.batchCode);
     if (result.success) {
       notify.success('Batch removed from outdoor availability');
@@ -423,6 +424,20 @@ const IndoorBatchMaster: React.FC = () => {
       notify.success('Last action undone successfully');
     } else {
       notify.error(result.error || 'Failed to undo last action');
+    }
+  };
+
+  const handlePartialMultiplication = async (data: any) => {
+    try {
+      await indoorApi.batchOperations.makePartialMultiplication({
+        ...data,
+        createdBy: getCreatedBy(),
+      });
+      notify.success('Partial multiplication completed successfully');
+      closeModal();
+      fetchBatches();
+    } catch (error: unknown) {
+      notify.error(extractApiErrorMessage(error) || 'Failed to create partial multiplication');
     }
   };
 
@@ -463,7 +478,8 @@ const IndoorBatchMaster: React.FC = () => {
         temperature: data.temperature ? parseFloat(data.temperature) : undefined,
         humidity: data.humidity ? parseFloat(data.humidity) : undefined,
         lightIntensity: data.lightIntensity ? parseFloat(data.lightIntensity) : undefined,
-        notes: data.notes || ''
+        notes: data.notes || '',
+        operators: data.operators || data.operatorIds?.map((id: number) => ({ id })) || [],
       });
       notify.success('Batch moved to terminal incubation successfully');
       closeModal();
@@ -492,17 +508,17 @@ const IndoorBatchMaster: React.FC = () => {
 
   const isTerminal = (batch: Batch) => batch.rooted === true || batch.stage === 'Terminal-Incubation';
 
-  const showSubculture = (batch: Batch) => {
-    if (batch.stage === 'Rooting') return false;
+  const showMultiplication = (batch: Batch) => {
+    if (batch.phase === 'rooting') return false;
     if (batch.phase === 'initialisation') return true;
     const n = parseInt(batch.stage?.split('-')[1] || '0');
     return n >= 0 && n <= 8 && batch.phase === 'incubation';
   };
 
   const showIncubate = (batch: Batch) => {
-    if (batch.stage === 'Rooting') return false;
+    if (batch.phase === 'rooting') return false;
     const n = parseInt(batch.stage?.split('-')[1] || '0');
-    return n >= 0 && n <= 8 && batch.phase === 'subculturing';
+    return n >= 0 && n <= 8 && batch.phase === 'multiplication';
   };
 
   const showExport = (batch: Batch) => {
@@ -513,8 +529,6 @@ const IndoorBatchMaster: React.FC = () => {
 
   const showPartialRooting = (batch: Batch) => batch.phase === 'incubation' && !batch.rooted;
   const showFullRooting = (batch: Batch) => batch.phase === 'incubation' && !batch.rooted;
-
-  const showContamination = (batch: Batch) => batch.phase === 'incubation' || batch.phase === 'rooting';
 
   const handleExportData = () => {
     const exportData = batches.map(batch => ({
@@ -576,10 +590,10 @@ const columns = [
             
             <DropdownMenuSeparator />
             
-            {/* Subculture — initialisation phase OR Stage 0-8 incubation */}
+            {/* Multiplication — initialisation phase OR Stage 0-8 incubation */}
             {batch.phase !== 'partial_rooting' && (batch.phase === 'initialisation' || (parseInt(batch.stage?.split('-')[1] || '0') >= 0 && batch.phase === 'incubation')) && (() => {
               const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canSubculture;
+              const permission = batchPermissions[batch.batchCode]?.canMultiply;
               const isLocked = isLoadingPermissions || (permission && !permission.allowed);
               const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
               
@@ -589,26 +603,26 @@ const columns = [
                     <span className="block w-full">
                       <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
                         <Lock className="mr-2 h-4 w-4" />
-                        <span>{batch.phase === 'initialisation' ? 'Subculture' : 'Continue Subculture'}</span>
+                        <span>{batch.phase === 'initialisation' ? 'Multiplication' : 'Continue Multiplication'}</span>
                       </DropdownMenuItem>
                     </span>
                   </Tooltip>
                 </TooltipProvider>
               ) : (
-                <DropdownMenuItem onClick={() => openModal('SUBCULTURE', batch)}>
+                <DropdownMenuItem onClick={() => openModal('MULTIPLICATION', batch)}>
                   <FlaskConical className="mr-2 h-4 w-4 text-green-600" />
-                  <span>{batch.phase === 'initialisation' ? 'Subculture' : 'Continue Subculture'}</span>
+                  <span>{batch.phase === 'initialisation' ? 'Multiplication' : 'Continue Multiplication'}</span>
                 </DropdownMenuItem>
               );
             })()}
             
-            {/* Incubate — alternates with Subculture */}
-            {batch.phase === 'subculturing' && (() => {
+            {/* Incubate — from multiplication phase */}
+            {batch.phase === 'multiplication' && (() => {
               const isLoadingPermissions = !batchPermissions[batch.batchCode];
               const permission = batchPermissions[batch.batchCode]?.canIncubate;
               const isLocked = isLoadingPermissions || (permission && !permission.allowed);
               const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-              
+
               return isLocked ? (
                 <TooltipProvider>
                   <Tooltip side="left" content={lockReason}>
@@ -627,7 +641,7 @@ const columns = [
                 </DropdownMenuItem>
               );
             })()}
-            
+
             {/* Submit Sample — alternates with Report */}
             {batch.isSampled === 'n' && batch.phase !== 'partial_rooting' && (() => {
               const isLoadingPermissions = !batchPermissions[batch.batchCode];
@@ -706,6 +720,32 @@ const columns = [
               );
             })()}
 
+            {/* Partial Multiplication */}
+            {batch.phase === 'incubation' && !batch.rooted && (() => {
+              const isLoadingPermissions = !batchPermissions[batch.batchCode];
+              const permission = batchPermissions[batch.batchCode]?.canPartialMultiply;
+              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
+              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
+
+              return isLocked ? (
+                <TooltipProvider>
+                  <Tooltip side="left" content={lockReason}>
+                    <span className="block w-full">
+                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Make Partial Multiplication</span>
+                      </DropdownMenuItem>
+                    </span>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuItem onClick={() => openModal('PARTIAL_MULTIPLICATION', batch)}>
+                  <GitBranch className="mr-2 h-4 w-4 text-blue-600" />
+                  <span>Make Partial Multiplication</span>
+                </DropdownMenuItem>
+              );
+            })()}
+
             {/* Partial Rooting */}
             {batch.phase === 'incubation' && !batch.rooted && (() => {
               const isLoadingPermissions = !batchPermissions[batch.batchCode];
@@ -754,32 +794,6 @@ const columns = [
                 <DropdownMenuItem onClick={() => openModal('FULL_ROOTING', batch)}>
                   <GitMerge className="mr-2 h-4 w-4 text-orange-600" />
                   <span>Move Full Batch to Rooting</span>
-                </DropdownMenuItem>
-              );
-            })()}
-            
-            {/* Contamination */}
-            {batch.phase !== 'partial_rooting' && (() => {
-              const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canRecordContamination;
-              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
-              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-              
-              return isLocked ? (
-                <TooltipProvider>
-                  <Tooltip side="left" content={lockReason}>
-                    <span className="block w-full">
-                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="mr-2 h-4 w-4" />
-                        <span>Record Contamination</span>
-                      </DropdownMenuItem>
-                    </span>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <DropdownMenuItem onClick={() => openModal('CONTAMINATION', batch)} className="text-red-600">
-                  <Skull className="mr-2 h-4 w-4" />
-                  <span>Record Contamination</span>
                 </DropdownMenuItem>
               );
             })()}
@@ -875,6 +889,7 @@ const columns = [
       <Tabs defaultValue="master" className="w-full">
         <TabsList className="w-full">
           <TabsTrigger value="master">Indoor Batch Master</TabsTrigger>
+          <TabsTrigger value="operator-work">Operator Work</TabsTrigger>
         </TabsList>
         
         <TabsContent value="master">
@@ -916,6 +931,13 @@ const columns = [
         hideBorder={true}
       />
         </TabsContent>
+
+        <TabsContent value="operator-work">
+          <BatchOperatorWorkRegister
+            batchOptions={[...new Set(batches.map(batch => batch.batchCode))].sort()}
+            stageOptions={[...new Set(batches.map(batch => batch.stage))].sort()}
+          />
+        </TabsContent>
       </Tabs>
 
       {/* Modal forms */}
@@ -925,9 +947,9 @@ const columns = [
         </ModalLayout>
       )}
 
-      {activeModal === 'SUBCULTURE' && selectedBatch && (
-        <ModalLayout title={`Subculture Batch ${selectedBatch.batchCode}`} width="w-[700px]">
-          <SubcultureForm initialData={null} selectedBatch={selectedBatch} operators={operators} records={mediaCodes.map(code => ({ mediaCode: code }))} onSubmit={handleSubculture} onCancel={closeModal} />
+      {activeModal === 'MULTIPLICATION' && selectedBatch && (
+        <ModalLayout title={`Multiplication Batch ${selectedBatch.batchCode}`} width="w-[700px]">
+          <MultiplicationForm initialData={null} selectedBatch={selectedBatch} operators={operators} mediaCodes={mediaCodes} onSubmit={handleMultiplication} onCancel={closeModal} />
         </ModalLayout>
       )}
 
@@ -951,6 +973,19 @@ const columns = [
         </ModalLayout>
       )}
 
+      {activeModal === 'PARTIAL_MULTIPLICATION' && selectedBatch && (
+        <PartialMultiplicationForm
+          record={{
+            ...selectedBatch,
+            id: selectedBatch.currentSourceId,
+          }}
+          mediaCodes={mediaCodes}
+          operators={operators}
+          onSubmit={handlePartialMultiplication}
+          onCancel={closeModal}
+        />
+      )}
+
       {activeModal === 'PARTIAL_ROOTING' && selectedBatch && (
         <PartialRootingForm
           record={{
@@ -961,6 +996,7 @@ const columns = [
             nextStage: selectedBatch.stage
           }}
           mediaCodes={mediaCodes}
+          operators={operators}
           onSubmit={handlePartialRooting}
           onCancel={closeModal}
         />
@@ -973,6 +1009,7 @@ const columns = [
             id: selectedBatch.currentSourceId
           }}
           mediaCodes={mediaCodes}
+          operators={operators}
           onSubmit={handleFullRooting}
           onCancel={closeModal}
         />
@@ -993,14 +1030,6 @@ const columns = [
             onCancel={closeModal}
           />
         </ModalLayout>
-      )}
-
-      {activeModal === 'CONTAMINATION' && selectedBatch && (
-        <RecordContaminationModal
-          batch={selectedBatch}
-          onClose={closeModal}
-          onSuccess={fetchBatches}
-        />
       )}
 
       {activeModal === 'TIMELINE' && selectedBatch && (

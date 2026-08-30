@@ -25,6 +25,7 @@ export interface Batch {
   currentSourceId?: number;
   qtyInherited?: number;
   partialRooting?: boolean;
+  partialMultiplication?: boolean;
   rooted?: boolean;
   sourceBatchCode?: string;
   sourceBatchStage?: string;
@@ -33,7 +34,7 @@ export interface Batch {
   eventCode?: string;
 }
 
-export interface SubcultureRecord {
+export interface MultiplicationRecord {
   id: number;
   batchCode: string;
   plantName: string;
@@ -48,6 +49,8 @@ export interface SubcultureRecord {
   qtyAvailable?: number;
   notes: string;
   state: 'ACTIVE' | 'COMPLETED';
+  operatorsEditable?: boolean;
+  operatorsEditLockReason?: string | null;
   createdAt: string;
   departedAt: string | null;
   operators?: OperatorRef[];
@@ -155,4 +158,38 @@ export interface PlantConfig {
   active: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface BatchOperatorLine {
+  id: number;
+  batchCode: string;
+  phase: string;
+  stage: string;
+  sourceTable: string;
+  sourceRecordId: number;
+  eventCode: string;
+  operatorId: number;
+  operatorShortName: string;
+  qtyIn: number;
+  qtyOut: number;
+  qtyContaminated?: number;
+  labNumber?: number;
+  recordDate?: string;
+  state?: string;
+  editable?: boolean;
+  editLockReason?: string | null;
+}
+
+export interface MediaStorageRecord {
+  id?: number;
+  autoclaveCycleId?: number;
+  mediaCode: string;
+  mediaType?: string;
+  bottlesCount?: number;
+  volumeMl?: number;
+  status?: string;
+  importedAt?: string;
+  readyAt?: string;
+  labNumber?: number;
+  notes?: string;
 }

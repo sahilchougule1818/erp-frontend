@@ -50,7 +50,7 @@ interface Column {
   highlight?: string;
 }
 
-export interface SubculturingTableProps {
+export interface MultiplicationTableProps {
   title: string;
   description?: string;
   columns: Column[];
@@ -260,7 +260,7 @@ function EditSearchButton({
   );
 }
 
-export const SubculturingTable = memo(function SubculturingTable({
+export const MultiplicationTable = memo(function MultiplicationTable({
   title,
   description,
   columns,
@@ -273,7 +273,7 @@ export const SubculturingTable = memo(function SubculturingTable({
   exportFileName = 'data',
   pagination,
   hideBorder = false,
-}: SubculturingTableProps) {
+}: MultiplicationTableProps) {
   const [selectedFilter1, setSelectedFilter1] = useState('');
   const [selectedFilter2, setSelectedFilter2] = useState('');
   const [isFiltered, setIsFiltered] = useState(false);
@@ -416,11 +416,17 @@ export const SubculturingTable = memo(function SubculturingTable({
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => onEdit(record)}
-                                title={isHistorical ? 'Historical record — editing disabled' : 'Edit'}
+                                title={
+                                  isHistorical
+                                    ? 'Historical record — editing disabled'
+                                    : record.operatorsEditable === false
+                                      ? 'View operators (batch has progressed)'
+                                      : 'Edit operators'
+                                }
                                 disabled={isHistorical}
                                 className={isHistorical ? 'cursor-not-allowed' : ''}
                               >
-                                <PenSquare className="w-4 h-4" />
+                                <PenSquare className={`w-4 h-4 ${record.operatorsEditable === false ? 'text-gray-400' : ''}`} />
                               </Button>
                             )}
                             {onEditWorkers && record.state === 'ACTIVE' && (

@@ -97,12 +97,11 @@ export function Sidebar({ currentPage, onNavigate, user, isCollapsed, onToggle }
       children: [
         { id: 'indoor-dashboard', label: 'Indoor Dashboard', icon: Home, page: 'indoor-dashboard', breadcrumbs: ['Indoor', 'Indoor Dashboard'] },
         { id: 'operator-master', label: 'Operator Master', icon: Users, page: 'operator-master', breadcrumbs: ['Indoor', 'Operator Master'] },
-        { id: 'media-preparation', label: 'Media Preparation', icon: TestTube, page: 'media-preparation', breadcrumbs: ['Indoor', 'Media Preparation'] },
+        { id: 'media-preparation', label: 'Media', icon: TestTube, page: 'media-preparation', breadcrumbs: ['Indoor', 'Media'] },
         { id: 'indoor-batch-master', label: 'Batch Master', icon: Command, page: 'indoor-batch-master', breadcrumbs: ['Indoor', 'Batch Master'] },
-        { id: 'subculturing', label: 'Subculturing', icon: Microscope, page: 'subculturing', breadcrumbs: ['Indoor', 'Subculturing'] },
+        { id: 'multiplication', label: 'Multiplication', icon: Microscope, page: 'multiplication', breadcrumbs: ['Indoor', 'Multiplication'] },
         { id: 'incubation', label: 'Incubation', icon: Thermometer, page: 'incubation', breadcrumbs: ['Indoor', 'Incubation'] },
         { id: 'rooting', label: 'Rooting', icon: GitBranch, page: 'rooting', breadcrumbs: ['Indoor', 'Rooting'] },
-        { id: 'indoor-contamination', label: 'Indoor Contamination', icon: Bug, page: 'indoor-contamination', breadcrumbs: ['Indoor', 'Indoor Contamination'] },
         { id: 'cleaning-record', label: 'Cleaning Record', icon: ShieldCheck, page: 'cleaning-record', breadcrumbs: ['Indoor', 'Cleaning Record'] },
         { id: 'sampling', label: 'Sampling', icon: TestTube, page: 'sampling', breadcrumbs: ['Indoor', 'Sampling'] },
         { id: 'indoor-settings', label: 'Indoor Settings', icon: Settings, page: 'indoor-settings', breadcrumbs: ['Indoor', 'Indoor Settings'] }

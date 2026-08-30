@@ -1,6 +1,6 @@
 export const OPERATOR_DESIGNATIONS = [
   { value: 'MEDIA_PREPARATION', label: 'Media preparation' },
-  { value: 'SUBCULTURING', label: 'Subculturing' },
+  { value: 'MULTIPLICATION', label: 'Multiplication' },
   { value: 'INCUBATION', label: 'Incubation' },
 ] as const;
 
