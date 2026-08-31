@@ -928,7 +928,11 @@ const columns = [
 
         <TabsContent value="operator-work">
           <BatchOperatorWorkRegister
-            batchOptions={[...new Set(batches.map(batch => batch.batchCode))].sort()}
+            batchOptions={[...new Set(
+              batches
+                .filter(batch => !batch.partialRooting && !batch.partialMultiplication)
+                .map(batch => batch.batchCode)
+            )].sort()}
             stageOptions={[...new Set(batches.map(batch => batch.stage))].sort()}
           />
         </TabsContent>

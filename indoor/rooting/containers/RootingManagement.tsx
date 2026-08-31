@@ -2,9 +2,16 @@ import { RootingTable } from '../components/RootingTable';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useRootingData } from '../hooks/useRootingData';
+import { BatchOperatorLineEditModal } from '../../batch-operator-lines/components/BatchOperatorLineEditModal';
+import { indoorApi } from '../../api/indoorApi';
+import { useNotify } from '../../../shared/hooks/useNotify';
+import type { BatchOperatorLine } from '../../types';
+
 export function RootingManagement() {
-  const { rootedBatches, loading, error, pagination } = useRootingData();
+  const { rootedBatches, loading, error, pagination, refetch } = useRootingData();
+  const notify = useNotify();
   const [showAll, setShowAll] = useState(false);
+  const [editingLines, setEditingLines] = useState<BatchOperatorLine[] | null>(null);
 
   const formatDate = (dateString: string | null | undefined) => {
     if (!dateString) return '—';
@@ -26,6 +33,26 @@ export function RootingManagement() {
     { key: 'state', label: 'State' },
   ];
 
+  const handleEdit = async (record: any) => {
+    if (record.state !== 'ACTIVE') return;
+    try {
+      const lines = await indoorApi.batchOperatorLines.get({
+        eventCode: record.eventCode,
+        sourceTable: 'rooted_batches',
+        sourceRecordId: record.id,
+      });
+      const group = Array.isArray(lines) ? lines : [];
+      if (group.length === 0) {
+        notify.error('No operator lines found for this rooting record');
+        return;
+      }
+      setEditingLines(group);
+    } catch (error: any) {
+      notify.error(error?.response?.data?.message || 'Failed to load operator data');
+      setEditingLines(null);
+    }
+  };
+
   if (loading) return <div className="p-6">Loading rooted batches...</div>;
   if (error) return <div className="p-6 text-red-600">Error: {error}</div>;
 
@@ -45,6 +72,13 @@ export function RootingManagement() {
         description={`Total: ${pagination.total} | Active: ${activeCount} | Completed: ${completedCount}`}
         columns={columns}
         records={showAll ? rootedBatches : rootedBatches.filter((b: any) => b.state === 'ACTIVE' || b.state === 'OUTDOOR_READY')}
+        onEdit={handleEdit}
+        filterConfig={{
+          filter1Key: 'plantName',
+          filter1Label: 'Plant Name',
+          filter2Key: 'batchCode',
+          filter2Label: 'Batch Name',
+        }}
         exportFileName="rooted_batches"
         hideBorder={true}
         addButton={
@@ -63,6 +97,14 @@ export function RootingManagement() {
       />
         </TabsContent>
       </Tabs>
+
+      {editingLines && (
+        <BatchOperatorLineEditModal
+          lines={editingLines}
+          onClose={() => setEditingLines(null)}
+          onSuccess={refetch}
+        />
+      )}
     </div>
   );
 }

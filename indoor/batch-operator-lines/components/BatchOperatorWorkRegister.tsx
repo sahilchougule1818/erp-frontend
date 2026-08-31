@@ -57,8 +57,11 @@ export function BatchOperatorWorkRegister({
   }, [batchOptions, lines]);
 
   const derivedStageOptions = useMemo(() => {
+    if (lines.length > 0) {
+      return [...new Set(lines.map(line => line.stage))].sort();
+    }
     if (stageOptions.length > 0) return stageOptions;
-    return [...new Set(lines.map(line => line.stage))].sort();
+    return [];
   }, [stageOptions, lines]);
 
   const handleEdit = (record: BatchOperatorLine) => {
@@ -72,6 +75,16 @@ export function BatchOperatorWorkRegister({
       key: 'recordDate',
       label: 'Date',
       render: (val: string) => <span>{val ? String(val).split('T')[0] : '—'}</span>,
+    },
+    {
+      key: 'batchCode',
+      label: 'Batch',
+      render: (val: string, record: BatchOperatorLine) => (
+        <span className={val !== batchCode ? 'text-indigo-700 font-medium' : ''}>
+          {val || '—'}
+          {val && val !== batchCode ? ' (split)' : ''}
+        </span>
+      ),
     },
     {
       key: 'phase',
@@ -107,7 +120,11 @@ export function BatchOperatorWorkRegister({
     <>
       <BatchMasterTable
         title="Operator Work Register"
-        description={!batchCode ? 'Select a batch to view operator work.' : undefined}
+        description={
+          !batchCode
+            ? 'Select a batch to view operator work.'
+            : 'Includes partial multiplication and rooting splits linked via batch_splits.'
+        }
         columns={columns}
         records={loading || !batchCode ? [] : lines}
         onEdit={handleEdit}
