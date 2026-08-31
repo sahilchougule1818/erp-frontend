@@ -7,12 +7,6 @@ import { Textarea } from '../../../shared/ui/textarea';
 import { Button } from '../../../shared/ui/button';
 import { Trash2, ArrowRight } from 'lucide-react';
 import {
-  MultiplicationWorkOperatorAssignment,
-  validateFirstMultiplicationOperators,
-  validateFullMultiplicationOperators,
-  mapMultiplicationOperatorsToPayload,
-} from '../operators';
-import {
   SplitOperatorAssignment,
   validateSplitOperators,
   mapSplitOperatorsToPayload,
@@ -56,9 +50,9 @@ export function MultiplicationForm({
     new Set([...mediaCodes, initialData?.mediaCode].filter(Boolean))
   );
   const [form, setForm] = useState<any>(emptyForm);
-  const isFirstMultiplication = selectedBatch?.phase === 'initialisation';
-  const isFromIncubation = selectedBatch?.phase === 'incubation';
+  const isZerothMultiplication = selectedBatch?.phase === 'initialisation';
   const availableBottles = selectedBatch?.qtyAvailable ?? selectedBatch?.qtyIn ?? 0;
+  const bottlesIn = isZerothMultiplication ? 0 : availableBottles;
 
   const getNextStage = (currentStage: string, currentPhase: string) => {
     if (currentPhase === 'initialisation') return 'Stage-0';
@@ -109,11 +103,7 @@ export function MultiplicationForm({
       notify.error('Please select a media code');
       return;
     }
-    const operatorError = isFromIncubation
-      ? validateSplitOperators(form.operatorEntries, availableBottles, totalOutput)
-      : isFirstMultiplication
-        ? validateFirstMultiplicationOperators(form.operatorEntries, totalOutput)
-        : validateFullMultiplicationOperators(form.operatorEntries, availableBottles, totalOutput);
+    const operatorError = validateSplitOperators(form.operatorEntries, bottlesIn, totalOutput);
     if (operatorError) {
       notify.error(operatorError);
       return;
@@ -127,9 +117,7 @@ export function MultiplicationForm({
       currentBottles: availableBottles,
       noOfBottles: totalOutput,
       contaminationCount: form.contamination,
-      operators: isFromIncubation
-        ? mapSplitOperatorsToPayload(form.operatorEntries)
-        : mapMultiplicationOperatorsToPayload(form.operatorEntries, isFirstMultiplication),
+      operators: mapSplitOperatorsToPayload(form.operatorEntries, bottlesIn),
       notes: form.notes
     });
   };
@@ -188,7 +176,7 @@ export function MultiplicationForm({
                 </SelectContent>
               </Select>
             </div>
-            {!isFirstMultiplication && (
+            {!isZerothMultiplication && (
               <div className="space-y-2">
                 <Label>Current Quantity (Available)</Label>
                 <Input type="number" value={availableBottles} readOnly className="bg-gray-100" />
@@ -213,23 +201,13 @@ export function MultiplicationForm({
           </div>
         </div>
 
-        {isFromIncubation ? (
-          <SplitOperatorAssignment
-            operators={operators}
-            entries={form.operatorEntries}
-            onChange={(entries) => updateForm('operatorEntries', entries)}
-            bottlesIn={availableBottles}
-            bottlesOut={totalOutput || availableBottles}
-          />
-        ) : (
-          <MultiplicationWorkOperatorAssignment
-            operators={operators}
-            entries={form.operatorEntries}
-            onChange={(entries) => updateForm('operatorEntries', entries)}
-            isFirstMultiplication={isFirstMultiplication}
-            availableBottles={availableBottles}
-          />
-        )}
+        <SplitOperatorAssignment
+          operators={operators}
+          entries={form.operatorEntries}
+          onChange={(entries) => updateForm('operatorEntries', entries)}
+          bottlesIn={bottlesIn}
+          bottlesOut={totalOutput}
+        />
 
         <div className="space-y-3">
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Additional Information</p>

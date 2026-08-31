@@ -4,16 +4,12 @@ import { Input } from '../../../shared/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import { Button } from '../../../shared/ui/button';
 import { Trash2, Info } from 'lucide-react';
-import { IncubationOperatorAssignment as MultiplicationIncubationOperatorAssignment } from '../../multiplication/operators';
-import { IncubationOperatorAssignment as RootingIncubationOperatorAssignment, mapIncubationOperatorIdsToPayload, validateIncubationOperatorAssignment } from '../../rooting/operators';
-import { IncubationRecordOperatorAssignment } from '../operators';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { indoorApi } from '../../api/indoorApi';
 
 interface IncubationFormProps {
   initialData: any;
   selectedBatch: any;
-  operators: any[];
   isTerminalIncubation?: boolean;
   onSubmit: (data: any) => void;
   onDelete?: (id: number) => void;
@@ -23,18 +19,21 @@ interface IncubationFormProps {
 const emptyForm = {
   batchCode: '',
   plantName: '',
-  noOfBottles: '',
   mediaCode: '',
-  contamination: '0',
-  remainingBottles: '',
   incubationPeriod: '',
   temperature: '',
   humidity: '',
   lightIntensity: '',
-  operatorIds: []
 };
 
-export function IncubationForm({ initialData, selectedBatch, operators, isTerminalIncubation = false, onSubmit, onDelete, onCancel }: IncubationFormProps) {
+export function IncubationForm({
+  initialData,
+  selectedBatch,
+  isTerminalIncubation = false,
+  onSubmit,
+  onDelete,
+  onCancel,
+}: IncubationFormProps) {
   const [form, setForm] = useState<any>(emptyForm);
   const [mediaCodes, setMediaCodes] = useState<string[]>([]);
 
@@ -47,47 +46,27 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
       ...emptyForm,
       batchCode: selectedBatch?.batchCode || '',
       plantName: selectedBatch?.plantName || '',
-      noOfBottles: selectedBatch?.qtyAvailable || selectedBatch?.qtyIn || '',
       mediaCode: selectedBatch?.latestMediaCode || selectedBatch?.mediaCode || '',
-      ...initialData
+      ...initialData,
     });
-    if (initialData?.operators) {
-      const operatorIds = initialData.operators.map((op: any) => parseInt(op.operatorId ?? op.operatorId));
-      setForm((prev: any) => ({ ...prev, operatorIds }));
-    }
     if (isTerminalIncubation) {
-      indoorApi.autoclave.getMediaCodes().then((codes: any) => {
-        setMediaCodes(Array.isArray(codes) ? codes : []);
-      }).catch(() => {});
+      indoorApi.autoclave.getMediaCodes()
+        .then((codes: any) => setMediaCodes(Array.isArray(codes) ? codes : []))
+        .catch(() => {});
     }
   }, [initialData, selectedBatch, isTerminalIncubation]);
 
-  const handleContaminationChange = (value: string) => {
-    const contamination = parseInt(value) || 0;
-    setForm({ ...form, contamination: value, remainingBottles: (parseInt(form.noOfBottles) || 0) - contamination });
-  };
-
   const handleSubmit = () => {
-    const operatorError = validateIncubationOperatorAssignment(form.operatorIds);
-    if (operatorError) {
-      alert(operatorError);
-      return;
-    }
-
     onSubmit({
-    id: form.id,
-    batchName: selectedBatch?.batchCode,
-    plantName: selectedBatch?.plantName,
-    noOfBottles: selectedBatch?.qtyAvailable || selectedBatch?.qtyIn || form.noOfBottles,
-    mediaCode: form.mediaCode,
-    contaminationCount: form.contamination,
-    incubationPeriod: form.incubationPeriod,
-    temperature: form.temperature,
-    humidity: form.humidity,
-    lightIntensity: form.lightIntensity,
-    operatorIds: form.operatorIds,
-    operators: mapIncubationOperatorIdsToPayload(form.operatorIds)
-  });
+      id: form.id,
+      batchName: selectedBatch?.batchCode,
+      plantName: selectedBatch?.plantName,
+      mediaCode: form.mediaCode,
+      incubationPeriod: form.incubationPeriod,
+      temperature: form.temperature,
+      humidity: form.humidity,
+      lightIntensity: form.lightIntensity,
+    });
   };
 
   const terminalBanner = isTerminalIncubation && (
@@ -118,7 +97,7 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
                     Incubating at {selectedBatch.stage}
                   </div>
                   <div className="text-base text-amber-700">
-                    Incubation keeps the batch in the same stage but changes phase to 'incubation'
+                    Operators from multiplication are carried into incubation automatically.
                   </div>
                 </div>
               </div>
@@ -152,18 +131,6 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
                 <Input value={form.mediaCode || 'N/A'} readOnly className="bg-gray-100" />
               )}
             </div>
-            {initialData && (
-              <>
-                <div className="space-y-2">
-                  <Label>Contamination Count</Label>
-                  <Input type="number" value={form.contamination} onChange={(e) => handleContaminationChange(e.target.value)} />
-                </div>
-                <div className="space-y-2">
-                  <Label>Remaining Bottles</Label>
-                  <Input type="number" value={form.remainingBottles} readOnly className="bg-gray-100" />
-                </div>
-              </>
-            )}
           </div>
         </div>
 
@@ -188,28 +155,8 @@ export function IncubationForm({ initialData, selectedBatch, operators, isTermin
             </div>
           </div>
         </div>
-
-        {isTerminalIncubation ? (
-          <RootingIncubationOperatorAssignment
-            operators={operators}
-            selectedIds={form.operatorIds}
-            onChange={(ids) => updateForm('operatorIds', ids)}
-          />
-        ) : initialData ? (
-          <IncubationRecordOperatorAssignment
-            operators={operators}
-            selectedIds={form.operatorIds}
-            onChange={(ids) => updateForm('operatorIds', ids)}
-          />
-        ) : (
-          <MultiplicationIncubationOperatorAssignment
-            operators={operators}
-            selectedIds={form.operatorIds}
-            onChange={(ids) => updateForm('operatorIds', ids)}
-          />
-        )}
       </div>
-      
+
       <div className="border-t px-6 py-4 bg-gray-50" style={{ flexShrink: 0 }}>
         <div className="flex justify-end gap-3">
           <Button variant="outline" onClick={onCancel}>Cancel</Button>

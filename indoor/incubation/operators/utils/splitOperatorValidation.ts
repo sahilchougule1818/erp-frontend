@@ -8,7 +8,11 @@ export function validateSplitOperators(
   if (!entries.length) {
     return 'Please assign at least one operator';
   }
-  if (entries.some((entry) => !entry.qtyIn || entry.qtyIn <= 0)) {
+  const skipInput = bottlesIn === 0;
+  if (skipInput && entries.some((entry) => (entry.qtyIn || 0) > 0)) {
+    return 'Input bottles are not allowed for initial multiplication';
+  }
+  if (!skipInput && entries.some((entry) => !entry.qtyIn || entry.qtyIn <= 0)) {
     return 'Each operator must have a positive input bottle count';
   }
   if (entries.some((entry) => !entry.qtyOut || entry.qtyOut <= 0)) {
@@ -18,7 +22,7 @@ export function validateSplitOperators(
   const totalIn = entries.reduce((sum, entry) => sum + (entry.qtyIn || 0), 0);
   const totalOut = entries.reduce((sum, entry) => sum + (entry.qtyOut || 0), 0);
 
-  if (totalIn !== bottlesIn) {
+  if (!skipInput && totalIn !== bottlesIn) {
     return `Operator input bottles (${totalIn}) must equal ${bottlesIn}`;
   }
   if (totalOut !== bottlesOut) {
@@ -34,10 +38,11 @@ export function validateRootingOperators(
   return validateSplitOperators(entries, bottleCount, bottleCount);
 }
 
-export function mapSplitOperatorsToPayload(entries: OperatorWorkEntry[]) {
+export function mapSplitOperatorsToPayload(entries: OperatorWorkEntry[], bottlesIn?: number) {
+  const skipInput = bottlesIn === 0;
   return entries.map((entry) => ({
     id: entry.id,
-    qtyIn: entry.qtyIn,
+    qtyIn: skipInput ? 0 : entry.qtyIn,
     qtyOut: entry.qtyOut,
   }));
 }

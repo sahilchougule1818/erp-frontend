@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Input } from '../../../shared/ui/input';
-import { ChevronDown, ChevronUp, X } from 'lucide-react';
+import { ChevronDown, ChevronUp, FlaskConical, X } from 'lucide-react';
 
 export interface OperatorWorkEntry {
   id: number;
@@ -21,8 +21,8 @@ interface OperatorWorkAssignmentProps {
   availableBottles?: number;
   /** When true, only render bottle count rows (operator selection handled elsewhere). */
   hidePicker?: boolean;
-  /** When true, display assignments without allowing changes. */
-  readOnly?: boolean;
+  /** When true, bottle in/out fields are read-only (incubation contamination edit). */
+  lockBottleCounts?: boolean;
 }
 
 function displayName(op: any) {
@@ -39,6 +39,7 @@ export function OperatorWorkAssignment({
   availableBottles,
   hidePicker = false,
   readOnly = false,
+  lockBottleCounts = false,
 }: OperatorWorkAssignmentProps) {
   const [isExpanded, setIsExpanded] = useState(!hidePicker && entries.length === 0);
 
@@ -46,9 +47,7 @@ export function OperatorWorkAssignment({
   const totalOut = entries.reduce((sum, entry) => sum + (entry.qtyOut || 0), 0);
   const totalContaminated = entries.reduce((sum, entry) => sum + (entry.qtyContaminated || 0), 0);
 
-  const gridCols = showContamination
-    ? (showInput ? 'grid-cols-[1fr_90px_90px_90px_32px]' : 'grid-cols-[1fr_90px_90px_32px]')
-    : (showInput ? 'grid-cols-[1fr_100px_100px_32px]' : 'grid-cols-[1fr_100px_32px]');
+  const numberInputClass = 'h-8 w-[88px] px-2 text-sm';
 
   const toggleOperator = (operatorId: number) => {
     if (readOnly) return;
@@ -107,30 +106,32 @@ export function OperatorWorkAssignment({
       ) : (
         <div className="space-y-2">
           {entries.map(entry => (
-            <div key={entry.id} className={`grid ${gridCols} gap-2 items-center border rounded-md p-2`}>
-              <div className="text-sm font-medium truncate">{displayName(entry)}</div>
-              {showInput ? (
+            <div
+              key={entry.id}
+              className="flex items-center gap-2 rounded-md border px-2 py-1.5"
+            >
+              <FlaskConical className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden="true" />
+              <div className="min-w-0 flex-1 text-sm font-medium truncate">{displayName(entry)}</div>
+              {showInput && (
                 <Input
                   type="number"
                   min={0}
                   placeholder="In"
                   value={entry.qtyIn || ''}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                  className={readOnly ? 'bg-gray-100' : undefined}
+                  readOnly={readOnly || lockBottleCounts}
+                  disabled={readOnly || lockBottleCounts}
+                  className={(readOnly || lockBottleCounts) ? `${numberInputClass} bg-gray-100` : numberInputClass}
                   onChange={(e) => updateEntry(entry.id, 'qtyIn', e.target.value)}
                 />
-              ) : (
-                <div />
               )}
               <Input
                 type="number"
                 min={0}
                 placeholder="Out"
                 value={entry.qtyOut || ''}
-                readOnly={readOnly}
-                disabled={readOnly}
-                className={readOnly ? 'bg-gray-100' : undefined}
+                readOnly={readOnly || lockBottleCounts}
+                disabled={readOnly || lockBottleCounts}
+                className={(readOnly || lockBottleCounts) ? `${numberInputClass} bg-gray-100` : numberInputClass}
                 onChange={(e) => updateEntry(entry.id, 'qtyOut', e.target.value)}
               />
               {showContamination && (
@@ -141,20 +142,20 @@ export function OperatorWorkAssignment({
                   value={entry.qtyContaminated || ''}
                   readOnly={readOnly}
                   disabled={readOnly}
-                  className={readOnly ? 'bg-gray-100' : 'text-red-700'}
+                  className={readOnly ? `${numberInputClass} bg-gray-100` : `${numberInputClass} text-red-700`}
                   onChange={(e) => updateEntry(entry.id, 'qtyContaminated', e.target.value)}
                 />
               )}
-              {!readOnly && (
+              {!readOnly && !lockBottleCounts && (
                 <button
                   type="button"
                   onClick={() => toggleOperator(entry.id)}
-                  className="text-gray-500 hover:text-red-600"
+                  className="shrink-0 rounded p-1 text-gray-400 hover:bg-red-50 hover:text-red-600"
+                  aria-label={`Remove ${displayName(entry)}`}
                 >
-                  <X className="w-4 h-4" />
+                  <X className="h-4 w-4" />
                 </button>
               )}
-              {readOnly && <div />}
             </div>
           ))}
         </div>

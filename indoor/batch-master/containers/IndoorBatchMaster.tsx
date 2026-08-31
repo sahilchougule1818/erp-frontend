@@ -6,7 +6,6 @@ import {
   Download,
   Plus,
   MoreHorizontal,
-  FlaskConical,
   Microscope,
   TestTube,
   ArrowUpRight,
@@ -292,11 +291,9 @@ const IndoorBatchMaster: React.FC = () => {
       indoorApi.autoclave.getMediaCodes()
         .then((codes) => setMediaCodes(Array.isArray(codes) ? codes : []))
         .catch((error) => console.error('Failed to refresh media codes:', error));
-    } else if (type === 'INCUBATE') {
-      fetchOperators('INCUBATION');
+    } else if (type === 'INCUBATE' || type === 'TERMINAL_INCUBATION') {
+      // Operators are copied from prior phase — no picker needed
     } else if (type === 'PARTIAL_MULTIPLICATION' || type === 'PARTIAL_ROOTING' || type === 'FULL_ROOTING') {
-      fetchOperators('INCUBATION');
-    } else if (type === 'TERMINAL_INCUBATION') {
       fetchOperators('INCUBATION');
     }
     setActiveModal(type);
@@ -347,8 +344,6 @@ const IndoorBatchMaster: React.FC = () => {
       temperature: data.temperature ? parseFloat(data.temperature) : undefined,
       humidity: data.humidity ? parseFloat(data.humidity) : undefined,
       lightIntensity: data.lightIntensity ? parseFloat(data.lightIntensity) : undefined,
-      contaminationCount: data.contaminationCount ? parseInt(data.contaminationCount) : 0,
-      operators: data.operatorIds ? data.operatorIds.map((id: any) => ({ id: parseInt(id) })) : []
     };
 
     const result = await recordIncubation(selectedBatch.batchCode, apiData);
@@ -479,7 +474,6 @@ const IndoorBatchMaster: React.FC = () => {
         humidity: data.humidity ? parseFloat(data.humidity) : undefined,
         lightIntensity: data.lightIntensity ? parseFloat(data.lightIntensity) : undefined,
         notes: data.notes || '',
-        operators: data.operators || data.operatorIds?.map((id: number) => ({ id })) || [],
       });
       notify.success('Batch moved to terminal incubation successfully');
       closeModal();
@@ -610,7 +604,7 @@ const columns = [
                 </TooltipProvider>
               ) : (
                 <DropdownMenuItem onClick={() => openModal('MULTIPLICATION', batch)}>
-                  <FlaskConical className="mr-2 h-4 w-4 text-green-600" />
+                  <GitMerge className="mr-2 h-4 w-4 text-blue-600" />
                   <span>{batch.phase === 'initialisation' ? 'Multiplication' : 'Continue Multiplication'}</span>
                 </DropdownMenuItem>
               );
@@ -638,6 +632,110 @@ const columns = [
                 <DropdownMenuItem onClick={() => openModal('INCUBATE', batch)}>
                   <Microscope className="mr-2 h-4 w-4 text-blue-600" />
                   <span>Incubate</span>
+                </DropdownMenuItem>
+              );
+            })()}
+
+            {/* Terminal Incubation — only from rooting phase */}
+            {batch.phase === 'rooting' && (() => {
+              const isLoadingPermissions = !batchPermissions[batch.batchCode];
+              const permission = batchPermissions[batch.batchCode]?.canTerminalIncubate;
+              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
+              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
+
+              return isLocked ? (
+                <TooltipProvider>
+                  <Tooltip side="left" content={lockReason}>
+                    <span className="block w-full">
+                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Move to Terminal Incubation</span>
+                      </DropdownMenuItem>
+                    </span>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuItem onClick={() => openModal('TERMINAL_INCUBATION', batch)}>
+                  <Microscope className="mr-2 h-4 w-4 text-blue-600" />
+                  <span>Move to Terminal Incubation</span>
+                </DropdownMenuItem>
+              );
+            })()}
+
+            {/* Partial Multiplication */}
+            {batch.phase === 'incubation' && !batch.rooted && (() => {
+              const isLoadingPermissions = !batchPermissions[batch.batchCode];
+              const permission = batchPermissions[batch.batchCode]?.canPartialMultiply;
+              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
+              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
+
+              return isLocked ? (
+                <TooltipProvider>
+                  <Tooltip side="left" content={lockReason}>
+                    <span className="block w-full">
+                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Make Partial Multiplication</span>
+                      </DropdownMenuItem>
+                    </span>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuItem onClick={() => openModal('PARTIAL_MULTIPLICATION', batch)}>
+                  <GitMerge className="mr-2 h-4 w-4 text-red-600" />
+                  <span>Make Partial Multiplication</span>
+                </DropdownMenuItem>
+              );
+            })()}
+
+            {/* Partial Rooting */}
+            {batch.phase === 'incubation' && !batch.rooted && (() => {
+              const isLoadingPermissions = !batchPermissions[batch.batchCode];
+              const permission = batchPermissions[batch.batchCode]?.canPartialRooting;
+              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
+              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
+
+              return isLocked ? (
+                <TooltipProvider>
+                  <Tooltip side="left" content={lockReason}>
+                    <span className="block w-full">
+                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Make Partial Rooting</span>
+                      </DropdownMenuItem>
+                    </span>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuItem onClick={() => openModal('PARTIAL_ROOTING', batch)}>
+                  <GitBranch className="mr-2 h-4 w-4 text-red-600" />
+                  <span>Make Partial Rooting</span>
+                </DropdownMenuItem>
+              );
+            })()}
+
+            {/* Full Rooting */}
+            {batch.phase === 'incubation' && !batch.rooted && (() => {
+              const isLoadingPermissions = !batchPermissions[batch.batchCode];
+              const permission = batchPermissions[batch.batchCode]?.canFullRooting;
+              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
+              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
+              
+              return isLocked ? (
+                <TooltipProvider>
+                  <Tooltip side="left" content={lockReason}>
+                    <span className="block w-full">
+                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
+                        <Lock className="mr-2 h-4 w-4" />
+                        <span>Move Full Batch to Rooting</span>
+                      </DropdownMenuItem>
+                    </span>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <DropdownMenuItem onClick={() => openModal('FULL_ROOTING', batch)}>
+                  <GitBranch className="mr-2 h-4 w-4 text-blue-600" />
+                  <span>Move Full Batch to Rooting</span>
                 </DropdownMenuItem>
               );
             })()}
@@ -690,110 +788,6 @@ const columns = [
                 <DropdownMenuItem onClick={() => openModal('REPORT', batch)}>
                   <TestTube className="mr-2 h-4 w-4 text-purple-600" />
                   <span>Report Sample Result</span>
-                </DropdownMenuItem>
-              );
-            })()}
-            
-            {/* Terminal Incubation — only from rooting phase */}
-            {batch.phase === 'rooting' && (() => {
-              const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canTerminalIncubate;
-              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
-              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-
-              return isLocked ? (
-                <TooltipProvider>
-                  <Tooltip side="left" content={lockReason}>
-                    <span className="block w-full">
-                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="mr-2 h-4 w-4" />
-                        <span>Move to Terminal Incubation</span>
-                      </DropdownMenuItem>
-                    </span>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <DropdownMenuItem onClick={() => openModal('TERMINAL_INCUBATION', batch)}>
-                  <Microscope className="mr-2 h-4 w-4 text-blue-600" />
-                  <span>Move to Terminal Incubation</span>
-                </DropdownMenuItem>
-              );
-            })()}
-
-            {/* Partial Multiplication */}
-            {batch.phase === 'incubation' && !batch.rooted && (() => {
-              const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canPartialMultiply;
-              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
-              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-
-              return isLocked ? (
-                <TooltipProvider>
-                  <Tooltip side="left" content={lockReason}>
-                    <span className="block w-full">
-                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="mr-2 h-4 w-4" />
-                        <span>Make Partial Multiplication</span>
-                      </DropdownMenuItem>
-                    </span>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <DropdownMenuItem onClick={() => openModal('PARTIAL_MULTIPLICATION', batch)}>
-                  <GitBranch className="mr-2 h-4 w-4 text-blue-600" />
-                  <span>Make Partial Multiplication</span>
-                </DropdownMenuItem>
-              );
-            })()}
-
-            {/* Partial Rooting */}
-            {batch.phase === 'incubation' && !batch.rooted && (() => {
-              const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canPartialRooting;
-              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
-              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-
-              return isLocked ? (
-                <TooltipProvider>
-                  <Tooltip side="left" content={lockReason}>
-                    <span className="block w-full">
-                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="mr-2 h-4 w-4" />
-                        <span>Make Partial Rooting</span>
-                      </DropdownMenuItem>
-                    </span>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <DropdownMenuItem onClick={() => openModal('PARTIAL_ROOTING', batch)}>
-                  <GitBranch className="mr-2 h-4 w-4 text-orange-600" />
-                  <span>Make Partial Rooting</span>
-                </DropdownMenuItem>
-              );
-            })()}
-
-            {/* Full Rooting */}
-            {batch.phase === 'incubation' && !batch.rooted && (() => {
-              const isLoadingPermissions = !batchPermissions[batch.batchCode];
-              const permission = batchPermissions[batch.batchCode]?.canFullRooting;
-              const isLocked = isLoadingPermissions || (permission && !permission.allowed);
-              const lockReason = isLoadingPermissions ? 'Loading permissions...' : permission?.reason;
-              
-              return isLocked ? (
-                <TooltipProvider>
-                  <Tooltip side="left" content={lockReason}>
-                    <span className="block w-full">
-                      <DropdownMenuItem disabled className="text-slate-400 cursor-not-allowed pointer-events-none">
-                        <Lock className="mr-2 h-4 w-4" />
-                        <span>Move Full Batch to Rooting</span>
-                      </DropdownMenuItem>
-                    </span>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <DropdownMenuItem onClick={() => openModal('FULL_ROOTING', batch)}>
-                  <GitMerge className="mr-2 h-4 w-4 text-orange-600" />
-                  <span>Move Full Batch to Rooting</span>
                 </DropdownMenuItem>
               );
             })()}
@@ -955,7 +949,7 @@ const columns = [
 
       {activeModal === 'INCUBATE' && selectedBatch && (
         <ModalLayout title={`Incubate Batch ${selectedBatch.batchCode}`} width="w-[700px]">
-          <IncubationForm initialData={null} selectedBatch={selectedBatch} operators={operators} onSubmit={handleIncubation} onCancel={closeModal} />
+          <IncubationForm initialData={null} selectedBatch={selectedBatch} onSubmit={handleIncubation} onCancel={closeModal} />
         </ModalLayout>
       )}
 
@@ -1024,7 +1018,6 @@ const columns = [
               // pre-fill media code from rooted batch if available
               latestMediaCode: selectedBatch.latestMediaCode
             }}
-            operators={operators}
             isTerminalIncubation={true}
             onSubmit={handleMoveToTerminalIncubation}
             onCancel={closeModal}

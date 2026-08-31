@@ -76,7 +76,7 @@ export function PartialMultiplicationForm({
       newBottlesCount: output,
       mediaCode,
       notes,
-      operators: mapSplitOperatorsToPayload(operatorEntries),
+      operators: mapSplitOperatorsToPayload(operatorEntries, inherited),
     });
   };
 

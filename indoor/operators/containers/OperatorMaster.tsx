@@ -4,7 +4,6 @@ import { Button } from '../../../shared/ui/button';
 import { UserPlus, Trash2, Edit2, Plus } from 'lucide-react';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../../../shared/ui/alert-dialog';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
 import { useOperatorMaster } from '../hooks/useOperatorMaster';
 import { OperatorForm } from '../forms/OperatorForm';
 import { formatOperatorDesignations } from '../constants/operatorDesignations';
@@ -14,12 +13,10 @@ export function OperatorMaster() {
   const { labNumber } = useLabContext();
   const {
     operators,
-    activityLogs,
     createOperator,
     updateOperator,
     deleteOperator,
     operatorPagination,
-    activityLogsPagination,
     setCurrentLabFilter
   } = useOperatorMaster();
 
@@ -31,7 +28,6 @@ export function OperatorMaster() {
   const [deleteId, setDeleteId] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Update lab filter when global lab changes
   useEffect(() => {
     setCurrentLabFilter(labNumber || undefined);
   }, [labNumber, setCurrentLabFilter]);
@@ -81,62 +77,27 @@ export function OperatorMaster() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
-      <Tabs defaultValue="master" className="w-full">
-        <TabsList className="w-full">
-          <TabsTrigger value="master">Operator Master</TabsTrigger>
-          <TabsTrigger value="logs">Activity Monitoring</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="master">
-          <OperatorMasterTable
-            title="Operator Master"
-            records={operators}
-            columns={[
-              { key: 'id', label: 'ID' },
-              { key: 'shortName', label: 'Short Name' },
-              { key: 'fullName', label: 'Full Name', render: (_: any, op: any) => [op.firstName, op.middleName, op.lastName].filter(Boolean).join(' ') },
-              { key: 'designations', label: 'Designations', render: (_: any, op: any) => formatOperatorDesignations(op.designations) },
-              { key: 'isActive', label: 'State', render: (val: boolean, op: any) => (val ?? op.active) ? 'Active' : 'Inactive' }
-            ]}
-            onEdit={handleEdit}
-            onDelete={(op: any) => { setDeleteId(op.id); toggleModal('delete', true); }}
-            exportFileName="operator_directory"
-            pagination={operatorPagination}
-            addButton={
-              <Button onClick={() => toggleModal('operator', true)} className="font-bold rounded-xl px-4 py-2 flex items-center gap-2">
-                <Plus className="w-4 h-4" />
-                Register Operator
-              </Button>
-            }
-          />
-        </TabsContent>
-
-        <TabsContent value="logs">
-          <OperatorMasterTable
-            title="Activity Monitoring"
-            records={activityLogs}
-            columns={[
-              { key: 'activityDate', label: 'Date', render: (val: string) => val ? new Date(val).toLocaleDateString() : '—' },
-              { key: 'category', label: 'Category' },
-              { key: 'referenceCode', label: 'Reference' },
-              { key: 'phase', label: 'Activity/Phase' },
-              { key: 'stage', label: 'Stage', render: (val: string) => val || '-' },
-              { key: 'labNumber', label: 'Lab', render: (val: number) => val ? `Lab ${val}` : '-' },
-              { key: 'operatorId', label: 'Operator ID' },
-              { key: 'shortName', label: 'Operator Short Name' },
-              { key: 'notes', label: 'Notes', render: (val: string) => val || '-' }
-            ]}
-            filterConfig={{
-              filter1Key: 'category',
-              filter1Label: 'Category',
-              filter2Key: 'referenceCode',
-              filter2Label: 'Batch / Media / Task'
-            }}
-            exportFileName="staff_utilization_audit"
-            pagination={activityLogsPagination}
-          />
-        </TabsContent>
-      </Tabs>
+      <OperatorMasterTable
+        title="Operator Master"
+        records={operators}
+        columns={[
+          { key: 'id', label: 'ID' },
+          { key: 'shortName', label: 'Short Name' },
+          { key: 'fullName', label: 'Full Name', render: (_: any, op: any) => [op.firstName, op.middleName, op.lastName].filter(Boolean).join(' ') },
+          { key: 'designations', label: 'Designations', render: (_: any, op: any) => formatOperatorDesignations(op.designations) },
+          { key: 'isActive', label: 'State', render: (val: boolean, op: any) => (val ?? op.active) ? 'Active' : 'Inactive' }
+        ]}
+        onEdit={handleEdit}
+        onDelete={(op: any) => { setDeleteId(op.id); toggleModal('delete', true); }}
+        exportFileName="operator_directory"
+        pagination={operatorPagination}
+        addButton={
+          <Button onClick={() => toggleModal('operator', true)} className="font-bold rounded-xl px-4 py-2 flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Register Operator
+          </Button>
+        }
+      />
 
       {modals.operator && (
         <ModalLayout

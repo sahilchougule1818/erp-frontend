@@ -19,6 +19,7 @@ export function MediaStoragePanel() {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<MediaStorageRecord | null>(null);
   const [saving, setSaving] = useState(false);
+  const [reverting, setReverting] = useState(false);
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -69,7 +70,7 @@ export function MediaStoragePanel() {
     setSaving(true);
     try {
       const currentStatus = editingRecord.status || 'IMPORTED';
-      if (data.status === 'READY' && currentStatus !== 'READY') {
+      if (data.status === 'READY' && (currentStatus !== 'READY' || !editingRecord.readyAt)) {
         await indoorApi.mediaStorage.markReady(editingRecord.id);
       } else if (data.status === 'IMPORTED' && currentStatus === 'READY') {
         await indoorApi.mediaStorage.markImported(editingRecord.id);
@@ -81,6 +82,21 @@ export function MediaStoragePanel() {
       notify.error('Failed to save: ' + (error.message || 'Unknown error'));
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRevertToPreparation = async () => {
+    if (!editingRecord?.id) return;
+    setReverting(true);
+    try {
+      await indoorApi.mediaStorage.revertToPreparation(editingRecord.id);
+      notify.success('Media returned to Preparation register');
+      setEditingRecord(null);
+      await loadData();
+    } catch (error: any) {
+      notify.error('Failed to revert: ' + (error.response?.data?.message || error.message || 'Unknown error'));
+    } finally {
+      setReverting(false);
     }
   };
 
@@ -130,7 +146,9 @@ export function MediaStoragePanel() {
         open={!!editingRecord}
         record={editingRecord}
         saving={saving}
+        reverting={reverting}
         onSave={handleSaveEdit}
+        onRevertToPreparation={handleRevertToPreparation}
         onClose={() => setEditingRecord(null)}
       />
     </>

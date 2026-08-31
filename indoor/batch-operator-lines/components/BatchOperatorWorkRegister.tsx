@@ -91,6 +91,15 @@ export function BatchOperatorWorkRegister({
         </span>
       ),
     },
+    {
+      key: 'qtyUsed',
+      label: 'Used',
+      render: (val: number, record: BatchOperatorLine) => (
+        <span className="font-medium">
+          {Number(val ?? (record.qtyOut ?? 0) - (record.qtyContaminated ?? 0)).toLocaleString()}
+        </span>
+      ),
+    },
     { key: 'state', label: 'State' },
   ];
 

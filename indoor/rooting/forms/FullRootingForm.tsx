@@ -51,7 +51,7 @@ export function FullRootingForm({
       sourceRecordId: record.id,
       mediaCode,
       notes,
-      operators: mapSplitOperatorsToPayload(operatorEntries),
+      operators: mapSplitOperatorsToPayload(operatorEntries, availableBottles),
     });
   };
 

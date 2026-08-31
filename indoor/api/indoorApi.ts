@@ -101,7 +101,6 @@ export const indoorApi = {
     },
     getActive: (params?: { designation?: string }) =>
       apiClient.get('/indoor/operators/active', { params }),
-    getLog:    () => apiClient.get('/indoor/operator-log'),
     create:    (data: any) => apiClient.post('/indoor/operators', data),
     update:    (id: number | string, data: any) => apiClient.put(`/indoor/operators/${id}`, data),
     delete:    (id: number | string) => apiClient.delete(`/indoor/operators/${id}`),
@@ -140,6 +139,7 @@ export const indoorApi = {
       apiClient.post('/indoor/media-storage/import', data),
     markReady: (id: number) => apiClient.post(`/indoor/media-storage/${id}/mark-ready`),
     markImported: (id: number) => apiClient.post(`/indoor/media-storage/${id}/mark-imported`),
+    revertToPreparation: (id: number) => apiClient.delete(`/indoor/media-storage/${id}`),
     getReadyCodes: (labNumber?: number) =>
       apiClient.get('/indoor/media-storage/ready-codes', { params: labNumber != null ? { labNumber } : {} }),
   },

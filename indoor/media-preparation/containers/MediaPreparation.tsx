@@ -115,8 +115,8 @@ export function MediaPreparation() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="w-full">
           <TabsTrigger value="preparation">Preparation</TabsTrigger>
-          <TabsTrigger value="operator-work">Operator Work</TabsTrigger>
           <TabsTrigger value="storage">Storage</TabsTrigger>
+          <TabsTrigger value="operator-work">Operator Work</TabsTrigger>
         </TabsList>
 
         <TabsContent value="preparation">
@@ -142,6 +142,10 @@ export function MediaPreparation() {
       />
         </TabsContent>
 
+        <TabsContent value="storage">
+          <MediaStoragePanel />
+        </TabsContent>
+
         <TabsContent value="operator-work">
           <MediaPreparationTable
             title="Media Operator Work"
@@ -162,10 +166,6 @@ export function MediaPreparation() {
             exportFileName="media_operator_work"
             hideBorder={true}
           />
-        </TabsContent>
-
-        <TabsContent value="storage">
-          <MediaStoragePanel />
         </TabsContent>
       </Tabs>
 

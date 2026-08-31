@@ -69,7 +69,7 @@ export function PartialRootingForm({
       bottlesCount: bottles,
       mediaCode,
       notes,
-      operators: mapSplitOperatorsToPayload(operatorEntries),
+      operators: mapSplitOperatorsToPayload(operatorEntries, bottles),
     });
   };
 

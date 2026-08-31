@@ -2,10 +2,16 @@ import { IncubationTable } from '../components/IncubationTable';
 import { useState } from 'react';
 import { useIncubationData } from '../hooks/useIncubationData';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../../../shared/ui/tabs';
+import { BatchOperatorLineEditModal } from '../../batch-operator-lines/components/BatchOperatorLineEditModal';
+import { indoorApi } from '../../api/indoorApi';
+import { useNotify } from '../../../shared/hooks/useNotify';
+import type { BatchOperatorLine } from '../../types';
 
 export function Incubation() {
-  const { records, pagination } = useIncubationData();
+  const { records, refetch, pagination } = useIncubationData();
+  const notify = useNotify();
   const [showAll, setShowAll] = useState(false);
+  const [editingLines, setEditingLines] = useState<BatchOperatorLine[] | null>(null);
 
   const columns = [
     { key: 'incubationDate', label: 'Incubation Date', render: (val: string) => val?.split('T')[0] },
@@ -30,6 +36,26 @@ export function Incubation() {
     { key: 'state', label: 'State' },
   ];
 
+  const handleEdit = async (record: any) => {
+    if (record.state !== 'ACTIVE') return;
+    try {
+      const lines = await indoorApi.batchOperatorLines.get({
+        eventCode: record.eventCode,
+        sourceTable: 'incubation_records',
+        sourceRecordId: record.id,
+      });
+      const group = Array.isArray(lines) ? lines : [];
+      if (group.length === 0) {
+        notify.error('No operator lines found for this incubation record');
+        return;
+      }
+      setEditingLines(group);
+    } catch (error: any) {
+      notify.error(error?.response?.data?.message || 'Failed to load operator data');
+      setEditingLines(null);
+    }
+  };
+
   return (
     <div className="p-6">
       <Tabs defaultValue="register" className="w-full">
@@ -42,6 +68,7 @@ export function Incubation() {
             title="Incubation Register"
             columns={columns}
             records={showAll ? records : records.filter((r: any) => r.state === 'ACTIVE')}
+            onEdit={handleEdit}
             filterConfig={{
               filter1Key: 'plantName',
               filter1Label: 'Plant Name',
@@ -66,6 +93,14 @@ export function Incubation() {
           />
         </TabsContent>
       </Tabs>
+
+      {editingLines && (
+        <BatchOperatorLineEditModal
+          lines={editingLines}
+          onClose={() => setEditingLines(null)}
+          onSuccess={refetch}
+        />
+      )}
     </div>
   );
 }

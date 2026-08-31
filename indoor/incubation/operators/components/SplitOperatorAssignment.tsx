@@ -33,8 +33,8 @@ export function SplitOperatorAssignment({
         operators={operators}
         entries={entries}
         onChange={onChange}
-        showInput
-        availableBottles={bottlesIn}
+        showInput={bottlesIn > 0}
+        availableBottles={bottlesIn > 0 ? bottlesIn : undefined}
       />
       {bottlesOut > 0 && bottlesOut !== bottlesIn && (
         <p className="text-xs text-gray-500">

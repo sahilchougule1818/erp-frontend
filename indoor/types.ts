@@ -173,9 +173,12 @@ export interface BatchOperatorLine {
   qtyIn: number;
   qtyOut: number;
   qtyContaminated?: number;
+  qtyUsed?: number;
   labNumber?: number;
   recordDate?: string;
   state?: string;
+  operatorFirstName?: string;
+  operatorLastName?: string;
   editable?: boolean;
   editLockReason?: string | null;
 }

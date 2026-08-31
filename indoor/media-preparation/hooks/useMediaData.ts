@@ -93,7 +93,14 @@ export function useMediaData() {
       await fetchMediaBatches();
       await fetchPendingMediaBatches();
       return true;
-    } catch {
+    } catch (err: unknown) {
+      const msg = extractApiErrorMessage(err) || 'Please try again';
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 409) {
+        notify.error('This autoclave cycle cannot be deleted because it was imported into media storage.');
+      } else {
+        notify.error('Failed to delete: ' + msg);
+      }
       return false;
     } finally {
       setLoading(false);
