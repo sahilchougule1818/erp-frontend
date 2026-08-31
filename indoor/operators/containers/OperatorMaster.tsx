@@ -8,9 +8,12 @@ import { useOperatorMaster } from '../hooks/useOperatorMaster';
 import { OperatorForm } from '../forms/OperatorForm';
 import { formatOperatorDesignations } from '../constants/operatorDesignations';
 import { useLabContext } from '../../contexts/LabContext';
+import { useNotify } from '../../../shared/hooks/useNotify';
+import { extractApiErrorMessage } from '../../../shared/api/apiClient';
 
 export function OperatorMaster() {
   const { labNumber } = useLabContext();
+  const notify = useNotify();
   const {
     operators,
     createOperator,
@@ -48,7 +51,7 @@ export function OperatorMaster() {
       toggleModal('operator', false);
       setSelectedOperator(null);
     } catch (error: any) {
-      console.error('Error:', error);
+      notify.error(extractApiErrorMessage(error) || 'Failed to save operator');
     } finally {
       setIsSubmitting(false);
     }
@@ -65,8 +68,9 @@ export function OperatorMaster() {
       await deleteOperator(deleteId);
       toggleModal('delete', false);
       setDeleteId(null);
+      notify.success('Operator deleted');
     } catch (error) {
-      console.error('Error:', error);
+      notify.error(extractApiErrorMessage(error) || 'Failed to delete operator');
     }
   };
 

@@ -3,6 +3,7 @@ import { Label } from '../../../shared/ui/label';
 import { Button } from '../../../shared/ui/button';
 import { Badge } from '../../../shared/ui/badge';
 import { ChevronDown, ChevronUp, Users, X } from 'lucide-react';
+import { getOperatorListLabel, getOperatorShortLabel } from '../utils/operatorDisplay';
 
 interface OperatorSelectorProps {
   operators: any[];
@@ -58,9 +59,9 @@ export function OperatorSelector({ operators, selectedIds, onChange }: OperatorS
               <Badge 
                 key={operator.id} 
                 variant="secondary" 
-                className="text-base px-2 py-1 flex items-center gap-1"
+                className="text-base px-2 py-1 flex items-center gap-1 max-w-none overflow-visible"
               >
-                {operator.shortName}
+                <span className="shrink-0 font-medium">{getOperatorShortLabel(operator)}</span>
                 <button
                   type="button"
                   onClick={() => removeOperator(operator.id)}
@@ -93,7 +94,7 @@ export function OperatorSelector({ operators, selectedIds, onChange }: OperatorS
                     className="rounded border-gray-300 text-green-600 focus:ring-green-500"
                   />
                   <span className="text-base flex-1">
-                    {operator.shortName} ({operator.firstName} {operator.lastName})
+                    {getOperatorListLabel(operator)}
                   </span>
                 </label>
               ))}

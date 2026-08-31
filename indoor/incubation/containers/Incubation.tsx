@@ -12,6 +12,7 @@ export function Incubation() {
   const notify = useNotify();
   const [showAll, setShowAll] = useState(false);
   const [editingLines, setEditingLines] = useState<BatchOperatorLine[] | null>(null);
+  const [editingIncubationId, setEditingIncubationId] = useState<number | null>(null);
 
   const columns = [
     { key: 'incubationDate', label: 'Incubation Date', render: (val: string) => val?.split('T')[0] },
@@ -38,21 +39,27 @@ export function Incubation() {
 
   const handleEdit = async (record: any) => {
     if (record.state !== 'ACTIVE') return;
+    if (!record.operatorSourceTable || !record.operatorSourceRecordId) {
+      notify.error('No prior-phase operator source found for this incubation record');
+      return;
+    }
     try {
       const lines = await indoorApi.batchOperatorLines.get({
-        eventCode: record.eventCode,
-        sourceTable: 'incubation_records',
-        sourceRecordId: record.id,
+        sourceTable: record.operatorSourceTable,
+        sourceRecordId: record.operatorSourceRecordId,
+        forIncubationRecordId: record.id,
       });
       const group = Array.isArray(lines) ? lines : [];
       if (group.length === 0) {
-        notify.error('No operator lines found for this incubation record');
+        notify.error('No prior-phase operator lines found for this incubation record');
         return;
       }
+      setEditingIncubationId(record.id);
       setEditingLines(group);
     } catch (error: any) {
       notify.error(error?.response?.data?.message || 'Failed to load operator data');
       setEditingLines(null);
+      setEditingIncubationId(null);
     }
   };
 
@@ -94,10 +101,14 @@ export function Incubation() {
         </TabsContent>
       </Tabs>
 
-      {editingLines && (
+      {editingLines && editingIncubationId != null && (
         <BatchOperatorLineEditModal
           lines={editingLines}
-          onClose={() => setEditingLines(null)}
+          incubationRecordId={editingIncubationId}
+          onClose={() => {
+            setEditingLines(null);
+            setEditingIncubationId(null);
+          }}
           onSuccess={refetch}
         />
       )}

@@ -97,7 +97,7 @@ export function IncubationForm({
                     Incubating at {selectedBatch.stage}
                   </div>
                   <div className="text-base text-amber-700">
-                    Operators from multiplication are carried into incubation automatically.
+                    Operators stay on the multiplication record — incubation only tracks aggregate contamination.
                   </div>
                 </div>
               </div>
@@ -119,7 +119,10 @@ export function IncubationForm({
             <div className="col-span-2 space-y-2">
               <Label>Media Code</Label>
               {isTerminalIncubation ? (
-                <Select value={form.mediaCode} onValueChange={(v) => updateForm('mediaCode', v)}>
+                <Select
+                  value={form.mediaCode || undefined}
+                  onValueChange={(v) => updateForm('mediaCode', v)}
+                >
                   <SelectTrigger><SelectValue placeholder="Select media code" /></SelectTrigger>
                   <SelectContent>
                     {mediaCodes.map(code => (

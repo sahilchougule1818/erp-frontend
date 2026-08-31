@@ -8,6 +8,10 @@ interface SplitOperatorAssignmentProps {
   onChange: (entries: OperatorWorkEntry[]) => void;
   bottlesIn: number;
   bottlesOut: number;
+  /** Show In column even when bottlesIn is 0 (partial splits — operators drive counts). */
+  alwaysShowInput?: boolean;
+  /** When true, operator in/out must match (rooting — no bottle multiplication). */
+  equalInOut?: boolean;
 }
 
 /** Bottle in/out assignment for incubation-phase split workflows. */
@@ -17,8 +21,25 @@ export function SplitOperatorAssignment({
   onChange,
   bottlesIn,
   bottlesOut,
+  alwaysShowInput = false,
+  equalInOut = false,
 }: SplitOperatorAssignmentProps) {
   const selectedIds = entries.map((entry) => entry.id);
+  const showInput = alwaysShowInput || bottlesIn > 0;
+  const targetBottles = equalInOut ? bottlesIn : bottlesOut;
+
+  const handleEntriesChange = (updated: OperatorWorkEntry[]) => {
+    if (!equalInOut) {
+      onChange(updated);
+      return;
+    }
+    onChange(
+      updated.map((entry) => ({
+        ...entry,
+        qtyOut: entry.qtyIn ?? entry.qtyOut ?? 0,
+      }))
+    );
+  };
 
   return (
     <div className="space-y-3">
@@ -26,19 +47,26 @@ export function SplitOperatorAssignment({
       <OperatorSelector
         operators={operators}
         selectedIds={selectedIds}
-        onChange={(ids) => onChange(buildOperatorEntriesFromSelection(operators, ids, entries))}
+        onChange={(ids) => handleEntriesChange(buildOperatorEntriesFromSelection(operators, ids, entries))}
       />
       <OperatorWorkAssignment
         hidePicker
         operators={operators}
         entries={entries}
-        onChange={onChange}
-        showInput={bottlesIn > 0}
-        availableBottles={bottlesIn > 0 ? bottlesIn : undefined}
+        onChange={handleEntriesChange}
+        showInput={showInput}
+        syncInOut={equalInOut}
+        availableBottles={showInput ? (bottlesIn > 0 ? bottlesIn : undefined) : undefined}
       />
-      {bottlesOut > 0 && bottlesOut !== bottlesIn && (
+      {equalInOut && bottlesIn > 0 && (
         <p className="text-xs text-gray-500">
-          Total output bottles must equal <strong>{bottlesOut}</strong>.
+          For rooting, each operator&apos;s <strong>In</strong> and <strong>Out</strong> must match;
+          totals must equal <strong>{bottlesIn}</strong> bottles.
+        </p>
+      )}
+      {!equalInOut && targetBottles > 0 && targetBottles !== bottlesIn && (
+        <p className="text-xs text-gray-500">
+          Total output bottles must equal <strong>{targetBottles}</strong>.
         </p>
       )}
     </div>

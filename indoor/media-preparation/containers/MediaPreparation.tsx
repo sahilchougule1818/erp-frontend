@@ -34,9 +34,10 @@ export function MediaPreparation() {
       const rows = Array.isArray(res) ? res : [];
       setOperatorLines(rows.map((row: any) => ({
         ...row,
-        operatorShortName: row.shortName,
+        operatorShortName: row.shortName || '—',
         referenceLabel: row.mediaCode || row.referenceLabel,
         recordDate: row.recordDate,
+        status: row.status,
       })));
     } catch {
       setOperatorLines([]);

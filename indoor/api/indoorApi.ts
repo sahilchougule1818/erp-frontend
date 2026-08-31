@@ -113,12 +113,14 @@ export const indoorApi = {
       eventCode?: string;
       sourceTable?: string;
       sourceRecordId?: number;
+      forIncubationRecordId?: number;
       labNumber?: number;
     } = {}) => apiClient.get('/indoor/batch-operator-lines', { params }),
     update: (data: {
       sourceTable: string;
       sourceRecordId: number;
       eventCode: string;
+      incubationRecordId?: number;
       notes?: string;
       operators: { id: number; qtyIn?: number; qtyOut?: number; qtyContaminated?: number }[];
     }) => apiClient.put('/indoor/batch-operator-lines', data),

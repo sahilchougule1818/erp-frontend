@@ -2,17 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { indoorApi } from '../../api/indoorApi';
 import { useLabContext } from '../../contexts/LabContext';
 import { BatchMasterTable } from '../../batch-master/components/BatchMasterTable';
-import { BatchOperatorLineEditModal } from './BatchOperatorLineEditModal';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../shared/ui/select';
 import type { BatchOperatorLine } from '../../types';
 
 interface BatchOperatorWorkRegisterProps {
   batchOptions?: string[];
   stageOptions?: string[];
-}
-
-function groupKey(line: BatchOperatorLine) {
-  return `${line.sourceTable}:${line.sourceRecordId}:${line.eventCode}`;
 }
 
 export function BatchOperatorWorkRegister({
@@ -24,7 +19,6 @@ export function BatchOperatorWorkRegister({
   const [stage, setStage] = useState('');
   const [lines, setLines] = useState<BatchOperatorLine[]>([]);
   const [loading, setLoading] = useState(false);
-  const [editingLines, setEditingLines] = useState<BatchOperatorLine[] | null>(null);
 
   const fetchLines = useCallback(async () => {
     if (!batchCode) {
@@ -63,12 +57,6 @@ export function BatchOperatorWorkRegister({
     if (stageOptions.length > 0) return stageOptions;
     return [];
   }, [stageOptions, lines]);
-
-  const handleEdit = (record: BatchOperatorLine) => {
-    const key = groupKey(record);
-    const group = lines.filter(line => groupKey(line) === key);
-    setEditingLines(group.length > 0 ? group : [record]);
-  };
 
   const columns = [
     {
@@ -127,7 +115,6 @@ export function BatchOperatorWorkRegister({
         }
         columns={columns}
         records={loading || !batchCode ? [] : lines}
-        onEdit={handleEdit}
         filterConfig={{
           filter1Key: 'operatorShortName',
           filter1Label: 'Operator',
@@ -162,14 +149,6 @@ export function BatchOperatorWorkRegister({
           </div>
         }
       />
-
-      {editingLines && (
-        <BatchOperatorLineEditModal
-          lines={editingLines}
-          onClose={() => setEditingLines(null)}
-          onSuccess={fetchLines}
-        />
-      )}
     </>
   );
 }

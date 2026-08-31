@@ -14,11 +14,15 @@ import {
 import type { OperatorWorkEntry } from '../../operators/components/OperatorWorkAssignment';
 import { ModalLayout } from '../../../shared/components/ModalLayout';
 
+type MultiplicationFormVariant = 'multiplication' | 'fullRooting';
+
 interface MultiplicationFormProps {
   initialData: any;
   selectedBatch: any;
   operators: any[];
   mediaCodes?: string[];
+  variant?: MultiplicationFormVariant;
+  sourceRecordId?: number;
   onSubmit: (data: any) => void;
   onDelete?: (id: number) => void;
   onCancel: () => void;
@@ -41,11 +45,14 @@ export function MultiplicationForm({
   selectedBatch,
   operators,
   mediaCodes = [],
+  variant = 'multiplication',
+  sourceRecordId,
   onSubmit,
   onDelete,
   onCancel,
 }: MultiplicationFormProps) {
   const notify = useNotify();
+  const isFullRooting = variant === 'fullRooting';
   const allMediaCodes = Array.from(
     new Set([...mediaCodes, initialData?.mediaCode].filter(Boolean))
   );
@@ -103,9 +110,25 @@ export function MultiplicationForm({
       notify.error('Please select a media code');
       return;
     }
-    const operatorError = validateSplitOperators(form.operatorEntries, bottlesIn, totalOutput);
+    const operatorError = validateSplitOperators(
+      form.operatorEntries,
+      isFullRooting ? availableBottles : bottlesIn,
+      totalOutput
+    );
     if (operatorError) {
       notify.error(operatorError);
+      return;
+    }
+
+    if (isFullRooting) {
+      onSubmit({
+        batchCode: selectedBatch?.batchCode,
+        sourceRecordId,
+        mediaCode: form.mediaCode,
+        newBottlesCount: totalOutput,
+        notes: form.notes,
+        operators: mapSplitOperatorsToPayload(form.operatorEntries, availableBottles),
+      });
       return;
     }
 
@@ -122,12 +145,32 @@ export function MultiplicationForm({
     });
   };
 
+  const modalTitle = initialData
+    ? 'Edit Multiplication Record'
+    : isFullRooting
+      ? 'Record Full Rooting'
+      : 'Record Multiplication';
+
+  const headerTitle = isFullRooting ? 'Rooting Batch' : 'Multiplication Batch';
+  const currentStageLabel = isFullRooting
+    ? selectedBatch?.stage
+    : selectedBatch?.phase === 'initialisation'
+      ? 'Initialisation'
+      : selectedBatch?.stage;
+  const nextStageLabel = getNextStage(selectedBatch?.stage, selectedBatch?.phase);
+  const afterLabel = isFullRooting ? 'After Rooting' : 'After Multiplication';
+  const footerNote = isFullRooting
+    ? 'Full rooting will move the entire batch to the next stage'
+    : 'Multiplication will automatically advance the batch to the next stage';
+  const detailsHeading = isFullRooting ? 'Rooting Details' : 'Multiplication Details';
+  const submitLabel = isFullRooting ? 'Move to Rooting' : 'Save';
+
   return (
-    <ModalLayout title={initialData ? 'Edit Multiplication Record' : 'Record Multiplication'}>
+    <ModalLayout title={modalTitle}>
       <div className="px-6 py-4 space-y-4" style={{ flex: 1, overflowY: 'auto' }}>
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="text-center mb-3">
-            <div className="text-base text-gray-600">Multiplication Batch</div>
+            <div className="text-base text-gray-600">{headerTitle}</div>
             <div className="font-semibold text-blue-800 text-xl">{selectedBatch?.batchCode}</div>
             <div className="text-base text-gray-600 mt-1">{selectedBatch?.plantName}</div>
           </div>
@@ -135,24 +178,22 @@ export function MultiplicationForm({
             <div className="flex items-center justify-center space-x-4">
               <div className="text-center">
                 <div className="text-base text-gray-600">Current Stage</div>
-                <div className="font-semibold text-blue-800">
-                  {selectedBatch.phase === 'initialisation' ? 'Initialisation' : selectedBatch.stage}
-                </div>
+                <div className="font-semibold text-blue-800">{currentStageLabel}</div>
               </div>
               <ArrowRight className="w-6 h-6 text-blue-600" />
               <div className="text-center">
-                <div className="text-base text-gray-600">After Multiplication</div>
-                <div className="font-semibold text-green-800">{getNextStage(selectedBatch.stage, selectedBatch.phase)}</div>
+                <div className="text-base text-gray-600">{afterLabel}</div>
+                <div className="font-semibold text-green-800">{nextStageLabel}</div>
               </div>
             </div>
           )}
           <div className="text-center mt-2 text-base text-gray-600">
-            Multiplication will automatically advance the batch to the next stage
+            {footerNote}
           </div>
         </div>
 
         <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">Multiplication Details</p>
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-3 mt-5">{detailsHeading}</p>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Media Code *</Label>
@@ -205,7 +246,7 @@ export function MultiplicationForm({
           operators={operators}
           entries={form.operatorEntries}
           onChange={(entries) => updateForm('operatorEntries', entries)}
-          bottlesIn={bottlesIn}
+          bottlesIn={isFullRooting ? availableBottles : bottlesIn}
           bottlesOut={totalOutput}
         />
 
@@ -226,7 +267,9 @@ export function MultiplicationForm({
               <Trash2 className="w-4 h-4 mr-2" />Delete
             </Button>
           )}
-          <Button className="bg-green-600 hover:bg-green-700" onClick={handleSubmit}>Save</Button>
+          <Button className="bg-green-600 hover:bg-green-700" onClick={handleSubmit}>
+            {submitLabel}
+          </Button>
         </div>
       </div>
     </ModalLayout>

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Input } from '../../../shared/ui/input';
+import { getOperatorShortLabel } from '../utils/operatorDisplay';
 import { ChevronDown, ChevronUp, FlaskConical, X } from 'lucide-react';
 
 export interface OperatorWorkEntry {
@@ -23,11 +24,13 @@ interface OperatorWorkAssignmentProps {
   hidePicker?: boolean;
   /** When true, bottle in/out fields are read-only (incubation contamination edit). */
   lockBottleCounts?: boolean;
+  readOnly?: boolean;
+  /** Rooting: keep qtyOut in sync with qtyIn. */
+  syncInOut?: boolean;
 }
 
-function displayName(op: any) {
-  const full = `${op.firstName || ''} ${op.lastName || ''}`.trim();
-  return full || op.shortName || `Operator ${op.id}`;
+function displayName(op: OperatorWorkEntry | { id?: number; shortName?: string; firstName?: string; lastName?: string }) {
+  return getOperatorShortLabel(op);
 }
 
 export function OperatorWorkAssignment({
@@ -40,6 +43,7 @@ export function OperatorWorkAssignment({
   hidePicker = false,
   readOnly = false,
   lockBottleCounts = false,
+  syncInOut = false,
 }: OperatorWorkAssignmentProps) {
   const [isExpanded, setIsExpanded] = useState(!hidePicker && entries.length === 0);
 
@@ -76,11 +80,14 @@ export function OperatorWorkAssignment({
   const updateEntry = (operatorId: number, field: 'qtyIn' | 'qtyOut' | 'qtyContaminated', value: string) => {
     if (readOnly) return;
     const parsed = parseInt(value, 10);
-    onChange(entries.map(entry => (
-      entry.id === operatorId
-        ? { ...entry, [field]: Number.isNaN(parsed) ? 0 : Math.max(0, parsed) }
-        : entry
-    )));
+    const qty = Number.isNaN(parsed) ? 0 : Math.max(0, parsed);
+    onChange(entries.map(entry => {
+      if (entry.id !== operatorId) return entry;
+      if (syncInOut && (field === 'qtyIn' || field === 'qtyOut')) {
+        return { ...entry, qtyIn: qty, qtyOut: qty };
+      }
+      return { ...entry, [field]: qty };
+    }));
   };
 
   return (

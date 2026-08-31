@@ -1,7 +1,7 @@
 export const OPERATOR_DESIGNATIONS = [
   { value: 'MEDIA_PREPARATION', label: 'Media preparation' },
   { value: 'MULTIPLICATION', label: 'Multiplication' },
-  { value: 'INCUBATION', label: 'Incubation' },
+  { value: 'ROOTING', label: 'Rooting' },
 ] as const;
 
 export type OperatorDesignation = typeof OPERATOR_DESIGNATIONS[number]['value'];

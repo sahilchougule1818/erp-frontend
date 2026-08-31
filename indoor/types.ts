@@ -76,6 +76,8 @@ export interface IncubationRecord {
   operators?: OperatorRef[];
   rooted: boolean;
   outdoorMovementStatus: number;
+  operatorSourceTable?: string;
+  operatorSourceRecordId?: number;
 }
 
 export interface ContaminationRecord {

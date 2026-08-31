@@ -13,12 +13,15 @@ interface BatchOperatorLineEditModalProps {
   lines: BatchOperatorLine[];
   onClose: () => void;
   onSuccess?: () => void;
+  /** When set, contamination is recorded on prior-phase lines and synced to this incubation record. */
+  incubationRecordId?: number;
 }
 
 export function BatchOperatorLineEditModal({
   lines,
   onClose,
   onSuccess,
+  incubationRecordId,
 }: BatchOperatorLineEditModalProps) {
   const notify = useNotify();
   const template = lines[0];
@@ -29,19 +32,20 @@ export function BatchOperatorLineEditModal({
   const [saving, setSaving] = useState(false);
 
   const readOnly = lines.some(line => line.editable === false);
-  const isIncubation = template?.sourceTable === 'incubation_records';
+  const incubationContamination = incubationRecordId != null;
+  const isIncubationSource = template?.sourceTable === 'incubation_records';
   const isMultiplication = template?.sourceTable === 'multiplication_records';
   const isRooting = template?.sourceTable === 'rooted_batches';
-  const showInput = isMultiplication || isRooting;
-  const showContamination = isIncubation;
+  const showInput = !incubationContamination && (isMultiplication || isRooting);
+  const showContamination = incubationContamination || isIncubationSource;
 
-  const operatorDesignation = isIncubation ? 'INCUBATION' : 'MULTIPLICATION';
+  const operatorDesignation = isRooting ? 'ROOTING' : 'MULTIPLICATION';
 
   useEffect(() => {
     let active = true;
     async function load() {
       try {
-        if (!isIncubation) {
+        if (!incubationContamination && !isIncubationSource) {
           const operatorsRes = await indoorApi.operators.getActive({ designation: operatorDesignation });
           if (!active) return;
           setAllOperators(Array.isArray(operatorsRes) ? operatorsRes : []);
@@ -64,14 +68,14 @@ export function BatchOperatorLineEditModal({
     }
     load();
     return () => { active = false; };
-  }, [lines, operatorDesignation, isIncubation, notify]);
+  }, [lines, operatorDesignation, incubationContamination, isIncubationSource, notify]);
 
   const availableBottles = useMemo(() => {
-    if (!isMultiplication) return undefined;
+    if (!isMultiplication || incubationContamination) return undefined;
     const totalOut = lines.reduce((sum, line) => sum + (line.qtyOut || 0), 0);
     const totalIn = lines.reduce((sum, line) => sum + (line.qtyIn || 0), 0);
     return totalIn > 0 ? totalIn : totalOut;
-  }, [isMultiplication, lines]);
+  }, [isMultiplication, incubationContamination, lines]);
 
   const lockReason = readOnly
     ? (lines.find(line => line.editLockReason)?.editLockReason
@@ -81,7 +85,7 @@ export function BatchOperatorLineEditModal({
   const handleSave = async () => {
     if (!template?.sourceTable || !template.sourceRecordId || !template.eventCode) return;
 
-    if (!isIncubation) {
+    if (!showContamination) {
       if (operatorEntries.some(entry => !entry.qtyOut || entry.qtyOut <= 0)) {
         notify.error('Each operator must have a positive output bottle count');
         return;
@@ -95,7 +99,7 @@ export function BatchOperatorLineEditModal({
       }
     }
 
-    if (isIncubation) {
+    if (showContamination) {
       if (operatorEntries.some(entry => (entry.qtyContaminated || 0) > (entry.qtyOut || 0))) {
         notify.error('Contamination cannot exceed output bottles for any operator');
         return;
@@ -108,28 +112,32 @@ export function BatchOperatorLineEditModal({
         sourceTable: template.sourceTable,
         sourceRecordId: template.sourceRecordId,
         eventCode: template.eventCode,
-        notes: isIncubation ? notes : undefined,
+        incubationRecordId: incubationContamination ? incubationRecordId : undefined,
+        notes: showContamination ? notes : undefined,
         operators: operatorEntries.map(entry => ({
           id: entry.id,
           qtyIn: entry.qtyIn,
           qtyOut: entry.qtyOut,
-          qtyContaminated: isIncubation ? (entry.qtyContaminated ?? 0) : 0,
+          qtyContaminated: showContamination ? (entry.qtyContaminated ?? 0) : 0,
         })),
       });
-      notify.success(isIncubation ? 'Contamination updated' : 'Operator work updated');
+      notify.success(showContamination ? 'Contamination updated' : 'Operator work updated');
       onSuccess?.();
       onClose();
     } catch (error: any) {
-      notify.error('Failed to save: ' + (error.message || 'Unknown error'));
+      const message = error?.response?.data?.message || error.message || 'Unknown error';
+      notify.error('Failed to save: ' + message);
     } finally {
       setSaving(false);
     }
   };
 
-  const subtitle = `${template?.batchCode ?? ''} · ${template?.phase ?? ''} · ${template?.stage ?? ''}`;
+  const subtitle = incubationContamination
+    ? `${template?.batchCode ?? ''} · incubation contamination (prior ${template?.phase ?? ''} lines)`
+    : `${template?.batchCode ?? ''} · ${template?.phase ?? ''} · ${template?.stage ?? ''}`;
   const title = readOnly
-    ? (isIncubation ? 'View Incubation Operators' : 'View Operator Work')
-    : (isIncubation ? 'Record Contamination' : 'Edit Bottle Counts');
+    ? (showContamination ? 'View Contamination' : 'View Operator Work')
+    : (showContamination ? 'Record Contamination' : 'Edit Bottle Counts');
 
   return (
     <Dialog open onOpenChange={(open) => !open && !saving && onClose()}>
@@ -161,9 +169,9 @@ export function BatchOperatorLineEditModal({
               availableBottles={availableBottles}
               hidePicker
               readOnly={readOnly}
-              lockBottleCounts={isIncubation}
+              lockBottleCounts={showContamination}
             />
-            {isIncubation && (
+            {showContamination && (
               <div className="space-y-2">
                 <Label>Contamination Notes</Label>
                 <Textarea
